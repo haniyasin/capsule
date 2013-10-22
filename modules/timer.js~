@@ -1,0 +1,17 @@
+function timer_obj(){
+    this.destroy = function(){
+    }
+}
+
+function capsule_module_timer(name){
+    this.create = function(callback, milisec){
+	//return timer_obj
+    }
+
+    this.type = 'timer';
+    this.name = name;
+}
+
+exports.create = function(){
+    
+}
