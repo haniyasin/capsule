@@ -1,9 +1,9 @@
-exports.create = function(callback, milisec, cycle){
+exports.create = function(callback, milisec, cyclic){
     return {
-	cycle : cycle,
-	id : cycle ? setInterval(callback, milisec) : setTimeout(callback, milisec),
+	cyclic : cyclic,
+	id : cyclic ? setInterval(callback, milisec) : setTimeout(callback, milisec),
 	destroy : function(){
-	    cycle ? clearInterval(this.id) :clearTimeout(this.id);
+	    cyclic ? clearInterval(this.id) :clearTimeout(this.id);
 	}
     }
 }

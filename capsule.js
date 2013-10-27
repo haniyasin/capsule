@@ -13,9 +13,11 @@ function capsule(){
 
 function node_capsule(){
     var node_c = new capsule;
-    node_c.timer = { timer : require('./modules/timer.js') };
-    node_c.transport = {zmq : require('./modules/transport/zmq.js')};
-    node_c.transport = {direct : require('./modules/transport/direct.js')};
+    node_c.uuid =  { node : require('./modules/uuid.js') };
+    node_c.timer = { js : require('./modules/timer.js') };
+//    node_c.transport = {zmq : require('./modules/transport/zmq.js')};
+    node_c.transport = require('./modules/transport.js');
+    node_c.transport.direct = require('./modules/transport/direct.js');
     return node_c;
 }
 

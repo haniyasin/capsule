@@ -14,14 +14,10 @@ exports.instance_interface = function(){
     this.send = function(msg_id, msg, callback){
     }
 
-    this.callback_reg = function(msg_id, callback){
+    this.on_msg = function(msg_id, callback){
 	
     }
     
-    this.callback_unreg = function (msg_id){
-	
-    }
-
     this.error_callback = function(error){
     }
 
