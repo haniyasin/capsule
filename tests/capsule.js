@@ -141,11 +141,29 @@ function test_transport(transport){
 
 }
 
+function test_http_respondent(http_replier){
+    http_respondent.node.on_recv({ 'url' : "http://blah.com:8080/bro"}, function(context, response){
+				  response.end("<html><body><h1>Hello</h1></body></html>");
+			      }, function(error){console.log('failed', error)})
+    http_respondent.node.on_recv({ 'url' : "http://blah.com:8080/brog"}, function(context, response){
+				  response.end("<html><body><h1>Hellog</h1></body></html>");
+			      }, function(error){console.log('failed', error)})
+    http_respondent.node.on_recv({ 'url' : "http://blah.com:8080/broz"}, function(context, response){
+				  response.end("<html><body><h1>Helloz</h1></body></html>");
+			      }, function(error){console.log('failed', error)})
+    http_respondent.node.on_recv({ 'url' : "http://raketa.net:8900/broty/haha/fofo"}, function(context, response){
+				  response.end("<html><body><h1>Hellot</h1></body></html>");
+			      }, function(error){console.log('failed', error)})
+    http_respondent.node.on_recv({ 'url' : "http://localhost:8081/fafa"}, function(context, response){
+				  response.end("<html><body><h1>Helly</h1></body></html>");
+			      }, function(error){console.log('failed', error)})
+}
+
 with(capsule.create()){
 //    test_uuid(uuid);
 //    test_timer(timer);
-    test_transport(transport);
-
+//    test_transport(transport);
+    test_http_respondent(http_respondent);
 //    timer = timer.js.create()
 
     /*with(nc){

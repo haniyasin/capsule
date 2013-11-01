@@ -18,6 +18,7 @@ function node_capsule(){
 //    node_c.transport = {zmq : require('./modules/transport/zmq.js')};
     node_c.transport = require('./modules/transport.js');
     node_c.transport.direct = require('./modules/transport/direct.js');
+    node_c.http_respondent = { 'node' : require('./modules/http_respondent')};
     return node_c;
 }
 
