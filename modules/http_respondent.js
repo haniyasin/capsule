@@ -31,7 +31,7 @@ function find_server(context){
 								   for(i = 0; i < contexts.length;  i++){
 								       var context = contexts[i], _url = context._url;
 								       if(url.parse('http://' + headers.host).hostname == _url.hostname && request.url == _url.pathname)
-									   context.data_cb(request, response);								       
+									   context.data_cb(context, response);								       
 								   }
 ;
 							       });
