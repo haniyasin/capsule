@@ -1,4 +1,4 @@
-var transport = require('modules/transport.js');
+var transport = require('../transport.js');
 var callbacks = new Array();
 
 exports.create = function(address, features){
