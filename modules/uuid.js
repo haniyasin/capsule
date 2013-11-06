@@ -1,4 +1,8 @@
-var uuid = require('node-uuid');
+var uuid;
+if(typeof(module) != 'undefined')
+    uuid = require('node-uuid');
+else if(window.uuid)
+    uuid = window.uuid;
 
 exports.generate_str = function(){
     return uuid.v1();

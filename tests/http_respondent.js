@@ -1,20 +1,5 @@
 var fs = require('fs');
 exports.test = function(http_respondent){
-/*    http_respondent.node.on_recv({ 'url' : "http://blah.com:8080/bro"}, function(context, response){
-				  response.end("<html><body><h1>Hello</h1></body></html>");
-			      }, function(error){console.log('failed', error)})
-    http_respondent.node.on_recv({ 'url' : "http://blah.com:8080/brog"}, function(context, response){
-				  response.end("<html><body><h1>Hellog</h1></body></html>");
-			      }, function(error){console.log('failed', error)})
-    http_respondent.node.on_recv({ 'url' : "http://blah.com:8080/broz"}, function(context, response){
-				  response.end("<html><body><h1>Helloz</h1></body></html>");
-			      }, function(error){console.log('failed', error)})
-    http_respondent.node.on_recv({ 'url' : "http://raketa.net:8900/broty/haha/fofo"}, function(context, response){
-				  response.end("<html><body><h1>Hellot</h1></body></html>");
-			      }, function(error){console.log('failed', error)})
-    http_respondent.node.on_recv({ 'url' : "http://localhost:8081/fafa"}, function(context, response){
-				  response.end("<html><body><h1>Helly</h1></body></html>");
-			      }, function(error){console.log('failed', error)})*/
 //раздача зачаток браузерной капсулы
 
     http_respondent.node.on_recv({ 'url' : "http://localhost:8081/capsule.htm"}, 
@@ -28,6 +13,14 @@ exports.test = function(http_respondent){
     http_respondent.node.on_recv({ 'url' : "http://localhost:8081/module_loader.js"}, 
 				 function (context, response){
 				     fs.readFile('browser/module_loader.js', function(err, data)
+						 {
+						     response.end(data);
+						 });
+				 },
+				 function(error){console.log('failed', error)})    
+    http_respondent.node.on_recv({ 'url' : "http://localhost:8081/dependencies/uuid.js"}, 
+				 function (context, response){
+				     fs.readFile('dependencies/uuid.js', function(err, data)
 						 {
 						     response.end(data);
 						 });
