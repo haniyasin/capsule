@@ -1,9 +1,13 @@
 function module_loader(){
     var sources = (function(){
 	var _sources = [];
-
+ 
 	this.add = function(path, source){    
 	    _sources.push([path, source]);
+	}
+		       
+	this.add_array = function(array){
+	    _sources = _sources.concat(array);
 	}
 			   
         this.get = function(path){
@@ -28,6 +32,10 @@ function module_loader(){
 
     this.source_add = function(path, source) {
 	sources.add(path, source);
+    }
+
+    this.sources_add = function(array){
+        sources.add_array(array);	
     }
 
     this.load = function (path, base_path){
