@@ -1,6 +1,7 @@
 var transport = require('../transport.js');
 var callbacks = new Array();
 
+console.log(transport);
 exports.create = function(address, features){
     callbacks[address] = new Array();
     if(features & transport.features.router){

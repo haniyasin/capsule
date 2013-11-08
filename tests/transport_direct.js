@@ -1,6 +1,5 @@
 var DEBUG = 1;
 exports.test = function(transport){
-    console.log(transport.features.dealer, 'dfdf');
     console.log("transport module's testing is started...")
     //создаём транспорт, для каждого вида транспорта по своему
 

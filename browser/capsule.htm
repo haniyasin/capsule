@@ -13,9 +13,8 @@
       var _capsule = new capsule(loader);
       var _tests =  new tests(loader);
 
-//      _tests.timer.test(_capsule.timer);
-      console.log(_capsule.transport.features.router);
-      console.log(_capsule.transport.direct.create);
+      _tests.uuid.test(_capsule.uuid);
+      _tests.timer.test(_capsule.timer);
       _tests.transport_direct.test(_capsule.transport);
       }, 2000);
       }
