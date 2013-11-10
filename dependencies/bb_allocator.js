@@ -1,5 +1,5 @@
 //универсальный выделятор переиспользуемых кирпичей
-function id_manager(){
+exports.id_allocator = function(){
     var counter = 0;
     this.create = function(){
         return counter++;
@@ -15,14 +15,14 @@ exports.create = function(allocator){
     var free = [];
     var allocator =  new allocator();
     this.alloc = function(){
-	console.log(free.length);
-	console.log(busy.length);
+//	console.log(free.length);
+//	console.log(busy.length);
         if (free.length) {
             var obj = free.pop();
             busy.push(obj);
             return obj;
         } else {
-	    console.log("calling allocator");
+//	    console.log("calling allocator");
             var obj = allocator.create();
             busy.push(obj);
 
@@ -32,7 +32,7 @@ exports.create = function(allocator){
     this.free = function(obj){
         for (ind in busy){
             if(busy[ind] == obj){
-		console.log("freeing");
+//		console.log("freeing");
                 busy.splice(ind,1);
                 free.push(obj);
             }

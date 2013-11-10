@@ -6,8 +6,7 @@
     },
     
     "dependencies" : {
-	"bb_allocator" : "dependencies/bb_allocator.js",
-	"http_socket_cli" : "dependencies/http_socket_cli.js"
+	"bb_allocator" : "dependencies/bb_allocator.js"
     },
 
     "capsule" : {
@@ -21,12 +20,11 @@
 	    "http" : {
 		"this" : "modules/transport/http.js",
 		"lib" : {
-		    "socket_cli" : "browser/modules/transport/http/lib/socket_cli.js",
-		    
-		}
+		    "socket_cli" : "browser/modules/transport/http/socket_cli.js"
+		}		    
 	    }
 	},
-	"http_requester" : "browser/modules/http_requester.js",
+	"http_requester" : "browser/modules/http_requester.js"
     },
 
     "tests" : {

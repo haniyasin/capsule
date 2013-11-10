@@ -5,13 +5,17 @@ exports.test = function(http_requester, timer){
 		    'pass' : '123kochegar'};
     http_requester.send(context, 
 			function(response){
-//			    console.log("response is", response);
+			    console.log("response is", response);
 			});   
     http_requester.send(context, 
 			function(response){
-//			    console.log("response is", response);
+			    console.log("response is", response);
 			});   
     http_requester.send(context, 
+			function(response){
+			    console.log("response is", response);
+			});   
+/*    http_requester.send(context, 
 			function(response){
 //			    console.log("response is", response);
 			});   
@@ -49,5 +53,5 @@ exports.test = function(http_requester, timer){
 							 //			    console.log("response is", response);
 						     });   
 			     }, 200, true);
-    
+ */   
 }
