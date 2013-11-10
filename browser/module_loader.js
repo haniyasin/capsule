@@ -45,27 +45,33 @@ function module_loader(){
 	    var bp_reg = new RegExp("(.+)/(.+)");
 	    var bpr_ret = bp_reg.exec(path);
 	    if(bpr_ret){
-		base_path = bpr_ret[1];
+		base_path = bpr_ret[1] + '/';
 		path = bpr_ret[2];
 	    } else
 		base_path = '';
 	} else {
-	    var reg = new RegExp("([\\.\\w]+)/(.+)");
+	    var reg = new RegExp("([\\.]+)/(.+)");
 	    var reg_ret;
+
 	    while(reg_ret = reg.exec(path)){
 		path = reg_ret[2];
 		if(reg_ret[1] == '..'){
-                    var reg_back = new RegExp("(.*)[/.]+");
-		    base_path = reg_back.exec(base_path)[1];
+                    var reg_back = new RegExp("(.*/)[.]+");
+		    try {
+			base_path = reg_back.exec(base_path)[1];
+		    }
+		    catch (e) {
+			base_path = '';
+		    }
 		}
 		else if(reg_ret[1] == '.'){
 		    //ничего не делаем
 		} else{
-		    base_path += '/' + reg_ret[1];
+		    base_path += '/' + reg_ret[1] + '/';
 		}
 	    }
 	}
-	var source = sources.get(base_path + '/' + path);
+	var source = sources.get(base_path  + path);
 	var _module = new Function("exports", "require", source);
 	_module(module, (function(loader){
 			     return function(path){

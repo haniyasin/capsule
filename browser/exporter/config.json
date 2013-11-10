@@ -4,6 +4,11 @@
 	"Compositer" : "dependencies/Compositer.js",
 	"module_loader" : "browser/module_loader.js"
     },
+    
+    "dependencies" : {
+	"bb_allocator" : "dependencies/bb_allocator.js",
+	"http_socket_cli" : "dependencies/http_socket_cli.js"
+    },
 
     "capsule" : {
 	"uuid" : "modules/uuid.js",
@@ -12,13 +17,22 @@
 	},
 	"transport" : {
 	    "this" : "modules/transport.js",
-	    "direct" : "modules/transport/direct.js"
-	}
+	    "direct" : "modules/transport/direct.js",
+	    "http" : {
+		"this" : "modules/transport/http.js",
+		"lib" : {
+		    "socket_cli" : "browser/modules/transport/http/lib/socket_cli.js",
+		    
+		}
+	    }
+	},
+	"http_requester" : "browser/modules/http_requester.js",
     },
 
     "tests" : {
 	"uuid" : "tests/uuid.js",
 	"timer" : "tests/timer.js",
-	"transport_direct" : "tests/transport_direct.js"
+	"transport_direct" : "tests/transport_direct.js",
+        "http_requester" : "tests/http_requester.js"
     }
 }

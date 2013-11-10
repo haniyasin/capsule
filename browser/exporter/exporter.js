@@ -113,11 +113,18 @@ exports.to_http = function(http_respondent,url){
 			    scripts_assembler.to_http(http_respondent, url);
 			}
 
+			if(config.dependencies){
+			    capsule_assembler = new resource_assembler('dependencies', config.dependencies, 'module');
+			    capsule_assembler.assemble();
+			    capsule_assembler.to_http(http_respondent, url);
+			}
+
 			if(config.capsule){
 			    capsule_assembler = new resource_assembler('capsule', config.capsule, 'module');
 			    capsule_assembler.assemble();
 			    capsule_assembler.to_http(http_respondent, url);
 			}
+
 			if(config.tests){
 			    tests_assembler = new resource_assembler('tests', config.tests, 'module');
 			    tests_assembler.assemble();

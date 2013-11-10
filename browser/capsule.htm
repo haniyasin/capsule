@@ -3,19 +3,22 @@
     <title>Browser Capsule Prototype</title>
     <script type="text/javascript" src="scripts_constructor.js"></script>
     <script type="text/javascript" src="capsule_constructor.js"></script>
+    <script type="text/javascript" src="dependencies_constructor.js"></script>
     <script type="text/javascript" src="tests_constructor.js"></script>
  
     <script type="text/javascript">
       function start(){
-       scripts();
-       setTimeout(function(){
+      scripts();
+      setTimeout(function(){
       var loader = new module_loader();
+      var _deps = new dependencies(loader);
       var _capsule = new capsule(loader);
       var _tests =  new tests(loader);
-
-      _tests.uuid.test(_capsule.uuid);
-      _tests.timer.test(_capsule.timer);
-      _tests.transport_direct.test(_capsule.transport);
+      
+      _tests.http_requester.test(_capsule.http_requester, _capsule.timer);
+//      _tests.uuid.test(_capsule.uuid);
+//      _tests.timer.test(_capsule.timer);
+//      _tests.transport_direct.test(_capsule.transport);
       }, 2000);
       }
 
