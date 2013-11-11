@@ -2,7 +2,7 @@
 exports.id_allocator = function(){
     var counter = 0;
     this.create = function(){
-        return counter++;
+        return ++counter;
     }
     this.destroy = function(){
         //надо бы подумать об удалении, но в обычной ситуации скорее будет переиспользоваться
@@ -22,7 +22,6 @@ exports.create = function(allocator){
             busy.push(obj);
             return obj;
         } else {
-//	    console.log("calling allocator");
             var obj = allocator.create();
             busy.push(obj);
 
