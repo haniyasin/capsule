@@ -15,8 +15,13 @@ with(capsule.create()){
 //    var hr = require('./http_respondent.js');
 //    hr.test(http_respondent);
 
-var exporter = require('../browser/exporter/exporter.js');
-exporter.to_http(http_respondent.node, 'http://blah.com:8810/capsule/');
+    var exporter = require('../browser/exporter/exporter.js');
+    exporter.to_http(http_respondent.node, 'http://blah.com:8810/capsule/');
+    var socket_srv = require('../modules/transport/http/socket_srv.js');
+    var socket = socket_srv.create(http_respondent.node, { 'url' : 'http://localhost:8090/server'});
+    socket.on_recv(0, function(cli_id, msg){
+		       console.log("cli is", cli_id, "msg is", msg);
+		   });    
 }
 
 //MQ

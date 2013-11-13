@@ -20,7 +20,7 @@
 	    "http" : {
 		"this" : "modules/transport/http.js",
 		"lib" : {
-		    "socket_cli" : "browser/modules/transport/http/socket_cli.js"
+		    "socket_cli" : "modules/transport/http/socket_cli.js"
 		}		    
 	    }
 	},

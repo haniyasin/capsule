@@ -49,7 +49,7 @@ function xhr_allocator(){
 		var xhr = this._req;
 		this._req.onload = function(){ data_cb(xhr) };
 		this._req.open(context.method, context.url,true);
-		this._req.send();	
+		this._req.send(data);	
 	    }
 	}
     }
@@ -63,7 +63,7 @@ function xhr_allocator(){
 var xhr_allocator = new bb_allocator.create(xhr_allocator);
 var script_allocator = new bb_allocator.create(script_allocator);
 exports.send = function(context, data,  data_cb, err_cb){
-    var xhr = script_allocator.alloc();
+    var xhr = xhr_allocator.alloc();
     //for xhr, not for script allocator.free(xhr)
     xhr.send(context, '', function(_xhr){ data_cb(_xhr.responseText); });
 }
