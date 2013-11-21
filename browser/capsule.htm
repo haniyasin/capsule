@@ -15,7 +15,7 @@
       var _capsule = new capsule(loader);
       var _tests =  new tests(loader);
       
-      var socket = _capsule.transport.http.lib.socket_cli.create(_capsule.http_requester, { 'url' : 'http://localhost:8090/server' });
+      var socket = _capsule.transport.http.lib.socket_cli.create({ 'url' : 'http://localhost:8090/server' }, _capsule.http_requester, _capsule.timer);
       socket.send('blah blah, tuk tuk');
 //      _tests.http_requester.test(_capsule.http_requester, _capsule.timer);
 //      _tests.uuid.test(_capsule.uuid);

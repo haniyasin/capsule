@@ -43,14 +43,26 @@ function script_allocator(){
 
 function xhr_allocator(){
     this.create = function(){
+	var _req = new XMLHttpRequest();
 	return {
-	    '_req' : new XMLHttpRequest(),
-	    'send' : function(context, data, data_cb, err_cb){
-		var xhr = this._req;
-		this._req.onload = function(){ data_cb(xhr) };
-		this._req.open(context.method, context.url,true);
-		this._req.send(data);	
+	    'send_once' : function(context, data, data_cb, err_cb){
+		_req.onload = function(){ data_cb(_req.responseText) };
+		_req.open(context.method, context.url,true);
+		_req.send(data);
+		_req.abort();
+	    },
+	    'send' : function(context, data){
+		
+	    },
+	    'close' : function(){
+	    },
+	    'on_data' : function(data_cb){
+	    },
+	    'on_closed' : function(closed_cb){
+	    },
+	    'on_err' : function(error_cb){
 	    }
+	    
 	}
     }
     this.destroy = function(obj){
@@ -62,8 +74,31 @@ function xhr_allocator(){
 
 var xhr_allocator = new bb_allocator.create(xhr_allocator);
 var script_allocator = new bb_allocator.create(script_allocator);
-exports.send = function(context, data,  data_cb, err_cb){
-    var xhr = xhr_allocator.alloc();
+exports.TYPE_SCRIPT = 0;
+exports.TYPE_XHR_1 = 1;
+function get_allocator(type){
+    if(type == 'xhr')
+	return xhr_allocator;
+    else 
+	if(type == 'script')
+	    return script_allocator;    
+}
+exports.send = function(type, context, data,  data_cb, err_cb){
+    var allocator = get_allocator(type);
+    
+    var req = allocator.alloc();
     //for xhr, not for script allocator.free(xhr)
-    xhr.send(context, '', function(_xhr){ data_cb(_xhr.responseText); });
+    req.send_once(context, data, function(data){
+		      data_cb(data);
+		      allocator.free(req);
+		  }, err_cb);
+}
+
+exports.create = function(type, context, data_cb, err_cb, closed_cb){
+    var allocator = get_allocator(type);
+    var req = allocator.alloc();
+    req.free = function(){
+	allocator.free(req);
+    }
+    return req;
 }
