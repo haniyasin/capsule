@@ -37,13 +37,19 @@ function objects_tree_assembler(definition, cur_path, type, download, preload, h
 		if(key == 'name'){
 		    name = definition[key];		    
 		    if(cur_path == undefined)
-			cur_path = name;			
+			cur_path = name;
+
+		    assembler += 'var ' + name + "={};";
 		}
 	    else {
+		var content = fs.readFileSync(definition[key],"utf8");
 		if(type == types.script){ 
-		    assembler += 'var ' + key + "=document.createElement('script');" + key + ".setAttribute('type', 'text/javascript'); " + key + ".setAttribute('src', '" + definition[key] +  "'); head.appendChild(" + key + ");";
+		    var _cur_path = cur_path + '.' + key;
+		    assembler += _cur_path + " = document.createElement('script'); " + _cur_path + ".setAttribute('type', 'text/javascript'); " + _cur_path + ".setAttribute('src', '" + definition[key] +  "'); head.appendChild(" + _cur_path + ");";
+		    modules.push([definition[key], content]);
 		} else {
 		    if(type == types.module){
+			assembler += "module_loader.source_add(\"" + definition[key] + "\"," + JSON.stringify(content) + ");"; 
 			if(key == 'this'){
 			    assembler += cur_path + ' = new Object('+ "module_loader.load(\'" + definition[key] + "\'));";
 			}
@@ -52,11 +58,6 @@ function objects_tree_assembler(definition, cur_path, type, download, preload, h
 			}
 		    }
 		}
-		var content = fs.readFileSync(definition[key],"utf8");
-		if(type == types.module){
-		    assembler += "module_loader.source_add(" + definition[key] + ",\\" + JSON.stringify(content).slice(0,-1) + "\\\");"; 
-		} else
-		    modules.push([definition[key], content]);
 	    }
 
 	    //подумать как сделать относительные пути, диагностика папок
@@ -107,6 +108,7 @@ function resource_assembler(definition){
 				 function(error){console.log('failed export _construct_func', error)})
 	for(var i = 0;i < objects.length; i++){
 	    (function(object){
+		 console.log(object[0])
 		 http_respondent.on_recv({ 'url' : url + object[0]}, 
 					 function (context, response){
 					     response.end(object[1]);
