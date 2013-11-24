@@ -6,8 +6,8 @@ var types = {"envelop" : 1,
 	     "script" : 3
 	    };
 function objects_tree_assembler(definition, cur_path, type, download, preload, head){
-    //consts
     var assembler = '',
+        asm_load = '',
         modules = [];
 
     var name = '';
@@ -50,12 +50,18 @@ function objects_tree_assembler(definition, cur_path, type, download, preload, h
 		} else {
 		    if(type == types.module){
 			assembler += "module_loader.source_add(\"" + definition[key] + "\"," + JSON.stringify(content) + ");"; 
+			var load_code = '';
 			if(key == 'this'){
-			    assembler += cur_path + ' = new Object('+ "module_loader.load(\'" + definition[key] + "\'));";
+			    load_code += cur_path + ' = new Object('+ "module_loader.load(\'" + definition[key] + "\'));";
 			}
 			else {			    
-			    assembler += cur_path + '.' + key + ' = ' + "module_loader.load(\'" + definition[key] + "\');";
+			    load_code += cur_path + '.' + key + ' = ' + "module_loader.load(\'" + definition[key] + "\');";
 			}
+			
+			if(!preload)
+			    asm_load += load_code;
+			else 
+			    assembler += load_code;
 		    }
 		}
 	    }
@@ -66,19 +72,16 @@ function objects_tree_assembler(definition, cur_path, type, download, preload, h
 	    var _cur_path = cur_path + '.' + key;
 	    assembler += _cur_path + "= {};";
 	    var ret_object = objects_tree_assembler(definition[key], _cur_path, type, download, preload, head);
+
+	    assembler += ret_object.assembler;
 	    if(!ret_object.preload){
-		assembler += cur_path + '.' + key + '.load=' + 'function(){' +	ret_object.assembler + '};';	
-	    } 
-	    else
-	    {
-		assembler += ret_object.assembler;
-	    }
+		assembler += _cur_path +'.load=' + 'function(){' + ret_object.asm_load + '};';			         }
 	    
 	    modules = modules.concat(ret_object.modules);
 	}
     }
 
-    return {assembler : assembler, modules : modules, download : download, preload : preload, type : type};
+    return {assembler : assembler, asm_load : asm_load, modules : modules, download : download, preload : preload, type : type};
 }
 
 function resource_assembler(definition){
