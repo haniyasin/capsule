@@ -1,0 +1,52 @@
+{
+    "name" : "capsule",
+
+    "download" : true,
+    "preload" : true,
+
+    "scripts" : {
+	"type" : "script",
+	"uuid" : "dependencies/uuid.js",
+	"Compositer" : "dependencies/Compositer.js",
+	"module_loader" : "browser/module_loader.js"
+    },
+    
+    "capsule" : {
+	"type" : "module",
+
+	"dependencies" : {
+	    "preload" : false,
+
+	    "bb_allocator" : "dependencies/bb_allocator.js"	    
+	},
+
+	"modules" : {
+	    "uuid" : "modules/uuid.js",
+	    "timer" : {
+		"js" : "modules/timer.js"
+	    },
+	    "transport" : {
+		"this" : "modules/transport.js",
+		"direct" : "modules/transport/direct.js",
+		"http" : {
+		    "this" : "modules/transport/http.js",
+		    "lib" : {
+			"socket_cli" : "modules/transport/http/socket_cli.js"
+		    }		    
+		}
+	    },
+	    "http_requester" : "browser/modules/http_requester.js"	    
+	},
+
+	"tests" : {
+	    "download" : false,
+	    "preload" : false,
+
+	    "uuid" : "tests/uuid.js",
+	    "timer" : "tests/timer.js",
+	    "transport_direct" : "tests/transport_direct.js",
+            "http_requester" : "tests/http_requester.js"
+	}
+
+    }
+}

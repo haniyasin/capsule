@@ -15,7 +15,8 @@ exports.create = function(){
 			}
 		    }
 		}
-		callback.apply(this, Array.prototype.reverse.call(arguments));
+		callback.apply(this, arguments);
+//		callback.apply(this, Array.prototype.reverse.call(arguments));
 		if(!callbacks.length)
 		    parent.after_all();
 	    }
