@@ -5,7 +5,8 @@ var types = {"envelop" : 1,
 	     "module" : 2,
 	     "script" : 3
 	    };
-function objects_tree_assembler(definition, cur_path, type, download, preload, head){
+
+function objects_tree_assembler(definition, cur_path, type, download, preload, head, inline){
     var assembler = '',
         asm_load = '',
         modules = [];
@@ -71,7 +72,7 @@ function objects_tree_assembler(definition, cur_path, type, download, preload, h
 	else if(typeof(definition[key]) == 'object'){
 	    var _cur_path = cur_path + '.' + key;
 	    assembler += _cur_path + "= {};";
-	    var ret_object = objects_tree_assembler(definition[key], _cur_path, type, download, preload, head);
+	    var ret_object = objects_tree_assembler(definition[key], _cur_path, type, download, preload, head, inline);
 
 	    assembler += ret_object.assembler;
 	    if(!ret_object.preload){

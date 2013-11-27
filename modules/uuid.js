@@ -1,5 +1,5 @@
 var uuid;
-if(typeof(module) != 'undefined')
+if(typeof(module) != 'undefined')  
     uuid = require('node-uuid');
 else if(window.uuid)
     uuid = window.uuid;
@@ -15,7 +15,7 @@ exports.generate_bin = function(){
 }
 
 exports.parse = function(UUID_string){
-    return uuid.parse(UUID_string)
+    return uuid.parse(UUID_string);
 }
 
 exports.unparse = function(buffer){

@@ -16,11 +16,11 @@
 //      _tests.http_requester.test(_capsule.http_requester, _capsule.timer);
       _capsule.capsule.tests.load();
       
-      __capsule.tests.uuid.test(__capsule.modules.uuid);
+//      console.log(window.uuid.v1());
+//      console.log("uuid module is", JSON.stringify(__capsule.modules.transport.direct));
+//      __capsule.tests.uuid.test(__capsule.modules.uuid);
       __capsule.tests.timer.test(__capsule.modules.timer);
-      console.log(JSON.stringify(__capsule.modules.transport));
-//      __capsule.tests.transport_direct.test(__capsule.modules.transport);
-
+      __capsule.tests.transport_direct.test(__capsule.modules.transport);
       }, 3000);
       }
 
