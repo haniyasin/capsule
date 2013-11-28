@@ -1,27 +1,27 @@
 function module_loader(){
-    var sources = (function(){
-	var _sources = [];
+    var modules = (function(){
+	var _modules = [];
  
-	this.add = function(path, source){
-	    _sources[_sources.length] = [path, source];
+	this.add = function(path, module){
+	    _modules[_modules.length] = [path, module];
 	}
 		       
 	this.add_array = function(array){
-	    _sources = _sources.concat(array);
+	    _modules = _modules.concat(array);
 	}
 			   
         this.get = function(path){
-            var source_founded = false;
-            for(i = 0; i < _sources.length; i++){
-		if(_sources[i][0] == path){
-                    source_founded = true;
+            var module_founded = false;
+            for(i = 0; i < _modules.length; i++){
+		if(_modules[i][0] == path){
+                    module_founded = true;
                     break;
 		}
             }
-            if(source_founded)
-		return _sources[i][1];
-	    else
-		return null;
+            if(module_founded)
+		return _modules[i][1];
+	    
+	    return null;
 	}
 	
 	this.remove = function(path){
@@ -30,12 +30,12 @@ function module_loader(){
         return this;
     })();
 
-    this.source_add = function(path, source) {
-	sources.add(path, source);
+    this.add = function(path, module) {
+	modules.add(path, module);
     }
 
-    this.sources_add = function(array){
-        sources.add_array(array);	
+    this.add_array = function(array){
+        modules.add_array(array);	
     }
 
     this.load = function (path, base_path){
@@ -82,22 +82,21 @@ function module_loader(){
 		}
 	    }
 	    
-	    console.log("lastIndex is ", lastIndex);
 	    path = path.substr(lastIndex,path.length - lastIndex + 1);
 
 	}
 
-	var source = sources.get(base_path  + path);
-	console.log("\n\npath is", path, "base_path is", base_path);
-	console.log("source is", source.substr(0,10));
-	var module = {};
-	var _module = new Function("exports", "require", source);
-	_module(module, (function(loader){
+	var module = modules.get(base_path  + path);
+
+	var _scope = {};
+
+	var _module = typeof(module) == 'function' ? module : new Function("exports", "require", module);
+	_module(_scope, (function(loader){
 			     return function(path){
 				 return loader.load(path, base_path);
 			     }
 			 })(this));
 	
-	return module;	
+	return _scope;	
     }
 }

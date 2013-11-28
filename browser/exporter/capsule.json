@@ -1,8 +1,7 @@
 {
-    "name" : "capsule",
-
     "download" : true,
     "preload" : true,
+    "inline" : false,
 
     "scripts" : {
 	"type" : "script",

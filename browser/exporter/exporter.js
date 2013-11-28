@@ -6,21 +6,44 @@ var types = {"envelop" : 1,
 	     "script" : 3
 	    };
 
-function objects_tree_assembler(definition, cur_path, type, download, preload, head, inline){
+function module_load_emitter(path, code, current,  module_name, inline){
+    
+    this.emit_declare = function(){
+	if(inline){
+	    return "function _" + module_name + "(exports, require){" + code + "};" + 
+		"module_loader.add(\"" + path + "\",_" + module_name + ");";
+	} else 
+	    return  "module_loader.add(\"" + path + "\"," + JSON.stringify(code) + ");";
+    }
+    
+    this.emit_load = function(){
+	if(module_name == 'this')
+	    return 'current = new Object('+ "module_loader.load(\'" + path + "\'));";
+
+	return module_name  + ' = ' + "module_loader.load(\'" + path + "\');";
+    }
+
+}
+
+function objects_tree_assembler(definition, current, type, download, preload, head, inline){
     var assembler = '',
         asm_load = '',
         modules = [];
 
-    var name = '';
-
     for(var key in definition){
 	if(typeof(definition[key]) == 'boolean'){
-	    if(key == 'download')
-		download = definition[key];		    
-	    else 
-		if(key == 'preload')
-		    preload = definition[key];		    
+	    switch(key){		
+	    case 'download' :
+		download = definition[key];
+		break;
+	    case 'preload' :
+		preload = definition[key];		    
+		break;
+	    case 'inline' :
+		inline = definition[key];
+	    }
 	}
+
 	if(typeof(definition[key]) == 'string'){
 	    if(key == 'type'){
 		if(definition[key]  == 'script'){
@@ -34,31 +57,20 @@ function objects_tree_assembler(definition, cur_path, type, download, preload, h
 			type = types.module;			
 		}
 	    }
-	    else 
-		if(key == 'name'){
-		    name = definition[key];		    
-		    if(cur_path == undefined)
-			cur_path = name;
-
-		    assembler += 'var ' + name + "={};";
-		}
 	    else {
 		var content = fs.readFileSync(definition[key],"utf8");
-		if(type == types.script){ 
-		    var _cur_path = cur_path + '.' + key;
-		    assembler += _cur_path + " = document.createElement('script'); " + _cur_path + ".setAttribute('type', 'text/javascript'); " + _cur_path + ".setAttribute('src', '" + definition[key] +  "'); head.appendChild(" + _cur_path + ");";
+		if(type == types.script){
+		    var tag = '_' + key;
+		    assembler += tag + " = document.createElement('script'); " + tag + ".setAttribute('type', 'text/javascript'); " + tag + ".setAttribute('src', '" + definition[key] +  "'); head.appendChild(" + tag + ");";
 		    modules.push([definition[key], content]);
 		} else {
 		    if(type == types.module){
-			assembler += "module_loader.source_add(\"" + definition[key] + "\"," + JSON.stringify(content) + ");"; 
-			var load_code = '';
-			if(key == 'this'){
-			    load_code += cur_path + ' = new Object('+ "module_loader.load(\'" + definition[key] + "\'));";
-			}
-			else {			    
-			    load_code += cur_path + '.' + key + ' = ' + "module_loader.load(\'" + definition[key] + "\');";
-			}
+			var module_load = new module_load_emitter(definition[key], content, current, key, inline);
 			
+			assembler +=  module_load.emit_declare()
+;
+			var load_code = module_load.emit_load();
+		
 			if(!preload)
 			    asm_load += load_code;
 			else 
@@ -70,13 +82,13 @@ function objects_tree_assembler(definition, cur_path, type, download, preload, h
 	    //подумать как сделать относительные пути, диагностика папок
 	}
 	else if(typeof(definition[key]) == 'object'){
-	    var _cur_path = cur_path + '.' + key;
-	    assembler += _cur_path + "= {};";
-	    var ret_object = objects_tree_assembler(definition[key], _cur_path, type, download, preload, head, inline);
-
+	    assembler +=  'current.' + key + "= {};";
+	    var ret_object = objects_tree_assembler(definition[key], key, type, download, preload, head, inline);
+	    assembler += '(function(current){';
 	    assembler += ret_object.assembler;
 	    if(!ret_object.preload){
-		assembler += _cur_path +'.load=' + 'function(){' + ret_object.asm_load + '};';			         }
+		assembler += 'current.load=' + '(function(current){ return function(){' + ret_object.asm_load + '}})(current);';			         }
+	    assembler += '})(current.' + key + ');'
 	    
 	    modules = modules.concat(ret_object.modules);
 	}
@@ -84,14 +96,14 @@ function objects_tree_assembler(definition, cur_path, type, download, preload, h
 
     return {assembler : assembler, asm_load : asm_load, modules : modules, download : download, preload : preload, type : type};
 }
-
+//AHTUNG NEED pastrough name of definition
 function resource_assembler(definition){
     var def = definition,
     construct_func,
     objects;
     this.assemble = function(){
 	var ret_arr = objects_tree_assembler(def, undefined, types.envelop,false, false, false);
-	construct_func =  "function " + definition.name + "(module_loader){" + ret_arr.assembler + "return " + definition.name + ";}";
+	construct_func =  "function capsule(module_loader){var current = {}; " + ret_arr.assembler + "return current;}";
 //	console.log(construct_func);
 	objects = ret_arr.modules;
     }
@@ -105,7 +117,7 @@ function resource_assembler(definition){
 						     });
 				     },
 				     function(error){console.log('failed', error)})    
-	http_respondent.on_recv({ 'url' : url + definition.name + '_constructor.js'}, 
+	http_respondent.on_recv({ 'url' : url + 'capsule_constructor.js'}, 
 				 function (context, response){
 				     response.end(construct_func);
 				 },

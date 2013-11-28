@@ -8,19 +8,19 @@
     <script type="text/javascript">
       function start(){
       var loader = new module_loader();
-      var _capsule = capsule(loader);
-      var __capsule = _capsule.capsule;
+      var _capsule = capsule(loader).capsule;
       setTimeout(function(){
 //      var socket = _capsule.transport.http.lib.socket_cli.create({ 'url' : 'http://localhost:8090/server' }//, _capsule.http_requester, _capsule.timer);
 //      socket.send('blah blah, tuk tuk');
 //      _tests.http_requester.test(_capsule.http_requester, _capsule.timer);
-      _capsule.capsule.tests.load();
+      console.log(JSON.stringify(_capsule));
+      _capsule.tests.load();
       
 //      console.log(window.uuid.v1());
 //      console.log("uuid module is", JSON.stringify(__capsule.modules.transport.direct));
 //      __capsule.tests.uuid.test(__capsule.modules.uuid);
-      __capsule.tests.timer.test(__capsule.modules.timer);
-      __capsule.tests.transport_direct.test(__capsule.modules.transport);
+      _capsule.tests.timer.test(_capsule.modules.timer);
+      _capsule.tests.transport_direct.test(_capsule.modules.transport);
       }, 3000);
       }
 
