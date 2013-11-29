@@ -1,7 +1,7 @@
 {
     "download" : true,
     "preload" : true,
-    "inline" : false,
+    "inline" : true,
 
     "scripts" : {
 	"type" : "script",

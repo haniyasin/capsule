@@ -10,17 +10,20 @@ function module_load_emitter(path, code, current,  module_name, inline){
     
     this.emit_declare = function(){
 	if(inline){
-	    return "function _" + module_name + "(exports, require){" + code + "};" + 
-		"module_loader.add(\"" + path + "\",_" + module_name + ");";
+	    var func_name = module_name;
+	    if(module_name == 'this')
+		func_name = 'upper';
+	    return "function _" + func_name + "(exports, require){\n" + code + "\n};" + 
+		"module_loader.add(\"" + path + "\",_" + func_name + ");";
 	} else 
 	    return  "module_loader.add(\"" + path + "\"," + JSON.stringify(code) + ");";
     }
     
     this.emit_load = function(){
 	if(module_name == 'this')
-	    return 'current = new Object('+ "module_loader.load(\'" + path + "\'));";
+	    return "current = module_loader.load(\'" + path + "\');";
 
-	return module_name  + ' = ' + "module_loader.load(\'" + path + "\');";
+	return 'current.'+ module_name  + ' = ' + "module_loader.load(\'" + path + "\');";
     }
 
 }
@@ -50,7 +53,7 @@ function objects_tree_assembler(definition, current, type, download, preload, he
 		    type = types.script;
 		    if(!head){
 			head = true;
-			assembler += "var head = document.getElementsByTagName('head')[0]; ";		
+			assembler += "var head = document.getElementsByTagName('head')[0];";		
 		    }
 		} else {
 		    if(definition[key] == 'module')
@@ -61,7 +64,7 @@ function objects_tree_assembler(definition, current, type, download, preload, he
 		var content = fs.readFileSync(definition[key],"utf8");
 		if(type == types.script){
 		    var tag = '_' + key;
-		    assembler += tag + " = document.createElement('script'); " + tag + ".setAttribute('type', 'text/javascript'); " + tag + ".setAttribute('src', '" + definition[key] +  "'); head.appendChild(" + tag + ");";
+		    assembler += tag + " = document.createElement('script');" + tag + ".setAttribute('type', 'text/javascript');" + tag + ".setAttribute('src', '" + definition[key] +  "');" +  "head.appendChild(" + tag + ");";
 		    modules.push([definition[key], content]);
 		} else {
 		    if(type == types.module){
@@ -82,13 +85,14 @@ function objects_tree_assembler(definition, current, type, download, preload, he
 	    //подумать как сделать относительные пути, диагностика папок
 	}
 	else if(typeof(definition[key]) == 'object'){
-	    assembler +=  'current.' + key + "= {};";
+	    assembler +=  'current.' + key + "= ";
 	    var ret_object = objects_tree_assembler(definition[key], key, type, download, preload, head, inline);
 	    assembler += '(function(current){';
 	    assembler += ret_object.assembler;
 	    if(!ret_object.preload){
-		assembler += 'current.load=' + '(function(current){ return function(){' + ret_object.asm_load + '}})(current);';			         }
-	    assembler += '})(current.' + key + ');'
+		assembler += 'current.load=' + '(function(current){ return function(){' + ret_object.asm_load + '}})(current);';			         
+	    }
+	    assembler += 'return current;})({});';
 	    
 	    modules = modules.concat(ret_object.modules);
 	}
