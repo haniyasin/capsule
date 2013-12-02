@@ -44,27 +44,49 @@ function script_allocator(){
 function xhr_allocator(){
     this.create = function(){
 	var _req = new XMLHttpRequest();
-	return {
-	    'send_once' : function(context, data, data_cb, err_cb){
-		_req.onload = function(){ data_cb(_req.responseText) };
+	_req.timeout = 5;
+	var _on_done;
+	var _on_load;
+	var _on_closed;
+	_req.onreadystatechange = function(){
+	    switch(_req.readyState){
+		case 3 : 
+		if(typeof(_on_load) == 'function')
+		    _on_load(_req.responseText);
+		break;
+
+		case 4 :
+		if(typeof(_on_closed) == 'function')
+		    _on_closed();		
+	    }
+	}
+        return {
+	    'send_once' : function(context, data, recv_cb, err_cb){
+		_req.onload = function(){ recv_cb(_req.responseText) };
 		_req.open(context.method, context.url,true);
 		_req.send(data);
-		_req.abort();
 	    },
-	    'send' : function(context, data){
-		
+	    'open' : function(context){
+		_req.open(context.method, context.url, true);		
+	    },
+	    'send' : function(data){
+		_req.send(data);
 	    },
 	    'close' : function(){
+		_on_closed();
 	    },
-	    'on_data' : function(data_cb){
+	    'on_recv' : function(recv_cb){
+		_on_load =_req.onload = function(){ recv_cb(_req.responseText) };
 	    },
 	    'on_closed' : function(closed_cb){
+		_on_closed =_req.ontimeout = closed_cb;
 	    },
 	    'on_err' : function(error_cb){
 	    }
 	    
 	}
     }
+    
     this.destroy = function(obj){
 	obj._req.abort();
 	obj._req = null;
@@ -86,7 +108,7 @@ function get_allocator(type){
 exports.send = function(type, context, data,  data_cb, err_cb){
     var allocator = get_allocator(type);
     
-    var req = allocator.alloc();
+    var req = allocator.alloc(context);
     //for xhr, not for script allocator.free(xhr)
     req.send_once(context, data, function(data){
 		      data_cb(data);
@@ -94,7 +116,7 @@ exports.send = function(type, context, data,  data_cb, err_cb){
 		  }, err_cb);
 }
 
-exports.create = function(type, context, data_cb, err_cb, closed_cb){
+exports.create = function(type){
     var allocator = get_allocator(type);
     var req = allocator.alloc();
     req.free = function(){

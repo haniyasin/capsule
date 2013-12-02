@@ -22,7 +22,7 @@ exports.create = function(allocator){
             busy.push(obj);
             return obj;
         } else {
-            var obj = allocator.create();
+            var obj = allocator.create(arguments);
             busy.push(obj);
 
             return obj;

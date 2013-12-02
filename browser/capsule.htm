@@ -10,17 +10,21 @@
       var loader = new module_loader();
       var _capsule = capsule(loader).capsule;
       setTimeout(function(){
-//      var socket = _capsule.transport.http.lib.socket_cli.create({ 'url' : 'http://localhost:8090/server' }//, _capsule.http_requester, _capsule.timer);
-//      socket.send('blah blah, tuk tuk');
+      _capsule.modules.transport.http.load();
+      _capsule.modules.transport.http.lib.load();
+      var socket = _capsule.modules.transport.http.lib.socket_cli.create({ 'url' : 'http://localhost:8090/server' }, _capsule.modules);
+      socket.send('blah blah, tuk tuk');
+      
+
 //      _tests.http_requester.test(_capsule.http_requester, _capsule.timer);
-      console.log(JSON.stringify(_capsule.transport));
-      _capsule.tests.load();
+//      console.log(JSON.stringify(_capsule.transport));
+//      _capsule.tests.load();
       
 //      console.log(window.uuid.v1());
 //      console.log("uuid module is", JSON.stringify(__capsule.modules.transport.direct));
 //      __capsule.tests.uuid.test(__capsule.modules.uuid);
-      _capsule.tests.timer.test(_capsule.modules.timer);
-      _capsule.tests.transport_direct.test(_capsule.modules.transport);
+//      _capsule.tests.timer.test(_capsule.modules.timer);
+//      _capsule.tests.transport_direct.test(_capsule.modules.transport);
       }, 3000);
       }
 
