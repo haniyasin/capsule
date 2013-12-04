@@ -21,6 +21,12 @@ with(capsule.create()){
     exporter.create('browser/exporter/capsule.json', http_respondent.node,function(web_capsule){
 			web_capsule.to_http('http://blah.com:8810/capsule/');
 		    });
+
+    http_respondent.node.on_recv({ 'url' : "http://blah.com:8810/socket.js"}, 
+				 function(content, response){
+				     response.end(JSON.stringify("hai hai"));
+				 },
+				 function(error){console.log('failed', error)})    
 //    var socket_srv = require('../modules/transport/http/socket_srv.js');
 //    var socket = socket_srv.create(http_respondent.node, { 'url' : 'http://localhost:8090/server'});
 //    socket.on_recv(0, function(cli_id, msg){

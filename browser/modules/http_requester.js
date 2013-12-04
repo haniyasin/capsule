@@ -12,67 +12,100 @@ function script_allocator(){
     head.appendChild(script_tag);
     
     this.create = function(){
-	return {
-	    'req_id' : '',
-	    'send' : function(context, data,  data_cb, err_cb){
-		this.req_id = ids.alloc();
-		var head = document.getElementsByTagName('head')[0];
-		var script_tag = document.createElement('script');
-		script_tag.setAttribute('id','s' + this.req_id);
-		//нужны проверки данных
-		script_tag.setAttribute('src',context.url + '?' + data + 'jsonp=rca[' + this.req_id + ']');
-		rca[this.req_id] = function(reply){
-                    head.removeChild(script_tag);
-                    ids.free(this.req_id);
-                    rca[this.req_id] = undefined;
-                    data_cb(reply);
+	var _context;
+	var _on_recv,
+	_on_closed,
+	_on_error;
+	function compose_request(context, data, recv_cb, closed_cb, err_cb){
+	    var id = ids.alloc();
+	    var head = document.getElementsByTagName('head')[0];
+	    var script_tag = document.createElement('script');
+	    script_tag.setAttribute('id','s' + id);
+	    //нужны проверки данных и передача данных
+//	    script_tag.setAttribute('src',context.url + '?' + data + 'jsonp=rca[' + id + ']');
+	    script_tag.setAttribute('src',context.url + '?' + 'jsonp=rca[' + id + ']');
+	    rca[id] = function(reply){
+                head.removeChild(script_tag);
+                ids.free(id);
+                rca[id] = undefined;
+                recv_cb(reply);
+	    }
+	    //прилепить сюда ещё превышение времени ожидание по таймеру надобно:)
+	    return {
+		'activate' : function(){
+		    head.appendChild(script_tag);
 		}
-		head.appendChild(script_tag);
-
+	    }
+	}
+	return {
+	    'send_once' : function(context, data,  recv_cb, closed_cb, err_cb){
+		compose_request(arguments).activate();
+	    },
+	    'open' : function(context){
+		_context = context;
+	    },
+	    'send' : function(data){
+		compose_request(_context, data, _on_recv, _on_closed, _on_error).activate();
+	    },
+	    'close' : function(){
+	    },
+	    'on_recv' : function(callback){
+		_on_recv = callback;
+	    },
+	    'on_closed' : function(callback){
+		_on_closed = callback;
+	    },
+            'on_err' : function(callback){
+		_on_error = callback;
 	    }	    
 	}
     }
     
     this.destroy = function(obj){
-	
+	var script_tag = document.getElementById('script_transport_data');
+	script_tag.parentNode.removeChild(script_tag);
 	//зачистить теги script за собой	
     }
-//	var script_tag = document.getElementById('script_transport_data');
-//	script_tag.parentNode.removeChild(script_tag);
 }
 
 function xhr_allocator(){
     this.create = function(){
 	var _req = new XMLHttpRequest();
-	_req.timeout = 5;
-	var _on_done;
+	_req.timeout = 2000;
 	var _on_load;
 	var _on_closed;
+	var _on_error;
 	_req.onreadystatechange = function(){
 	    switch(_req.readyState){
 		case 3 : 
 		if(typeof(_on_load) == 'function')
-		    _on_load(_req.responseText);
+//		    console.log('loading');
+//		    _on_load(this.responseText);
 		break;
 
 		case 4 :
-		if(typeof(_on_closed) == 'function')
+		if(typeof(_on_closed) == 'function'){
+//		    console.log('closed', this.responseText);		    
 		    _on_closed();		
+		}
 	    }
 	}
         return {
-	    'send_once' : function(context, data, recv_cb, err_cb){
-		_req.onload = function(){ recv_cb(_req.responseText) };
+	    'send_once' : function(context, data, recv_cb, closed_cb, err_cb){
 		_req.open(context.method, context.url,true);
+		_req.onload = function(){ recv_cb(_req.responseText) };
 		_req.send(data);
 	    },
 	    'open' : function(context){
-		_req.open(context.method, context.url, true);		
+		_req.overrideMimeType("text/plain; charset=x-user-defined");
+		_req.open(context.method, context.url, true);
+		//реализовать передачу типов, хотя это ещё касается поддежки типов данных и другими модулями, так что потом, а пока просто будем текст получать
 	    },
 	    'send' : function(data){
 		_req.send(data);
 	    },
 	    'close' : function(){
+		_req.abort();
 		_on_closed();
 	    },
 	    'on_recv' : function(recv_cb){

@@ -35,6 +35,7 @@ function find_server(context){
 									      'footer' : '',
 									      'end' : function(data){
 										  {
+										      //нужна реализация работы с mimetype
 										      this._response.writeHead(200, {														  'Cache-Control' : 'no-cache' });
 										      this._response.end(this.header + data + this.footer);
 										  }
@@ -43,7 +44,7 @@ function find_server(context){
 									  
 									  //script jsonp support
 									  if(request_url.query.jsonp != undefined){
-//									      console.log(request_url.query.jsonp)
+									      console.log(request_url.query.jsonp)
 									      res.header = request_url.query.jsonp + '(';
 									      res.footer = ')';
 									  }

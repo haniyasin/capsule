@@ -3,7 +3,7 @@ function msg_queue(){
     var queue = [];
     this.add = function(msg){
 	queue.push(msg);
-	cb(msg); //may be packet_sender
+	cb(msg);
     }
     this.pop = function(){
 	return queue.pop();
@@ -27,8 +27,11 @@ function requests_holder(modules){
 	//вписать сюда свой установщик каллбека, который вставляет код удаления request
 	request.on_closed(function(){
 			      for(key in _requests){
-				  if(_requests[key] == request)
+				  if(_requests[key] == request){
 				      _requests.splice(key,1);
+                                      request.on_destroyed();
+				      request.free();				      
+				  }
 			      }
 			  });
 	return request;
@@ -41,38 +44,38 @@ function requests_holder(modules){
     }
 }
 
-function packet_sender(modules, _holder, packet_receiver){
-    var max_access = 2;
+function packet_sender(modules, _holder, _incoming, _lpoller){
     this.send = function(msg){	
 	var request = _holder.get_waited_request();
 	if(request){
-	    if(request.last_access > max_access){
-		request.on_recv(function(data){packet_receiver.on_recv(data)});
+		request.on_recv(function(data){_incoming.add(data)});
 		request.send(msg);
-	    }	    
-	}
-	//написать отложенное срабатывание либо через таймер, либо через try_poll, либо через холдер, когда он создаст новый request
+	    	    
+	} else 
+	    _lpoller.delayed_packets.push(msg);
+	// либо через try_poll, либо через холдер, когда он создаст новый request
     }
 }
 
-function packet_receiver(incoming){
-    this.on_recv = function(data){
-	incoming.push(data);
-    }
-}
-
-function lpoller(modules, context, _holder, packet_receiver){
-    var _timer;   
+function lpoller(modules, context, _holder, _incoming){
+    var _timer;
+    this.delayed_packets = [];
+    var _packets = this.delayed_packets;
+    var _lpoller = this;
     this.try_poll = function(){	
-	if(typeof(_poll_timer) == 'undefined'){
+	if(typeof(_timer) == 'undefined'){
 	    _timer = modules.timer.js.create(function(){
-						 if(!_holder.get_waited_request()){
+						 var _waited = _holder.get_waited_request();
+						 if(!_waited){
 						     var request = _holder.create_request();
-						     request.on_closed(lpoller);
-						     request.on_recv(function(data){packet_receiver.recv(data)});
+						     request.on_destroyed = function(){_lpoller.try_poll()};
+						     request.on_recv(function(data){_incoming.add(data)});
 						     request.open(context);
+						 } else {
+						     if(_packets.length > 0)
+							 _waited.send(_packets.shift());
 						 }
-					     }, 50, false);	
+					     }, 100, true);	
 	}
     }
 
@@ -87,20 +90,18 @@ function lpoller(modules, context, _holder, packet_receiver){
 exports.create = function(context, modules){
     var _incoming = new msg_queue(), _outgoing = new msg_queue();
     var _holder = new requests_holder(modules);
-    var _receiver = new packet_receiver(_incoming);
-    var _sender = new packet_sender(modules, _holder, _receiver);
-    var _lpoller = new lpoller(modules, context, _holder, _receiver);
+    var _lpoller = new lpoller(modules, context, _holder, _incoming);
+    var _sender = new packet_sender(modules, _holder, _incoming, _lpoller);
     _outgoing.on_add(function(msg){_sender.send(msg)});
     //надо везде подключить receiver
     return {
 	'send' : function(msg){
 	    _lpoller.try_poll();
-	    console.log(msg);
 	    _outgoing.add(msg);
 	},
 	'on_recv' : function(callback){
-	    _lpoller.try_poll();
 	    _incoming.on_add(callback);
+	    _lpoller.try_poll();
 	}
 	
     }
