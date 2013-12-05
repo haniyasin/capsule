@@ -12,7 +12,6 @@ function script_allocator(){
     head.appendChild(script_tag);
     
     this.create = function(){
-	var _context;
 	var _on_recv,
 	_on_closed,
 	_on_error;
@@ -32,20 +31,22 @@ function script_allocator(){
 	    }
 	    //прилепить сюда ещё превышение времени ожидание по таймеру надобно:)
 	    return {
-		'activate' : function(){
+		'activate' : function(data){
+		    //TODO упаковка данных в url
 		    head.appendChild(script_tag);
 		}
 	    }
 	}
 	return {
+	    '_req' : undefined,
 	    'send_once' : function(context, data,  recv_cb, closed_cb, err_cb){
 		compose_request(arguments).activate();
 	    },
 	    'open' : function(context){
-		_context = context;
+		this._req = compose_request(context,null, _on_recv, _on_closed, _on_error);
 	    },
 	    'send' : function(data){
-		compose_request(_context, data, _on_recv, _on_closed, _on_error).activate();
+		this._req.activate(data);
 	    },
 	    'close' : function(){
 	    },
