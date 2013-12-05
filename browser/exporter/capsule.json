@@ -17,7 +17,8 @@
 	"dependencies" : {
 	    "preload" : false,
 
-	    "bb_allocator" : "dependencies/bb_allocator.js"	    
+	    "bb_allocator" : "dependencies/bb_allocator.js",
+	    "utils" : "dependencies/utils.js"
 	},
 
 	"modules" : {

@@ -1,19 +1,3 @@
-function msg_queue(){
-    var cb;
-    var queue = [];
-    this.add = function(msg){
-	queue.push(msg);
-	cb(msg);
-    }
-    this.pop = function(){
-	return queue.pop();
-    }
-    this.on_add = function(callback){
-	cb = callback;
-    }
-}
-
-
 function _request(context, http_requester){
     this.on_closed = function(cb){
 	//TODO to find himself and to delete from requests;
@@ -22,7 +6,7 @@ function _request(context, http_requester){
 function requests_holder(modules){
     var _requests = [];
     this.create_request = function(){
-	var request = modules.http_requester.create('xhr');
+	var request = modules.http_requester.create('script');
 	_requests.push(request);
 	//вписать сюда свой установщик каллбека, который вставляет код удаления request
 	request.on_closed(function(){
@@ -88,7 +72,8 @@ function lpoller(modules, context, _holder, _incoming){
 }
 
 exports.create = function(context, modules){
-    var _incoming = new msg_queue(), _outgoing = new msg_queue();
+    var utils = require('../../../dependencies/utils.js');
+    var _incoming = new utils.msg_queue(), _outgoing = new utils.msg_queue();
     var _holder = new requests_holder(modules);
     var _lpoller = new lpoller(modules, context, _holder, _incoming);
     var _sender = new packet_sender(modules, _holder, _incoming, _lpoller);
