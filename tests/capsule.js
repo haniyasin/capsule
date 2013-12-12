@@ -8,30 +8,28 @@ var capsule = require('../capsule.js');
 var cb_synchronizer = require('../dependencies/cb_synchronizer.js');
 var DEBUG = 1;
 
-
-with(capsule.create()){
+var modules = capsule.create();
+with(modules){
 //    test_uuid(uuid);
 //    test_timer(timer);
 //    test_transport(transport);
 //    var hr = require('./http_respondent.js');
 //    hr.test(http_respondent);
 
+    var socket_srv = require('../modules/transport/http/socket_srv.js');
+    var socket = socket_srv.create({ 'url' : 'http://localhost:8810/socket.js'}, modules);
+    socket.listen();
+    socket.on_recv(0, function(cli_id, msg){
+		       socket.send(cli_id, 'vozmi obratno ' + msg);
+		       console.log("cli is", cli_id, "msg is", msg);
+		   });    
+
     var exporter = require('../browser/exporter/exporter.js');
     var cb_sync = cb_synchronizer.create();
-    exporter.create('browser/exporter/capsule.json', http_respondent.node,function(web_capsule){
+    exporter.create('browser/exporter/capsule.json', http_respondent.node ,function(web_capsule){
 			web_capsule.to_http('http://blah.com:8810/capsule/');
 		    });
 
-    http_respondent.node.on_recv({ 'url' : "http://blah.com:8810/socket.js"}, 
-				 function(content, response){
-				     response.end(JSON.stringify("hai hai"));
-				 },
-				 function(error){console.log('failed', error)})    
-//    var socket_srv = require('../modules/transport/http/socket_srv.js');
-//    var socket = socket_srv.create(http_respondent.node, { 'url' : 'http://localhost:8090/server'});
-//    socket.on_recv(0, function(cli_id, msg){
-//		       console.log("cli is", cli_id, "msg is", msg);
-//		   });    
 
 /*
     var cb_sync = require('../dependencies/cb_synchronizer.js').create();

@@ -1,18 +1,6 @@
-function msg_queue(){
-    var cb;
-    var queue = [];
-    this.add = function(msg){
-	queue.push(msg);
-	cb(msg);
-    }
-    this.pop = function(){
-	return queue.pop();
-    }
-    this.on_add = function(callback){
-	cb = callback;
-    }
-}
+var bb_allocator = require('../../../dependencies/bb_allocator.js');
 
+var id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
 
 function _request(context, http_requester){
     this.on_closed = function(cb){
@@ -22,7 +10,7 @@ function _request(context, http_requester){
 function requests_holder(modules){
     var _requests = [];
     this.create_request = function(){
-	var request = modules.http_requester.create('xhr');
+	var request = modules.http_requester.create('script');
 	_requests.push(request);
 	//вписать сюда свой установщик каллбека, который вставляет код удаления request
 	request.on_closed(function(){
@@ -44,15 +32,16 @@ function requests_holder(modules){
     }
 }
 
-function packet_sender(modules, _holder, _incoming, _lpoller){
+function packet_sender(modules, _holder, cli_id, _incoming, _lpoller){
     this.send = function(msg){	
 	var request = _holder.get_waited_request();
+	var msg_json = JSON.stringify({'cli_id' : cli_id, 'msg' : msg});
 	if(request){
 		request.on_recv(function(data){_incoming.add(data)});
-		request.send(msg);
+		request.send(msg_json);
 	    	    
 	} else 
-	    _lpoller.delayed_packets.push(msg);
+	    _lpoller.delayed_packets.push(msg_json);
 	// либо через try_poll, либо через холдер, когда он создаст новый request
     }
 }
@@ -88,10 +77,13 @@ function lpoller(modules, context, _holder, _incoming){
 }
 
 exports.create = function(context, modules){
-    var _incoming = new msg_queue(), _outgoing = new msg_queue();
+    var utils = require('../../../dependencies/utils.js');
+    var cli_id = id_allocator.alloc();
+    var _incoming = new utils.msg_queue(), _outgoing = new utils.msg_queue();
+    //реализовать выбор транспорта, xhr или script
     var _holder = new requests_holder(modules);
     var _lpoller = new lpoller(modules, context, _holder, _incoming);
-    var _sender = new packet_sender(modules, _holder, _incoming, _lpoller);
+    var _sender = new packet_sender(modules, _holder, cli_id, _incoming, _lpoller);
     _outgoing.on_add(function(msg){_sender.send(msg)});
     //надо везде подключить receiver
     return {

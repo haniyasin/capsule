@@ -3,6 +3,7 @@ var bb_allocator = require('../../dependencies/bb_allocator.js');
 
 function script_allocator(){
     var ids = new bb_allocator.create(bb_allocator.id_allocator);
+    var base32 = require('../../dependencies/base32.js');
 
     var head = document.getElementsByTagName('head')[0];
     var script_tag = document.createElement('script');
@@ -21,8 +22,10 @@ function script_allocator(){
 	    var script_tag = document.createElement('script');
 	    script_tag.setAttribute('id','s' + id);
 	    //нужны проверки данных и передача данных
-//	    script_tag.setAttribute('src',context.url + '?' + data + 'jsonp=rca[' + id + ']');
-	    script_tag.setAttribute('src',context.url + '?' + 'jsonp=rca[' + id + ']');
+	    var data_str = '';
+	    if(data)
+		data_str = 'data=' + base32.encode(data) + '&'
+	    script_tag.setAttribute('src',context.url + '?' + data_str + 'jsonp=rca[' + id + ']');
 	    rca[id] = function(reply){
                 head.removeChild(script_tag);
                 ids.free(id);
@@ -71,6 +74,7 @@ function script_allocator(){
 
 function xhr_allocator(){
     this.create = function(){
+	var _context;
 	var _req = new XMLHttpRequest();
 	_req.timeout = 2000;
 	var _on_load;
@@ -91,18 +95,28 @@ function xhr_allocator(){
 		}
 	    }
 	}
+	function _pack_data_url(context, data){
+	    if(context.method == 'GET')
+		return  context.url + '?data=' + base32.encode(data);
+	    return context.url;
+	}
         return {
 	    'send_once' : function(context, data, recv_cb, closed_cb, err_cb){
-		_req.open(context.method, context.url,true);
+		_req.open(context.method, context.method == 'GET' ? _pack_data_url(context, data) : context.url,true);
 		_req.onload = function(){ recv_cb(_req.responseText) };
 		_req.send(data);
 	    },
 	    'open' : function(context){
 		_req.overrideMimeType("text/plain; charset=x-user-defined");
-		_req.open(context.method, context.url, true);
+		if(context.method == 'GET')
+		    _context = context; //That hack need for data_url
+		else
+		    _req.open(context.method, context_url, true);
 		//реализовать передачу типов, хотя это ещё касается поддежки типов данных и другими модулями, так что потом, а пока просто будем текст получать
 	    },
 	    'send' : function(data){
+		if(_context)
+		    _req.open(_context.method, _pack_data_url(_context, data), true);		    
 		_req.send(data);
 	    },
 	    'close' : function(){

@@ -13,7 +13,7 @@ function module_load_emitter(path, code, current,  module_name, inline){
 	    var func_name = module_name;
 	    if(module_name == 'this')
 		func_name = 'upper';
-	    return "function _" + func_name + "(exports, require){\n" + code + "\n};" + 
+	    return "function _" + func_name + "(module, exports, require){\n" + code + "\n};" + 
 		"module_loader.add(\"" + path + "\",_" + func_name + ");";
 	} else 
 	    return  "module_loader.add(\"" + path + "\"," + JSON.stringify(code) + ");";

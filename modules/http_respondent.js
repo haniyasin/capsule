@@ -1,11 +1,69 @@
 var http = require('http');
 var url = require('url');
 var dns = require('dns');
+var base32 = require('../dependencies/base32.js');
 
 // for storing active and unactive server contexts
 var servers = [];
 
-function find_server(context){
+function server_create(context, address){
+    var server  = {
+	'ip' : context.ip = address,
+	'port' : context._url.port,
+	'contexts' : [context],
+	'context_add' : function(context){
+	    this.contexts.push(context);
+	}
+    };
+    server._server = http.createServer(function(request, response){
+					   var contexts = server.contexts;
+					   var headers = request.headers;
+
+					   for(i = 0; i < contexts.length;  i++){
+					       var context = contexts[i], _url = context._url;
+					       var request_url = url.parse(request.url,true);
+					       if(url.parse('http://' + headers.host).hostname == _url.hostname && request_url.pathname == _url.pathname ){	
+						   var content = '';
+						   var res = {
+						       '_response' : response,
+						       'header' : '',
+						       'footer' : '',
+						       'end' : function(data){
+							   {
+							       //нужна реализация работы с mimetype
+							       this._response.writeHead(200, {														  'Cache-Control' : 'no-cache' });
+							       this._response.end(this.header + data + this.footer);
+							   }
+						       },
+						       'on_close' : function(callback){
+							   this._response.on('close',callback);
+						       }
+						   };
+						   
+						   //script jsonp support
+						   if(request_url.query.jsonp != undefined){
+						       res.header = request_url.query.jsonp + '(';
+						       res.footer = ')';
+						   }
+
+						   if(request.method == 'GET'){
+						       if(request_url.query.data)
+							   content = base32.decode(request_url.query.data);
+						   }
+						   else if (request.method == 'POST')
+						   content = '';
+						   context.data_cb(content, res);								 }      
+					   }
+					   ;
+				       });
+    
+    server._server.listen(context._url.port,context.ip);
+    servers.push(server);
+    
+    return server;
+}
+
+function server_find(context, callback){
     var server;
     context._url = url.parse(context.url);
     dns.lookup(context.url.hostname, function(err, address){
@@ -14,66 +72,14 @@ function find_server(context){
 			   if(servers[i].ip == address && servers[i].port == context._url.port)
 			       server = servers[i];
 		       }
-		       
-		       if(!server){
-			   server = {
-			       ip : context.ip = address,
-			       port : context._url.port,
-			       contexts : [context]
-			   };
-			   server._server = http.createServer(function(request, response){
-								  var contexts = server.contexts;
-								  var headers = request.headers;
-
-								  for(i = 0; i < contexts.length;  i++){
-								      var context = contexts[i], _url = context._url;
-								      var request_url = url.parse(request.url,true);
-								      if(url.parse('http://' + headers.host).hostname == _url.hostname && request_url.pathname == _url.pathname ){	
-									  var res = {
-									      '_response' : response,
-									      'header' : '',
-									      'footer' : '',
-									      'end' : function(data){
-										  {
-										      //нужна реализация работы с mimetype
-										      this._response.writeHead(200, {														  'Cache-Control' : 'no-cache' });
-										      this._response.end(this.header + data + this.footer);
-										  }
-									      }
-									  };
-									  
-									  //script jsonp support
-									  if(request_url.query.jsonp != undefined){
-									      console.log(request_url.query.jsonp)
-									      res.header = request_url.query.jsonp + '(';
-									      res.footer = ')';
-									  }
-									  context.data_cb(context, res);								 }      
-								  }
-								  ;
-							      });
-			   
-			   server._server.listen(context._url.port,context.ip);
-			   servers.push(server);
-			   //	server = http.createServer(request_handler);
-			   //        server.listen(context.port, context.ip);
-			   ///	servers.push([server, [context]]);
-		       } else {
-			   server.contexts.push(context);
-		       }
+		       if (!server)
+			   server = server_create(context, address);
+		       callback(server);
 		   } else 
-		       console.log('failed');
+		       console.log('failed lookup', context.url.hostname);
 	       });
-    
-    return server;    
 }
     
-var contexts = []
-
-function find_context(request){
-    
-}
-
 exports.on_recv = function(context, data_cb, error_cb){
     
     //проверяем контекст, по url находим ip адрес.
@@ -81,8 +87,9 @@ exports.on_recv = function(context, data_cb, error_cb){
     context.data_cb = data_cb;
     context.error_cb = error_cb;
 
-    var server = find_server(context);
- //    server.context_add(context);
+    server_find(context, function(server){    
+		    server.context_add(context);
+		});
 
 //    http.cre    
 }
