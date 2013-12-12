@@ -88,15 +88,19 @@ function module_loader(){
 
 	var module = modules.get(base_path  + path);
 
-	var _scope = {};
+	var _exports = {};
 
-	var _module = typeof(module) == 'function' ? module : new Function("exports", "require", module);
-	_module(_scope, (function(loader){
+	var _module = typeof(module) == 'function' ? module : new Function("module", "exports", "require", module);
+	var module_definition = {
+	    'name' : '',
+	    'exports' : _exports
+	}
+	_module(module_definition, _exports, (function(loader){
 			     return function(path){
 				 return loader.load(path, base_path);
 			     }
 			 })(this));
 	
-	return _scope;	
+	return module_definition.exports;	
     }
 }
