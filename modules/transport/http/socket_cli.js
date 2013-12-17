@@ -10,14 +10,15 @@ function _request(context, http_requester){
 function requests_holder(modules){
     var _requests = [];
     this.create_request = function(){
-	var request = modules.http_requester.create('script');
+	var request = modules.http_requester.create('xhr');
 	_requests.push(request);
 	//вписать сюда свой установщик каллбека, который вставляет код удаления request
 	request.on_closed(function(){
 			      for(key in _requests){
 				  if(_requests[key] == request){
 				      _requests.splice(key,1);
-                                      request.on_destroyed();
+                                      if(request.on_destroyed)
+					  request.on_destroyed();
 				      request.free();				      
 				  }
 			      }
@@ -32,17 +33,26 @@ function requests_holder(modules){
     }
 }
 
-function packet_sender(modules, _holder, cli_id, _incoming, _lpoller){
+function packet_sender(modules, context, _holder, cli_id, _incoming, _lpoller){
     this.send = function(msg){	
 	var request = _holder.get_waited_request();
 	var msg_json = JSON.stringify({'cli_id' : cli_id, 'msg' : msg});
-	if(request){
+	switch(context.method){
+	    case 'GET' :
+	    var request = _holder.create_request();
+	    request.on_recv(function(data){_incoming.add(data)});
+	    request.open(context);
+	    request.send(msg_json);	    
+	    break;
+
+	    case 'POST' :
+	    if(request){
 		request.on_recv(function(data){_incoming.add(data)});
-		request.send(msg_json);
-	    	    
-	} else 
-	    _lpoller.delayed_packets.push(msg_json);
-	// либо через try_poll, либо через холдер, когда он создаст новый request
+		request.send(msg_json);	    	
+	    } else 
+		_lpoller.delayed_packets.push(msg_json);
+	    break;
+	}
     }
 }
 
@@ -61,6 +71,7 @@ function lpoller(modules, context, _holder, _incoming){
 						     request.on_recv(function(data){_incoming.add(data)});
 						     request.open(context);
 						 } else {
+						     //реализовать упаковку запросов
 						     if(_packets.length > 0)
 							 _waited.send(_packets.shift());
 						 }
@@ -79,17 +90,16 @@ function lpoller(modules, context, _holder, _incoming){
 exports.create = function(context, modules){
     var utils = require('../../../dependencies/utils.js');
     var cli_id = id_allocator.alloc();
-    var _incoming = new utils.msg_queue(), _outgoing = new utils.msg_queue();
+    var _incoming = new utils.msg_queue();
     //реализовать выбор транспорта, xhr или script
     var _holder = new requests_holder(modules);
     var _lpoller = new lpoller(modules, context, _holder, _incoming);
-    var _sender = new packet_sender(modules, _holder, cli_id, _incoming, _lpoller);
-    _outgoing.on_add(function(msg){_sender.send(msg)});
+    var _sender = new packet_sender(modules, context, _holder, cli_id, _incoming, _lpoller);
     //надо везде подключить receiver
     return {
 	'send' : function(msg){
 	    _lpoller.try_poll();
-	    _outgoing.add(msg);
+	    _sender.send(msg);
 	},
 	'on_recv' : function(callback){
 	    _incoming.on_add(callback);

@@ -14,10 +14,9 @@
       _capsule.modules.transport.http.lib.load();
       var socket = _capsule.modules.transport.http.lib.socket_cli.create({ 'url' : "http://localhost:8810/socket.js", 'method' : "GET" }, _capsule.modules);
       socket.on_recv(function(msg){console.log("prishlo",msg)});
-      socket.send('blah blah, tuk tuk');
-      socket.send('blah blah, tuk tuk');
-      socket.send('blah blah, tuk tuk');
-      socket.send('blah blah, tuk tuk');
+      for(ind = 0; ind < 100; ind++){
+			 socket.send('blah blah, tuk tuk');
+			 }
       
 //      _tests.http_requester.test(_capsule.http_requester, _capsule.timer);
 //      console.log(JSON.stringify(_capsule.transport));

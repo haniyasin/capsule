@@ -37,6 +37,8 @@ function server_create(context, address){
 						       },
 						       'on_close' : function(callback){
 							   this._response.on('close',callback);
+						       },
+						       'close' : function(){
 						       }
 						   };
 						   
@@ -46,15 +48,24 @@ function server_create(context, address){
 						       res.footer = ')';
 						   }
 
-						   if(request.method == 'GET'){
-						       if(request_url.query.data)
-							   content = base32.decode(request_url.query.data);
-						   }
-						   else if (request.method == 'POST')
-						   content = '';
-						   context.data_cb(content, res);								 }      
+						   switch(request.method){
+						   case 'GET' :
+						       if(request_url.query.data){
+							   content = base32.decode(request_url.query.data); 
+						       }
+			       
+						       context.data_cb(content, res);						                                    break;
+
+						   case 'POST' :
+						       var _cb = context.data_cb;
+						       request.on('data', function(data){
+								      //console.log(context.data_cb);
+								      _cb(data, res);
+								 });
+						       break;
+						   }						   
+					       }
 					   }
-					   ;
 				       });
     
     server._server.listen(context._url.port,context.ip);

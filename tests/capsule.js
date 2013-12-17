@@ -21,13 +21,12 @@ with(modules){
     socket.listen();
     socket.on_recv(0, function(cli_id, msg){
 		       socket.send(cli_id, 'vozmi obratno ' + msg);
-		       console.log("cli is", cli_id, "msg is", msg);
 		   });    
 
     var exporter = require('../browser/exporter/exporter.js');
     var cb_sync = cb_synchronizer.create();
     exporter.create('browser/exporter/capsule.json', http_respondent.node ,function(web_capsule){
-			web_capsule.to_http('http://blah.com:8810/capsule/');
+			web_capsule.to_http('http://localhost:8810/capsule/');
 		    });
 
 

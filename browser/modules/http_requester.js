@@ -21,11 +21,6 @@ function script_allocator(){
 	    var head = document.getElementsByTagName('head')[0];
 	    var script_tag = document.createElement('script');
 	    script_tag.setAttribute('id','s' + id);
-	    //нужны проверки данных и передача данных
-	    var data_str = '';
-	    if(data)
-		data_str = 'data=' + base32.encode(data) + '&'
-	    script_tag.setAttribute('src',context.url + '?' + data_str + 'jsonp=rca[' + id + ']');
 	    rca[id] = function(reply){
                 head.removeChild(script_tag);
                 ids.free(id);
@@ -35,7 +30,11 @@ function script_allocator(){
 	    //прилепить сюда ещё превышение времени ожидание по таймеру надобно:)
 	    return {
 		'activate' : function(data){
-		    //TODO упаковка данных в url
+		    //нужны проверки данных и передача данных
+		    var data_str = '';
+		    if(data)
+			data_str = 'data=' + base32.encode(data) + '&'
+		    script_tag.setAttribute('src',context.url + '?' + data_str + 'jsonp=rca[' + id + ']');
 		    head.appendChild(script_tag);
 		}
 	    }
@@ -109,9 +108,9 @@ function xhr_allocator(){
 	    'open' : function(context){
 		_req.overrideMimeType("text/plain; charset=x-user-defined");
 		if(context.method == 'GET')
-		    _context = context; //That hack need for data_url
+		    _context = context; //This hack need for data_url
 		else
-		    _req.open(context.method, context_url, true);
+		    _req.open(context.method, context.url, true);
 		//реализовать передачу типов, хотя это ещё касается поддежки типов данных и другими модулями, так что потом, а пока просто будем текст получать
 	    },
 	    'send' : function(data){

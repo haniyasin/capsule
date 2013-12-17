@@ -1,21 +1,25 @@
 var bb_allocator = require('../../../dependencies/bb_allocator.js');
+function get_by_cli_id(array, cli_id){
+    for(key in array){
+	if(array[key][0] == cli_id)
+	    return array[key][1];
+    }
+    return null;	    
+}
 function response_holder(_incoming, modules){
     var ids = new bb_allocator.create(bb_allocator.id_allocator);
     var responses = [];
     this.delayed_packets = [];
     this.get_waited_response = function(cli_id){
-	for(key in responses){
-	    if(responses[key][0] == cli_id)
-		return responses[key][1];
-	}
-	return null;	
+	return get_by_cli_id(responses, cli_id);
     }
+
+    var _packets = this.delayed_packets;
 
     this.activate = function(context){
 	//нужно выбирать доступный http_respondent,  а не хардкодится на node
 	modules.http_respondent.node.on_recv(context, 
 					     function(content, response){
-						 console.log('content is', content);
 						 var _content = JSON.parse(content);
 						 _incoming.add(_content);
 						 if(_content.cli_id === undefined)
@@ -28,7 +32,13 @@ function response_holder(_incoming, modules){
 								       }
 								   });
 						 //записать все ожидающие ответы
-						 responses.push([_content.cli_id,response]);
+						 if(_packets.length){
+						     var packet = get_by_cli_id(_packets, _content.cli_id);
+						     if(packet)
+							 response.end(packet);
+						 } else {
+						     responses.push([_content.cli_id,response]);	     
+						 }
 					     },
 					     function(error){console.log('response_holder is failed', error)})    
     }
