@@ -9,9 +9,10 @@ function _request(context, http_requester){
 }
 function requests_holder(modules){
     var _requests = [];
-    this.create_request = function(){
+    this.create_request = function(without_data){
 	var request = modules.http_requester.create('xhr');
-	_requests.push(request);
+	if(without_data)
+	    _requests.push(request);
 	//вписать сюда свой установщик каллбека, который вставляет код удаления request
 	request.on_closed(function(){
 			      for(key in _requests){
@@ -36,21 +37,22 @@ function requests_holder(modules){
 function packet_sender(modules, context, _holder, cli_id, _incoming, _lpoller){
     this.send = function(msg){	
 	var request = _holder.get_waited_request();
+	if(!request)
+	    request = _holder.create_request(false);
 	var msg_json = JSON.stringify({'cli_id' : cli_id, 'msg' : msg});
 	switch(context.method){
 	    case 'GET' :
-	    var request = _holder.create_request();
 	    request.on_recv(function(data){_incoming.add(data)});
 	    request.open(context);
 	    request.send(msg_json);	    
 	    break;
 
 	    case 'POST' :
-	    if(request){
-		request.on_recv(function(data){_incoming.add(data)});
-		request.send(msg_json);	    	
-	    } else 
-		_lpoller.delayed_packets.push(msg_json);
+	    request.on_recv(function(data){_incoming.add(data)});
+	    request.open(context);
+	    request.send(msg_json);	    		
+	    //нужно реализовать ограничение количества одновременных xhr, актуально для браузеров
+		//_lpoller.delayed_packets.push(msg_json);
 	    break;
 	}
     }
@@ -66,7 +68,7 @@ function lpoller(modules, context, _holder, _incoming){
 	    _timer = modules.timer.js.create(function(){
 						 var _waited = _holder.get_waited_request();
 						 if(!_waited){
-						     var request = _holder.create_request();
+						     var request = _holder.create_request(true);
 						     request.on_destroyed = function(){_lpoller.try_poll()};
 						     request.on_recv(function(data){_incoming.add(data)});
 						     request.open(context);

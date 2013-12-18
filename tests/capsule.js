@@ -19,14 +19,15 @@ with(modules){
     var socket_srv = require('../modules/transport/http/socket_srv.js');
     var socket = socket_srv.create({ 'url' : 'http://localhost:8810/socket.js'}, modules);
     socket.listen();
+    var ind = 0;
     socket.on_recv(0, function(cli_id, msg){
-		       socket.send(cli_id, 'vozmi obratno ' + msg);
+		       socket.send(cli_id, 'vozmi obratno ' + msg + ind++);
 		   });    
 
     var exporter = require('../browser/exporter/exporter.js');
     var cb_sync = cb_synchronizer.create();
     exporter.create('browser/exporter/capsule.json', http_respondent.node ,function(web_capsule){
-			web_capsule.to_http('http://localhost:8810/capsule/');
+			web_capsule.to_http('http://localhost:8810/');
 		    });
 
 

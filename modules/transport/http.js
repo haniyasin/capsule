@@ -4,7 +4,7 @@ exports.backends = {
     'xhr' : 3
 }
 
-var max_packet_size;
+var max_packet_size = 2000;
 
 var transport = require('transport.js');
 
@@ -14,6 +14,16 @@ function msg_package(msg, packets, on_done_callback){
 
 function msg_unpacker(socket){
     
+}
+
+var packet = {
+    'i' : '', //id
+    'd' : '' //data
+}
+
+var frame = {
+    'length' : '',
+    'packets' : []
 }
 
 function msg_packer(socket, msg){
@@ -37,6 +47,8 @@ exports.create = function(context, features, modules){
 	}
     }
     else if(features & transport.features.router){
+	var socket_srv = require('http/socket_srv.js');
+	var socket = socket_srv.create(context, modules);
 	return {
 	    'on_msg' : function(msg_id, callback){
 		
