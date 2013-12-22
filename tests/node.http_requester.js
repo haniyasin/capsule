@@ -11,11 +11,11 @@ var modules = capsule.create();
 with(modules){
     var socket_cli = require('../modules/transport/http/socket_cli.js');
 
-   var socket = socket_cli.create({ 'url' : "http://localhost:8810/socket.js", 'method' : "POST" }, modules);
+   var socket = socket_cli.create({ 'url' : "http://localhost:8810/socket.js", 'method' : "POST" }, 'xhr', modules);
    var inde = 0;
-   socket.on_recv(function(msg){console.log(inde++, "prishlo",msg)});
+   socket.on_recv(function(msg){console.log("prishlo",msg)});
     
-   for(ind = 0; ind < 3000; ind++){
+   for(var ind = 0; ind < 300; ind++){
        socket.send('blah blah, tuk tuk' + ind);
    }
 

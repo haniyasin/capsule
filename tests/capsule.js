@@ -21,7 +21,7 @@ with(modules){
     socket.listen();
     var ind = 0;
     socket.on_recv(0, function(cli_id, msg){
-		       socket.send(cli_id, 'vozmi obratno ' + msg + ind++);
+		       socket.send(cli_id, 'vozmi obratno ' + msg);
 		   });    
 
     var exporter = require('../browser/exporter/exporter.js');

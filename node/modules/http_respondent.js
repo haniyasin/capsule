@@ -1,7 +1,7 @@
 var http = require('http');
 var url = require('url');
 var dns = require('dns');
-var base32 = require('../dependencies/base32.js');
+var base32 = require('../../dependencies/base32.js');
 
 // for storing active and unactive server contexts
 var servers = [];
@@ -18,7 +18,6 @@ function server_create(context, address){
     server._server = http.createServer(function(request, response){
 					   var contexts = server.contexts;
 					   var headers = request.headers;
-					   console.log('vatata', headers);
 					   for(i = 0; i < contexts.length;  i++){
 					       var context = contexts[i], _url = context._url;
 					       var request_url = url.parse(request.url,true);
@@ -59,7 +58,6 @@ function server_create(context, address){
 						   case 'POST' :
 						       var _cb = context.data_cb;
 						       request.on('data', function(data){
-//								      console.log(context);
 								      _cb(data, res);
 								 });
 						       break;

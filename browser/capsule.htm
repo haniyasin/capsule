@@ -12,9 +12,9 @@
       setTimeout(function(){
       _capsule.modules.transport.http.load();
       _capsule.modules.transport.http.lib.load();
-      var socket = _capsule.modules.transport.http.lib.socket_cli.create({ 'url' : "http://localhost:8810/socket.js", 'method' : "GET" }, _capsule.modules);
+      var socket = _capsule.modules.transport.http.lib.socket_cli.create({ 'url' : "http://localhost:8810/socket.js", 'method' : "POST" }, 'xhr', _capsule.modules);
       socket.on_recv(function(msg){console.log("prishlo",msg)});
-      for(ind = 0; ind < 2; ind++){
+      for(ind = 0; ind < 40; ind++){
 			 socket.send('blah blah, tuk tuk');
 			 }
       

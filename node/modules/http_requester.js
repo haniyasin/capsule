@@ -10,7 +10,7 @@ function request(){
     return {
 	'send_once' : function(context, data, recv_cb, closed_cb, err_cb){
 	    var _url = url.parse(context.url, true);
-	    _url.method = context.url;
+	    _url.method = context.method;
 	    _url.headers = {
 		'connection' : 'close',
 		'Content-length' : data.length(),
@@ -23,15 +23,14 @@ function request(){
 				    });
 	    _req.on('close', closed_cb);
 	    _req.on('error', err_cb);
-	    _req.write(data);
-	    _req.end()
+	    _req.end(data);
 	},
 	'open' : function(context){
 	    var _url = url.parse(context.url, false);
 	    _url.method = context.method;
 	    _url.headers = {
 		'connection' : 'close',
-		'Content-length' : 500,  //нужно реализовать передачу размера
+		'Content-length' : 2000,  //нужно реализовать передачу размера
 		'Expect' : ''
 	    }
 	    _req = http.request(_url, function(response){

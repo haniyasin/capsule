@@ -1,8 +1,11 @@
 var bb_allocator = require('../../../dependencies/bb_allocator.js');
-function get_by_cli_id(array, cli_id){
+function get_by_cli_id(array, cli_id, push){
     for(key in array){
-	if(array[key][0] == cli_id)
-	    return array[key][1];
+	if(array[key][0] == cli_id){
+	    var value = array[key][1];
+	    delete array[key];
+	    return value;    
+	}
     }
     return null;	    
 }
