@@ -2,11 +2,7 @@ var bb_allocator = require('../../../dependencies/bb_allocator.js');
 
 var id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
 
-function _request(context, http_requester){
-    this.on_closed = function(cb){
-	//TODO to find himself and to delete from requests;
-    }
-}
+
 function requests_holder(modules, type){
     var _requests = [];
     this.create_request = function(without_data){
@@ -92,7 +88,7 @@ function lpoller(modules, context, _holder, _incoming){
 
 exports.create = function(context, type, modules){
     var utils = require('../../../dependencies/utils.js');
-    var cli_id = id_allocator.alloc();
+    var cli_id = id_allocator.alloc(); //надо бы научиться сервером генерировать
     var _incoming = new utils.msg_queue();
     //реализовать выбор транспорта, xhr или script
     var _holder = new requests_holder(modules, type);

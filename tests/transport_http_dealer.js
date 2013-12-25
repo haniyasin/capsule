@@ -13,8 +13,8 @@ with(modules){
 
    var trans = transport_http.create({ 'url' : "http://localhost:8810/socket.js", 'method' : "POST" }, transport.features.dealer, modules);
 
-   for(var ind = 0; ind < 2; ind++){
-       trans.send('blah blah, tuk tuk lalala, hohoh, ya ya ya ga' + ind, function(msg){
+   for(var ind = 0; ind < 20; ind++){
+       trans.send('number', 'blah blah, tuk tuk lalala, hohoh, ya ya ya ga' + ind, function(msg){
 		       console.log('hoi ', msg);
 		   });
    }
