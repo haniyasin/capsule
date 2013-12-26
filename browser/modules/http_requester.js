@@ -15,16 +15,18 @@ function script_allocator(){
     this.create = function(){
 	var _on_recv,
 	_on_closed,
-	_on_error;
+	_on_error,
+	script_tag;
 	function compose_request(context, data, recv_cb, closed_cb, err_cb){
 	    var id = ids.alloc();
 	    var head = document.getElementsByTagName('head')[0];
-	    var script_tag = document.createElement('script');
+	    script_tag = document.createElement('script');
 	    script_tag.setAttribute('id','s' + id);
 	    rca[id] = function(reply){
                 head.removeChild(script_tag);
                 ids.free(id);
                 rca[id] = undefined;
+		_on_closed();
                 recv_cb(reply);
 	    }
 	    //прилепить сюда ещё превышение времени ожидание по таймеру надобно:)
@@ -51,6 +53,7 @@ function script_allocator(){
 		this._req.activate(data);
 	    },
 	    'close' : function(){
+                head.removeChild(script_tag);
 	    },
 	    'on_recv' : function(callback){
 		_on_recv = callback;

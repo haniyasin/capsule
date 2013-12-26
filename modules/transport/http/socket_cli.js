@@ -2,7 +2,6 @@ var bb_allocator = require('../../../dependencies/bb_allocator.js');
 
 var id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
 
-
 function requests_holder(modules, type){
     var _requests = [];
     this.create_request = function(without_data){
@@ -43,7 +42,7 @@ function packet_sender(modules, context, _holder, cli_id, _incoming, _lpoller){
 
 	if(request){
 	    request.on_recv(function(data){
-				_incoming.add(data)
+				_incoming.add(data);
 			    });
 	    request.open(context);
 	    request.send(msg_json);	    	    
@@ -66,11 +65,13 @@ function lpoller(modules, context, _holder, _incoming){
 						     var request = _holder.create_request(true);
 						     if(request){
 							 request.on_destroyed = function(){_lpoller.try_poll()};
-							 request.on_recv(function(data){_incoming.add(data)});
+							 request.on_recv(function(data){
+									     _incoming.add(data);
+									     request.close(); //в будущем надо учесть переиспользование объекта, возможно:)
+									 });
 							 request.open(context);				 
 						     }
 						 } else {
-						     //реализовать упаковку запросов
 						     if(_packets.length > 0)
 							 _waited.send(_packets.shift());
 						 }
@@ -96,6 +97,7 @@ exports.create = function(context, type, modules){
     var _sender = new packet_sender(modules, context, _holder, cli_id, _incoming, _lpoller);
     //надо везде подключить receiver
     return {
+	'type' : 'client',
 	'send' : function(msg){
 	    _lpoller.try_poll();
 	    _sender.send(msg);
@@ -103,7 +105,9 @@ exports.create = function(context, type, modules){
 	'on_recv' : function(callback){
 	    _incoming.on_add(callback);
 	    _lpoller.try_poll();
+	},
+	'deactivate' : function(){
+	    _lpoller.stop();
 	}
-	
     }
 }

@@ -17,7 +17,7 @@ function frames_io_doer(socket_creator, modules){
     function _frame_send(frame){
 //	if(frame[2]++)
 //	    console.log('надо еррор выкидывать');
-	console.log(frame);
+//	console.log(frame);
 	socket.send(frame);
     }
     this.frame_max_size = 250;
@@ -26,36 +26,48 @@ function frames_io_doer(socket_creator, modules){
 	msg.packets = null;
 	for(packet in packets){
 	    var cur_frame = frames[frames.length - 1];
-	    if(typeof(cur_frame) == 'object' && cur_frame[0] + packets[packet].length + 2 < this.frame_max_size){
-		cur_frame[1] += ',' + packets[packet];
-		cur_frame[0] += packets[packet].length + 1;		
+	    if(typeof(cur_frame) == 'object' && cur_frame.s < this.frame_max_size){
+		cur_frame.p.push += packets[packet];
+		cur_frame.s += packets[packet].s;
 	    }
 	    else
-		{
-		    cur_frame += ']';
-		    _frame_send(cur_frame);
-		    cur_frame = [packets[packet].length + 1, '[' + packets[packet], 0, id_allocator.alloc()];
-		    frames.push(cur_frame);
+	    {
+		_frame_send(JSON.stringify(cur_frame));
+		cur_frame = {
+		    'i' : id_allocator.alloc(),
+		    's' : packets[packet].s,
+		    'p' : [packets[packet]]
 		}
+		frames.push(cur_frame);
+	    }
 	}
 	messages.push(msg);
     }    
     function resender(){
 	for(key in frames){
-	    _frame_send(frames[key]);
+//	    _frame_send(frames[key]);
 	}	
     }
     this.activate = function(){
 	if(!activated){	    
 	    activated = true;
 	    socket = socket_creator();
-	    console.log(socket);
-	    socket.on_recv(null, function(msg_id, msg){
-			       //тут надо приходящие сообщение отлавливать:)
-			       console.log(msg);
-			   });
+	    function msg_receiver(cli_id, msg){
+//		if
+		//нужно отправить отправляющему, что фрейм дошёл
+		//нужно принять подтверждение доставки фрейма и убрать фрейм из списка фреймов к отправлению
+		console.log(msg);
+	    }
+	    if(socket.type == 'client')
+		socket.on_recv(msg_receiver);
+	    if(socket.type == 'server')
+	       socket.on_recv(null, msg_receiver);
+
 	    resender_timer = modules.timer.js.create(resender, 500, true);	    
 	}
+    }
+
+    this.deactivate = function(){
     }
 }
 
@@ -67,19 +79,21 @@ function msg_packer(frames_io_doer){
 	
 	//нужно учесть размеры технических данных
 	for(ind = 0; msg_body.length > frames_io_doer.frame_max_size; ind++){
-	    packets.push(JSON.stringify({
-					    'i' : msg_id,
-					    'n' : ind,
-					    'd' : msg_body.substring(0, frames_io_doer.frame_max_size)
-					}))
+	    packets.push({
+			     'i' : msg_id,
+			     'n' : ind,
+			     'd' : msg_body.substring(0, frames_io_doer.frame_max_size)
+			 });
 	    msg_body = msg_body.substring(frames_io_doer.frame_max_size);
 	}
-	packets.push(JSON.stringify({
-					'l' : true,
-					'i' : msg_id,
-					'n' : ind,
-					'd' : msg_body
-				    }))
+	packets.push({
+			 'l' : true,
+			 'i' : msg_id,
+			 'n' : ind,
+			 's' : msg_body.length + 10,
+			 'd' : msg_body
+		     })
+
 	return {
 	    'length' : msg_body.length, //тут надо посчитать содержимое packets, реальное
 	    'packets' : packets,
@@ -126,6 +140,7 @@ exports.create = function(context, features, modules){
 		console.log('transport.send: you must send something');
 	},
 	'destroy' : function(){
+	    _frames_io_doer.deactivate();
 	}
     }
 }

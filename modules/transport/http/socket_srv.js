@@ -14,7 +14,7 @@ function response_holder(_incoming, modules){
     var responses = [];
     this.delayed_packets = [];
     this.get_waited_response = function(cli_id){
-	return get_by_cli_id(responses, cli_id);
+	return responses[cli_id];
     }
 
     var _packets = this.delayed_packets;
@@ -29,9 +29,9 @@ function response_holder(_incoming, modules){
 						     _content.cli_id = ids.alloc();
 						 //проверить активно ли соединение
 						 response.on_close(function(){
-								       for(key in responses){
-									   if(responses[key][1] == response)
-									       responses.splice(key,1);
+								       for(key in responses[_content.cli_id]){
+									   if(responses[_content.cli_id][key] == response)
+									       responses[_content.cli_id].splice(key,1);
 								       }
 								   });
 						 //записать все ожидающие ответы
@@ -40,10 +40,22 @@ function response_holder(_incoming, modules){
 						     if(packet)
 							 response.end(packet);
 						 } else {
-						     responses.push([_content.cli_id,response]);	     
+						     //если много ждёт, то завершаем и оставляем не более 2
+						     for(cli_id in responses){				 
+							 while(responses[cli_id].length > 2){
+							     responses[cli_id].pop().end();
+							 }
+						     }
+						     if(typeof(responses[_content.cli_id]) == 'undefined')
+							 responses[_content.cli_id] = [];
+						     responses[_content.cli_id].push(response);	     
 						 }
 					     },
 					     function(error){console.log('response_holder is failed', error)})    
+    }
+
+    this.deactivate = function(){
+	//нужно написать деактивацию и добавить соответствующие возможности в http_respondent
     }
 }
 
@@ -85,6 +97,7 @@ exports.create = function(context, modules){
     _incoming.on_add(function(msg){_receiver.dispatch(msg)});
     
     return {
+	'type' : 'server',
 	'listen' : function(){
 	    _holder.activate(context);
 	},
@@ -93,6 +106,9 @@ exports.create = function(context, modules){
 	},
 	'on_recv' : function(cli_id, callback){
 	    _receiver.handler_add(cli_id, callback)
+	},
+	'deactivate' : function(){
+	    _holder.deactivate();
 	}
 	
     }
