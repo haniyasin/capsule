@@ -1,0 +1,197 @@
+* storage module
+
+** version 0.2
+   api совместим с capsule 0.6
+
+** description
+Абстрактный интерфейс к хранилищу объектов (key=>value подобное), с file подобным api
+Несмотря на то, что хранилище плоское, key=>value подобное, value множество кусков, доступ к которым происходит независимо. Каждый кусок имеет индекс. 
+Поэтому для доступа к какому-то значению, нужно знать и ключ, в виде uuid, и индекс куска.
+Также storage снабжён notify подобным способом оповещения о состоянии значений, но эта возможность включает пересылку изменившихся кусков, а не только
+сообщения о изменении метаданных.
+API полностью асинхронный, операции чтения и записи атомарны.
+Если происходит запись куска, и одновременно с этим чтение. То прочитаны будут те данные, который были на момент начала чтения. Никакого смешивания старых и новых данных куска быть не может.
+Замена содержимого куска происходит после его записи, и применяется только к тем, кто начинает читать этот кусок после его замены, а не в течении.
+** synopsis
+```javascript
+    var uuid = new uuid.node;
+    var id = uuid.get();
+    var storage = new storage.remote("2du.ru/storager.php");
+    storage.write(id, 2, "Запишем сюда блины с чесноком.", function(status){ //here must be some code for checking of status });
+    storage.read(id, 2, function(status, data){
+        if(status == status.succes){
+	    console.log(data); //printing our "Запишем сюда блины с чесноком"
+	}
+    });
+```
+
+** api
+
+```javascript
+{
+    write,
+    read,
+    get_info,
+    subscribe,
+    lock
+}
+```
+
+*** write
+```javascript
+    write(uuid, index, data, callback(status))
+```
+ 
+   Записывает кусок данных с индексом в объект uuid
+
+**** параметры   
+
++ uuid
+  id объекта, по сути key в терминах key=>value хранилища.
++ index
+  номер куска, который будет записываться. Кусок перезаписывается полностью, даже если данные меньше размером, чем те, что уже находятся в куске с этим
+  index. Важно понимать, что механизм кусков введён не для размерности данных, а для возможности ассоциировать с одним uuid множества данных и независимо их перезаписывать.
++ data
+  данные записываемые в куcок. Данные - текст.
++ callback(status)
+  Функция вызывается, когда известен статус записи. Возможные статусы:
+  - success
+  - fail
+  - storage_fail
+*** read
+```javascript
+    read(uuid, index, callback(status, data))
+```
+   Читает кусок данных с индексом index из объекта uuid
+**** параметры
+
++ uuid
+  id объекта, по сути key в терминах key=>value хранилища.
++ index
+  номер куска, который будет читать. Кусок читается полностью
++ callback(status, data)
+  Функция вызывается, когда приходят данные или ошибка.
+  + status
+    + success
+    + fail
+    + storage_fail
+  + data
+    Данные куска
+
+
+*** get_info
+```javascript
+    get_info(uuid, callback(status, info))
+```
+Запрашивает информацию об объекте.
+
+**** synopsis
+```javascript
+
+    //here code, which keeped ids of objects
+
+    var storage = new storage.remote("2du.ru/storager.php");
+    storage.get_info(id, 2, function(status, info){
+        if(status == status.succes){
+	    console.log(info.create_time);
+	    console.log(info.size);
+	    console.log(info.chunks);
+	}
+    });
+```
+
+**** параметры
++ uuid
+  id объекта, чью информацию запрашивают
+
++ callback(info)
+  Функция вызывается для передачи запрашиваемой информации.
+  + status
+    + success
+    + fail
+    + storage_fail
+  + info
+    это объект, следующего вида:
+```javascript
+var info : {
+    last_change, // время последнего доступа
+    create_time, // время создания
+    size, // размер всех кусков
+    chunks, // количество кусков
+    locked_chunks, // массив индексов заблокированных кусок объекта. true если заблокирован
+}
+```
+
+*** subscribe
+
+```javascript
+    subscribe(uuid, mask_info_and_chunks, callback(info_and_chunks))
+```
+
+Регистрирует callback на изменения объекта. Если объект изменился, callback вызывается.
+
+**** synopsis
+
+```javascript
+
+    //here code, which keeped ids of objects
+
+    var storage = new storage.remote("2du.ru/storager.php");
+    storage.subscribe(id, 2, 
+                      {last_change : 0, size : 0, changed_chunks : [0, 5, 10]}, 
+		      function(status, info){
+		          if(status == status.succes){
+			      console.log(info.last_change);
+			      console.log(info.size);
+			      console.log(info.changed_chunks[0].[1]); // печатает chunk с index 0
+			      console.log(info.changed_chunks[1].[1]); // chunk c index 5
+			      console.log(info.changed_chunks[2].[1]); // chunk c index 10
+			  }
+		      }
+    );
+```
+
+callback, который установлен в subscribe, будет вызываться всякий раз, когда любое из полей, занесённых mask_info_and_chunks, изменяется.
+При этом changed_chunks будет содержать массив именно _изменившихся_ chunks, то есть в приведённом примере выше, [0].[0] могло быть и не 0, а 5, или даже 10.
+Иными словами, прядок элементов в changed_chunks не важен, важно их содержание - index и data.
+
+**** параметры
+
++ uuid
+  id объекта
+
++ mask_info_and_chunks
+```javascript
+{
+    last_change,   // | 
+    create_time,  //  |
+    size,          // |=> Достаточно присутствие полей, без значений, чтобы информация о их изменении, а точнее их новые значения
+    chunks,        // |   посылались в callback
+    locked_chunks, // |
+    
+    changed_chunks //|=> массив индексов кусков, новые значения которых должны посылаться в callback
+}
+```
+  
++ info_and_chunks
+```javascript
+{
+    last_change, //   | 
+    create_time, //   |
+    size,        //   |=> содержат тоже, что и в параметре info в get_info, то есть значения
+    chunks,      //   |
+    locked_chunks, // |
+   
+    changed_chunks // |=> массив, каждый элемент массива это массив из двух значений. Первое - индекс chunk, второй - новые данные chunk
+}
+```
+
+*** lock
+
+```javascript
+    lock(uuid,index)
+```
+
+Блокирует, если разблокирован или наоборот, если заблокирован, указываемый кусок объекта.
+Заблокированный кусок не может быть записан никем, кроме того, кто блокировку поставил. Однако может быть прочитан.
+При попытке записать заблокированный кусок тем, кто не блокировал, будет выдан статус fail.

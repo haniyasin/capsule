@@ -8,3 +8,9 @@
 + implement more efficient and controlable loading <script> javascript, may be through union many 
    files in one and loading that code like a modules but into global scope
   
+
+** http_requester|http_responent|http_sockets -
+   + bug with reply, which consist string 'undefined'. Now is hacked around this.
+
+** modules/transport/direct
+   need fixes for more socket like server api

@@ -1,0 +1,124 @@
+* remote storage protocol, api and implementation
+  Протокол storage, позволяющий через произвольный транспорт подключиться к удалённому storage, и работать с ним через обычный storage api.
+  Обычная схема работы включает следующие элементы:
+  + storage class
+    реализующий протокол, и предоставляющий api в виде capsule.storage.
+    Таким образом remote storage используется через обычный capsule.storage api.
+    Этот класс реализуется однажды, и затем может быть использован для подключению к любой реализации remote storage(будь то php, nodejs или иная реализация)
+  + remote storage procotol
+    json базированный протокол, асихронный протокол доступа к storage. Работает поверх capsule.transport, а значит может работать через любой транспорт,
+    а не только через http.
+  + remote storage implementation
+    серверная реализация remote storage protocol, принимающая команды. 
+
+* synopsis
+
+* protocol
+
+** description
+   Протокол json-базированный, хотя в дальнейшем может быть и не так, всё равно описание представлено в виде json нотации, так как упаковка этих данных
+   любом способом не изменит формата протокола.
+
+** json
+```javascript
+var request_header = {
+ t, //message type, r - read, write - w, i - get_info, s - subscribe, l - lock
+ id, // uuid of object
+}
+
+var reply_header = {
+    status
+}
+```
+
+*** read
+```javascript
+var request = {
+    t : 'r',
+    id : 'some_uuid',
+    i : 'index_number'
+}
+
+var reply = {
+    's', // success|fail
+    d // chunk string
+}
+```
+
+request посылается в виде msg траспорта с произвольным uuid, reply является ответом на этот msg
+
+*** write
+
+```javascript
+var request = {
+    t : 'w',
+    id : 'some_uuid',
+    i : 'index_number',
+    d : 'some data'
+}
+
+var reply = {
+    s, //success | fail
+}
+
+```
+
+request посылается в виде msg транспорта с произвольным uuid, reply является ответом на этот msg
+
+*** get_info
+```javascript
+var request = {
+    t : 'i',
+    id : 'some_uuid'
+}
+
+var reply = {
+    s, //success | fail
+    i : {
+       lc, // время последнего доступа
+       ct, // время создания
+       s, // размер всех кусков
+       c, // количество кусков
+       lch // массив индексов заблокированных кусок объекта. true если заблокирован
+    }
+}
+
+```
+*** subscribe
+```javascript
+var request = {
+    t : 's',
+    i : {
+       lc, // время последнего доступа         |
+       ct, // время создания                   |
+       s, // размер всех кусков                |=> если поле присутствует, то будет в ответе, подробнее читать в storage subscribe
+       c, // количество кусков                 |
+       lch, // массив индексов заблокированных |
+       cc |=> массив индексов кусков, новые значения которых должны посылаться в reply
+    } 
+}
+
+var reply = {
+    s, // success | fail
+    i : {
+        lc, // время последнего доступа         |
+        ct, // время создания                   |
+        s, // размер всех кусков                |=> значения полей
+        c, // количество кусков                 |
+        lch, // массив индексов заблокированных |
+        cc // |=> массив, каждый элемент массива это массив из двух значений. Первое - индекс chunk, второй - новые данные chunk
+    }
+}
+```
+*** lock
+```javascript
+var request = {
+    t : 'l',
+    id : 'some_uuid',
+    i : 'index_number'
+}
+
+var reply = {
+    s, //success | fail
+}
+```

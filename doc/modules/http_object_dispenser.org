@@ -1,0 +1,32 @@
+* Этот модуль капсулы предназначен для раздачи объектов(файлов) через http, используя плоскую(не иерархическую)
+модель наименований объектов. С его помощью, вы можете взять файл, поместить его в `dispenser`, получить на него
+ссылку и передать ссылку через `transport`, например как `bin_container`. Таким образом можно передавать двоичные
+объекты старым веб браузерам. Но также можно публиковать объекты для других(не dsa базированных) программ.
+
+* example
+server
+```javascript
+var file = read_my_favorite_image();
+var object_ind = http_object_dispenser.load(new bin_container(blob, file)); 
+transport.send(2,new bin_container('url', object_ind.url));
+```
+
+Читаем из файла изображение, создаём `bin_container` с блобом изображения внутри, затем засовываем `bin_container`
+в `dispenser` и раздаём его. Создаём по url раздаваемого объекта `bin_container` обёртку и отправляем его
+через транспорт. 
+
+client
+```javascript
+transport.on_msg(2,function(id, body){
+   cimage = comp.image_create({ width : '60%', height : '60%', x : '10%', y : '10%', source : new bin_container(body)})
+}
+```
+Принимаем `bin_container` обёртку через транспорт и используем его в compositer.
+
+* specification
+```javascript
+var http_object_dispenser = function(){
+    this.load = function(bin_container);
+    this.unload = function(object_ind);
+}
+```

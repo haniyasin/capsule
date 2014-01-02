@@ -1,0 +1,16 @@
+* Механизм для доступа к объекту, хранящимся в том или ином облаке.
+  Единый api позволяет единообразно обращаться к объектам на различных облачных хостингах или в различных
+  социальных сетях и ресурсах.
+  К примеру вы можете хранить список фильмов в хранилище вконтакте от имени своего аккаунта, а сами фильмы
+  сохранять в youtube, vkontakte, amazon и тд. При этом вы оперируете лишь url объекта, аутентификационными данными
+  и типом объекта(изображение, json, видео и тд). Вы не опускаетесь до уровня api конкретного сервиса, не
+  используете http запросы напрямую и прочее.
+** specification
+
+   var cloud_object = function(type,url,auth){
+       this.get_url = function();//getting direct url for any purpose. Like tag's src property or for http request
+       this.write = function(offset, lenght, data);
+       this.read = function(offset, lenght, data);
+       this.delete = function();
+       this.clone = function(); //return new cloned cloud_object
+   }

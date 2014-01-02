@@ -14,7 +14,7 @@ function response_holder(_incoming, modules){
     var responses = [];
     this.delayed_packets = [];
     this.get_waited_response = function(cli_id){
-	return responses[cli_id];
+	return responses[cli_id].pop();
     }
 
     var _packets = this.delayed_packets;
@@ -61,8 +61,8 @@ function response_holder(_incoming, modules){
 
 function packet_sender(_outgoig, _holder){
     this.send = function(msg){
-	var response;
-	if(response = _holder.get_waited_response(msg[0]))
+	var response = _holder.get_waited_response(msg[0]);
+	if(response)
 	    response.end(msg[1]);
 	else
 	    _holder.delayed_packets.push(msg);
@@ -70,20 +70,12 @@ function packet_sender(_outgoig, _holder){
 }
 
 function packet_receiver(_incoming){
-    var callbacks = [];
-    var all_callback;
-    this.handler_add = function(cli_id, callback){
-	if(cli_id)
-	    callbacks.push([cli_id, callback]);
-	else all_callback = callback;
+    var _callback;
+    this.handler_add = function(callback){
+	_callback = callback;
     }
     this.dispatch = function(msg){
-	for(key in callbacks){
-	    if(callbacks[key][0] == msg.cli_id)
-		callbacks[key][1](msg.cli_id, msg.msg);
-	}	
-	if(all_callback)
-	    all_callback(msg.cli_id, msg.msg);
+	_callback(msg.cli_id, msg.msg);
     }   
 }
 
@@ -101,15 +93,25 @@ exports.create = function(context, modules){
 	'listen' : function(){
 	    _holder.activate(context);
 	},
-	'send' : function(cli_id, msg){
-	    _outgoing.add([cli_id, JSON.stringify(msg)])
+	'on_connect' : function(onconnect){
+	    var clients = {};
+	    _receiver.handler_add(function(cli_id, msg){
+				      if(typeof(clients[cli_id]) == 'undefined'){
+					  onconnect({	    
+							'send' : function(msg){
+							    _outgoing.add([cli_id, JSON.stringify(msg)])
+							},
+							'on_recv' : function(callback){
+							    clients[cli_id] = callback;  
+							}
+						    });
+				      } else
+					  clients[cli_id](msg);
+				  })
 	},
-	'on_recv' : function(cli_id, callback){
-	    _receiver.handler_add(cli_id, callback)
-	},
-	'deactivate' : function(){
+	'close' : function(){
 	    _holder.deactivate();
-	}
+	}	    
 	
     }
 }
