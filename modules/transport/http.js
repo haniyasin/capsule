@@ -1,4 +1,4 @@
-var bb_allocator = require('../../dependencies/bb_allocator.js');
+var bb_allocator = require('../../parts/bb_allocator.js');
 var transport = require('../transport.js');
 
 var frame = {

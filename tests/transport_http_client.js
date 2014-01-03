@@ -4,7 +4,7 @@
 
 var fs = require('fs');
 
-var capsule = require('../capsule.js');
+var capsule = require('../platforms/nodejs/capsule.js');
 var DEBUG = 1;
 
 var modules = capsule.create();

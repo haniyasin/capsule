@@ -1,10 +1,22 @@
-* клиент http, вдохновлён HttpRequest, но более ориентирован на асинхронность и простоту в использовании.
-  В рамках проекта capsule  необходим как абстракция над низлежащими клиентами http на поддерживаемых
-  платформах.
+* клиент http, вдохновлён HttpRequest, но более ориентирован на асинхронность и абстракцию от низлежащих реализаций.  
+В рамках проекта capsule  необходим как абстракция над низлежащими клиентами http на поддерживаемых
+платформах.
 ** synopsis
+example 1
 ```javascript
-   var context = ['get', '127.0.0.1', 'vasya', '123kochegar']
-   requester.send(context, 'lalalala', function(response){
+   var context = {'method' : 'get', 'url' : '127.0.0.1'}
+   requester.send_once(context, 'lalalala', function(response){
        console.log('uhaha ', response);
    }, function(error){ console.log('fail fail fail', error) };
+```
+
+example 2
+```javascript
+   var context = {'method' : 'get', 'url' : '127.0.0.1'}
+   var req = requester.create(context);
+   req.open();
+   req.on_recv(function(data){
+       console.log(data);
+   }
+   req.send('figa figa');
 ```

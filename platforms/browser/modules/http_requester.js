@@ -1,9 +1,9 @@
-var bb_allocator = require('../../dependencies/bb_allocator.js');
+var bb_allocator = require('../../../parts/bb_allocator.js');
 // iframe
 
 function script_allocator(){
     var ids = new bb_allocator.create(bb_allocator.id_allocator);
-    var base32 = require('../../dependencies/base32.js');
+    var base32 = require('../../../dependencies/base32.js');
 
     var head = document.getElementsByTagName('head')[0];
     var script_tag = document.createElement('script');

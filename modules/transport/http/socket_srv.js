@@ -1,4 +1,4 @@
-var bb_allocator = require('../../../dependencies/bb_allocator.js');
+var bb_allocator = require('../../../parts/bb_allocator.js');
 function get_by_cli_id(array, cli_id, push){
     for(key in array){
 	if(array[key][0] == cli_id){
@@ -21,7 +21,7 @@ function response_holder(_incoming, modules){
 
     this.activate = function(context){
 	//нужно выбирать доступный http_respondent,  а не хардкодится на node
-	modules.http_respondent.node.on_recv(context, 
+	modules.http_responder.node.on_recv(context, 
 					     function(content, response){
 						 var _content = JSON.parse(content);
 						 _incoming.add(_content);
@@ -80,7 +80,7 @@ function packet_receiver(_incoming){
 }
 
 exports.create = function(context, modules){
-    var utils = require('../../../dependencies/utils.js');
+    var utils = require('../../../parts/utils.js');
     var _incoming = new utils.msg_queue(), _outgoing = new utils.msg_queue();
     var _holder = new response_holder(_incoming, modules);
     var _sender = new packet_sender(_outgoing, _holder);

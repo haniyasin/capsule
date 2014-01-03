@@ -4,8 +4,8 @@
 
 var fs = require('fs');
 
-var capsule = require('../capsule.js');
-var cb_synchronizer = require('../dependencies/cb_synchronizer.js');
+var capsule = require('../platforms/nodejs/capsule.js');
+var cb_synchronizer = require('../parts/cb_synchronizer.js');
 var DEBUG = 1;
 
 var modules = capsule.create();
@@ -20,13 +20,15 @@ with(modules){
     var socket = socket_srv.create({ 'url' : 'http://localhost:8810/socket.js'}, modules);
     socket.listen();
     var ind = 0;
-    socket.on_recv(0, function(cli_id, msg){
-		       socket.send(cli_id, 'vozmi obratno ' + msg);
+    socket.on_connect(function(socket){
+			socket.on_recv(function(msg){
+					       socket.send('vozmi obratno ' + msg);
+			});
 		   });    
 
-    var exporter = require('../browser/exporter/exporter.js');
+    var exporter = require('../platforms/browser/exporter/exporter.js');
     var cb_sync = cb_synchronizer.create();
-    exporter.create('browser/exporter/capsule.json', http_respondent.node ,function(web_capsule){
+    exporter.create('platforms/browser/exporter/capsule.json', http_responder.node ,function(web_capsule){
 			web_capsule.to_http('http://localhost:8810/');
 		    });
 

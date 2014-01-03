@@ -1,5 +1,5 @@
 var fs = require('fs');
-var cb_synchronizer = require('../../dependencies/cb_synchronizer.js');
+var cb_synchronizer = require('../../../parts/cb_synchronizer.js');
 
 var types = {"envelop" : 1,
 	     "module" : 2,
@@ -115,7 +115,7 @@ function resource_assembler(definition){
     this.to_http = function(http_respondent, url){
 	http_respondent.on_recv({ 'url' : url + "capsule.htm"}, 
 				     function (context, response){
-					 fs.readFile('browser/capsule.htm', function(err, data)
+					 fs.readFile('platforms/browser/capsule.htm', function(err, data)
 						     {
 							 response.end(data);
 						     });

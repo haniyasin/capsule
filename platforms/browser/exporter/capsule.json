@@ -7,8 +7,8 @@
 	"type" : "script",
 
 	"uuid" : "dependencies/uuid.js",
-	"Compositer" : "dependencies/Compositer.js",
-	"module_loader" : "browser/module_loader.js"
+	"Compositer" : "parts/Compositer.js",
+	"module_loader" : "platforms/browser/module_loader.js"
     },
     
     "capsule" : {
@@ -17,9 +17,9 @@
 	"dependencies" : {
 	    "preload" : false,
 
-	    "bb_allocator" : "dependencies/bb_allocator.js",
+	    "bb_allocator" : "parts/bb_allocator.js",
 	    "base32" : "dependencies/base32.js",
-	    "utils" : "dependencies/utils.js"
+	    "utils" : "parts/utils.js"
 	},
 
 	"modules" : {
@@ -41,7 +41,7 @@
 		    }		    
 		}
 	    },
-	    "http_requester" : "browser/modules/http_requester.js"	    
+	    "http_requester" : "platforms/browser/modules/http_requester.js"	    
 	},
 
 	"tests" : {
