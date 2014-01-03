@@ -9,13 +9,16 @@ var frame = {
 function frames_io_doer(socket, modules){
     var id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
     var messages = [];
-    var frames = [{ 'i' : id_allocator.alloc(), 's' : 10, 'p' : [], 't' : 0}];
+    function get_blank_frame(){
+	return { 'i' : id_allocator.alloc(), 's' : 10, 'p' : [], 't' : 0, 'r' : []};
+    }
+    var frames = [get_blank_frame()];
     var activated = false;
     var resender_timer;
     var _on_msg;
 
     function _frame_send(frame){
-	socket.send(JSON.stringify(frame));
+	socket.send(frame);
      }
     this.frame_max_size = 250;
 
@@ -29,7 +32,7 @@ function frames_io_doer(socket, modules){
 	msg.packets = null;
 	for(packet in packets){
 	    if(typeof(cur_frame) == 'object' && cur_frame.s < this.frame_max_size){
-		cur_frame.p.push += packets[packet];
+		cur_frame.p.push(packets[packet]);
 		cur_frame.s += packets[packet].s;
 	    }
 	    else
@@ -40,7 +43,8 @@ function frames_io_doer(socket, modules){
 		    'i' : id_allocator.alloc(),
 		    's' : packets[packet].s,
 		    'p' : [packets[packet]],
-		    't' : 0
+		    't' : 0,
+		    'r' : []
 		}
 		frames.push(cur_frame);
 	    }
@@ -50,26 +54,32 @@ function frames_io_doer(socket, modules){
 
     function resender(){
 	for(key in frames){
-	    if(frames[key].t > 4)
-		console.log('нихрена не отправляется, надо вываливаться');
+	    if(frames[key].t > 5){
+		if(!frames[key].p.length){
+		    delete frames[key];		
+		}else
+		    console.log('нихрена не отправляется, надо вываливаться');
+		continue;		
+	    }
 	    frames[key].t++;
 	    _frame_send(frames[key]);
 	}	
     }
     
     function msg_receiver(msg){
-	msg = JSON.parse(msg);
 	var cur_frame = frames[frames.length - 1];
-	console.log('id is', msg, 'ttt');
-
-	if(typeof(cur_frame.r) == 'undefined')
-	    cur_frame.r = [];
+//	console.log('eeggg', msg);		    
+	if(!cur_frame){
+	    cur_frame = get_blank_frame();
+	    frames.push(cur_frame);	    
+	}
 	cur_frame.r.push(msg.i);
-	
+
 	for(received in msg.r){
 	    for(key in frames){
-		if(frames[key].i == msg.r[received])
-		    delete frames[key];
+		if(frames[key].i == msg.r[received]){
+		    delete frames[key];		    
+		}
 	    } 
 	}
     }

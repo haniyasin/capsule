@@ -43,7 +43,7 @@ function packet_sender(modules, context, _holder, cli_id, _incoming, _lpoller){
 	if(request){
 	    request.on_recv(function(data){
 				if(data != 'undefined')
-				    _incoming.add(data);
+				    _incoming.add(JSON.parse(data));
 			    });
 	    request.open(context);
 	    request.send(msg_json);	    	    
@@ -67,8 +67,7 @@ function lpoller(modules, context, _holder, _incoming){
 						     if(request){
 							 request.on_destroyed = function(){_lpoller.try_poll()};
 							 request.on_recv(function(data){
-									     console.log('data is',data);
-									     _incoming.add(data);
+									     _incoming.add(JSON.parse(data));
 									     request.close(); //в будущем надо учесть переиспользование объекта, возможно:)
 									 });
 							 request.open(context);				 
