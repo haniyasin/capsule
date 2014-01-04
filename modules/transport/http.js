@@ -66,18 +66,52 @@ function frames_io_doer(socket, modules){
 	}	
     }
     
+    var received_msgs = [];
     function msg_receiver(msg){
 	var cur_frame = frames[frames.length - 1];
-//	console.log('eeggg', msg);		    
+
+	//extracting packets and assemble msg
+	console.log('ff', msg);
+	if(msg.p.length){
+	    var cur_msg;
+	    for(packet in msg.p){
+		if(!received_msgs.hasOwnProperty(msg.p[packet].i)){
+		    received_msgs.push(cur_msg = {
+					   'i' : msg.p[packet].i,
+					   'p' : [],
+					   'c' : -1
+				       });
+		} 
+		else
+		    cur_msg = received_msgs[msg.p[packet].i];
+		cur_msg.p[msg.p[packet].n] = msg.p[packet].d;
+		if(msg.p[packet].hasOwnProperty('c'))
+		    cur_msg.c = msg.p[packet].c;
+		
+		if(cur_msg.c == cur_msg.p.length){
+		    _on_msg(cur_msg.p.join(''));
+		}
+		    
+	    }
+	}
+	//adding received frames' ids in frame from outgoing queue
 	if(!cur_frame){
 	    cur_frame = get_blank_frame();
 	    frames.push(cur_frame);	    
 	}
 	cur_frame.r.push(msg.i);
 
+	//deleting delivered frames from outgoing queue
 	for(received in msg.r){
 	    for(key in frames){
 		if(frames[key].i == msg.r[received]){
+		    //необходимо реализовать возвращение использованных msg_id
+		    //for(packet in frames[key].p){
+			//freeing used for messages ids
+		//	frames[key].p[packet].i.free();
+		  //  }
+		    //freeing used for frames ids
+		    id_allocator.free(frames[key].i);
 		    delete frames[key];		    
 		}
 	    } 
@@ -100,24 +134,26 @@ function frames_io_doer(socket, modules){
 }
 
 function msg_packer(frames_io_doer){
-    var id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
+    this.id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
+    frames_io_doer.msg_packer = this;
 
     this.pack = function(msg){
 	var packets = []; //[msg_id, packet_number,
 	
+	var msg_id = this.id_allocator.alloc();
 	//нужно учесть размеры технических данных
-	for(ind = 0; msg.length > frames_io_doer.frame_max_size; ind++){
+	for(var packet_ind = 0; msg.length > frames_io_doer.frame_max_size; packet_ind++){
 	    packets.push({
-			     'i' : id_allocator.alloc(),
-			     'n' : ind,
+			     'i' : msg_id,
+			     'n' : packet_ind,
 			     'd' : msg.substring(0, frames_io_doer.frame_max_size)
 			 });
 	    msg = msg.substring(frames_io_doer.frame_max_size);
 	}
 	packets.push({
-			 'l' : true,
-			 'i' : id_allocator.alloc(),
-			 'n' : ind,
+			 'c' : packet_ind + 1, //amount of packets
+			 'i' : msg_id,
+			 'n' : packet_ind,
 			 's' : msg.length + 10,
 			 'd' : msg
 		     })
