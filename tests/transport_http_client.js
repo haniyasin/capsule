@@ -16,7 +16,7 @@ with(modules){
    trans.on_msg(function(msg){
 		    console.log(msg);
 		})
-   for(var ind = 0; ind < 2; ind++){
+   for(var ind = 0; ind < 8; ind++){
        trans.send('blah blah, tuk tuk lalala, hohoh, ya ya ya ga' + ind, function(msg){
 		       console.log('hoi ', msg);
 		   });

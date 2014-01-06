@@ -2,7 +2,8 @@ var http = require('http');
 var url = require('url');
 
 function request(){
-    var _req;
+    var _req,
+    socket;
     var _on_load;
     var _on_closed;
     var _on_error;
@@ -35,17 +36,23 @@ function request(){
 	    }
 	    _req = http.request(_url, function(response){
 				    response.setTimeout(2000);
-				    response.on('data', function(data){_on_load(data.toString())});
+				    response.on('data', function(data){_on_load(data.toString());});
+				    response.on('close', _on_closed);
+				    response.on('timeout', _on_closed)
 				});
-	    _req.on('close', _on_closed);
-	    _req.on('error', function(e){console.log(e.message)});
+	    _req.on('error', function(e){_on_closed();console.log(e.message)});
+	    _req.on('socket', function(sock){
+			socket = sock;
+		    });
 	},
 	'send' : function(data){
 	    _req.end(data);
 	},
 	'close' : function(){
-	    _req.abort();
+	    socket.destroy();
 	    _on_closed();
+	    _req = null;
+	    socket = null;
 	},
 	'on_recv' : function(recv_cb){
 	    _on_load = recv_cb;
@@ -54,11 +61,6 @@ function request(){
 	    _on_closed = closed_cb;
 	},
 	'on_err' : function(error_cb){
-	},
-	'free' : function(){
-	    _req.abort();
-	    _on_closed();
-	    _req = null;
 	}
     }
 }

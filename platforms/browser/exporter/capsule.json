@@ -51,7 +51,8 @@
 	    "uuid" : "tests/uuid.js",
 	    "timer" : "tests/timer.js",
 	    "transport_direct" : "tests/transport_direct.js",
-            "http_requester" : "tests/http_requester.js"
+            "http_requester" : "tests/http_requester.js",
+	    "socket_cli" : "tests/transport/http/socket_cli.js"
 	}
 
     }

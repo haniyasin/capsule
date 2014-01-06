@@ -8,7 +8,6 @@ var frame = {
 
 function frames_io_doer(socket, modules){
     var id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
-    var messages = [];
     function get_blank_frame(){
 	return { 'i' : id_allocator.alloc(), 's' : 10, 'p' : [], 't' : 0, 'r' : []};
     }
@@ -18,7 +17,18 @@ function frames_io_doer(socket, modules){
     var _on_msg;
 
     function _frame_send(frame){
-	socket.send(frame);
+	var cur_time = new Date().valueOf();
+	//resending frame every 5 second
+	if(frame.hasOwnProperty('ti')){
+	    if(cur_time - frame.ti > 5000){
+		frame.ti = cur_time;
+		socket.send(frame);	       
+	    }
+	} else {
+	    frame.ti = cur_time;
+	    console.log(frame.ti);
+	    socket.send(frame);
+	}
      }
     this.frame_max_size = 250;
 
@@ -36,7 +46,7 @@ function frames_io_doer(socket, modules){
 		cur_frame.s += packets[packet].s;
 	    }
 	    else
-	    {
+	    {	
 		_frame_send(cur_frame);
 
 		cur_frame = {
@@ -49,7 +59,6 @@ function frames_io_doer(socket, modules){
 		frames.push(cur_frame);
 	    }
 	}
-	messages.push(msg);
     }    
 
     function resender(){
@@ -57,11 +66,14 @@ function frames_io_doer(socket, modules){
 	    if(frames[key].t > 5){
 		if(!frames[key].p.length){
 		    delete frames[key];		
-		}else
+		}else {
 		    console.log('нихрена не отправляется, надо вываливаться');
+//		    console.log(frames[key]);		    
+		}
 		continue;		
 	    }
 	    frames[key].t++;
+	    console.log('eeee', frame);
 	    _frame_send(frames[key]);
 	}	
     }
@@ -71,7 +83,6 @@ function frames_io_doer(socket, modules){
 	var cur_frame = frames[frames.length - 1];
 
 	//extracting packets and assemble msg
-	console.log('ff', msg);
 	if(msg.p.length){
 	    var cur_msg;
 	    for(packet in msg.p){
@@ -227,10 +238,10 @@ exports.create = function(context, features, modules){
 						  _frames_io_doer.activate();
 					      },
 					      'send' : function(msg, callback){
-						  _frames_io_doer.activate();		    
 						  if(msg.length > 0){
 						      var _msg = _msg_packer.pack(msg, callback);
 						      _frames_io_doer.msg_add(_msg);
+						      _frames_io_doer.activate();		    
 						  } else
 						      console.log('transport.send: you must send something');
 					      }
