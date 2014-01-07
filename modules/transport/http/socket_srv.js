@@ -43,9 +43,9 @@ function response_holder(_incoming, modules){
 						     if(packet)
 							 response.end(packet);
 						 } else {
-						     //если много ждёт, то завершаем и оставляем не более 2
+						     //если много ждёт, то завершаем и оставляем не более 3
 						     for(cli_id in responses){				 
-							 while(responses[cli_id].length > 2){
+							 while(responses[cli_id].length > 3){
 							     responses[cli_id].pop().end();
 							 }
 						     }

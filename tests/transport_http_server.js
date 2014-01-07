@@ -14,7 +14,10 @@ with(modules){
     var trans = transport_http.create({ 'url' : "http://localhost:8810/socket.js"}, transport.features.server, modules);
 
     trans.on_connect(function(tr){
-			 tr.on_msg(function(msg){console.log('prishlo chtoto', msg)})
+			 tr.on_msg(function(msg){
+				       console.log('prishlo chtoto', msg);
+				       tr.send('voz*mi ko obranto ' + msg);
+				   })
 			 tr.send('teg');
 		 })
 }

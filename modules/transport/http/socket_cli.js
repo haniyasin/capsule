@@ -42,7 +42,7 @@ function packet_sender(context, _holder, cli_id, _incoming, _lpoller, modules){
 	//изначальная идея совместить возможность long pooling с задёрженной отправкой не выходит, надо переработать
 	if(request){
 	    request.on_recv(function(data){
-				if(data != undefined)
+				if(data != undefined && data != 'undefined')
 				    _incoming.add(JSON.parse(data));
 				request.close();
 			    });
@@ -69,7 +69,7 @@ function lpoller(context, _holder, _incoming, cli_id, modules){
 						     if(request){
 							 request.on_destroyed = function(){_lpoller.try_poll()};
 							 request.on_recv(function(data){
-									     if(data != undefined)
+									     if(data != undefined && data != 'undefined')
 										 _incoming.add(JSON.parse(data));
 									     request.close(); //в будущем надо учесть переиспользование объекта, возможно:)
 									 });

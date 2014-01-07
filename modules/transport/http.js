@@ -9,25 +9,31 @@ var frame = {
 function frames_io_doer(socket, modules){
     var id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
     function get_blank_frame(){
-	return { 'i' : id_allocator.alloc(), 's' : 10, 'p' : [], 't' : 0, 'r' : []};
+	return { 'i' : id_allocator.alloc(), 's' : 10, 'p' : [], 't' : 0, 'r' : [], 'ti' : 0};
     }
     var frames = [get_blank_frame()];
     var activated = false;
     var resender_timer;
     var _on_msg;
 
+    function get_current_frame(){
+	var cur_frame;
+	if(frames.length)
+	    cur_frame = frames[frames.length - 1];
+	else {	    
+	    cur_frame = get_blank_frame();
+	    frames.push(cur_frame);	    
+	}
+	return cur_frame;
+    }
+
     function _frame_send(frame){
 	var cur_time = new Date().valueOf();
 	//resending frame every 5 second
-	if(frame.hasOwnProperty('ti')){
-	    if(cur_time - frame.ti > 5000){
-		frame.ti = cur_time;
-		socket.send(frame);	       
-	    }
-	} else {
+	if(!frame.ti || cur_time - frame.ti > 5000 ){
 	    frame.ti = cur_time;
-	    console.log(frame.ti);
-	    socket.send(frame);
+	    socket.send(frame);	       
+	    frame.t++;
 	}
      }
     this.frame_max_size = 250;
@@ -37,7 +43,7 @@ function frames_io_doer(socket, modules){
     }
 
     this.msg_add = function(msg){
-	var cur_frame = frames[frames.length - 1];
+	var cur_frame = get_current_frame();
 	var packets = msg.packets;
 	msg.packets = null;
 	for(packet in packets){
@@ -47,14 +53,16 @@ function frames_io_doer(socket, modules){
 	    }
 	    else
 	    {	
-		_frame_send(cur_frame);
+		if(typeof(cur_frame) != 'undefined')
+		    _frame_send(cur_frame);
 
 		cur_frame = {
 		    'i' : id_allocator.alloc(),
 		    's' : packets[packet].s,
 		    'p' : [packets[packet]],
 		    't' : 0,
-		    'r' : []
+		    'r' : [],
+		    'ti' : 0
 		}
 		frames.push(cur_frame);
 	    }
@@ -68,20 +76,23 @@ function frames_io_doer(socket, modules){
 		    delete frames[key];		
 		}else {
 		    console.log('нихрена не отправляется, надо вываливаться');
-//		    console.log(frames[key]);		    
+		    console.log(frames);		    
 		}
 		continue;		
 	    }
-	    frames[key].t++;
-	    console.log('eeee', frame);
 	    _frame_send(frames[key]);
 	}	
     }
     
     var received_msgs = [];
+    var received_frames_ids = {};
     function msg_receiver(msg){
-	var cur_frame = frames[frames.length - 1];
+	if(!received_frames_ids.hasOwnProperty(msg.i))
+	    received_frames_ids[msg.i] = true;
+	else
+	    return; //not parsing frames which is received twice
 
+	var cur_frame = get_current_frame();
 	//extracting packets and assemble msg
 	if(msg.p.length){
 	    var cur_msg;
@@ -105,14 +116,14 @@ function frames_io_doer(socket, modules){
 		    
 	    }
 	}
+
 	//adding received frames' ids in frame from outgoing queue
-	if(!cur_frame){
-	    cur_frame = get_blank_frame();
-	    frames.push(cur_frame);	    
-	}
 	cur_frame.r.push(msg.i);
 
 	//deleting delivered frames from outgoing queue
+	if(msg.r){
+	    //console.log(msg.r, frames);	    
+	}
 	for(received in msg.r){
 	    for(key in frames){
 		if(frames[key].i == msg.r[received]){
