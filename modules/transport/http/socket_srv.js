@@ -14,17 +14,20 @@ function response_holder(_incoming, modules){
     var responses = [];
     this.delayed_packets = [];
     this.get_waited_response = function(cli_id){
-	return responses[cli_id].pop();
+	if(responses.length)
+	    return responses[cli_id].pop();
+	return null;
     }
 
     var _packets = this.delayed_packets;
 
     this.activate = function(context){
-	//нужно выбирать доступный http_respondent,  а не хардкодится на node
+	//нужно выбирать доступный http_responder,  а не хардкодится на node
 	modules.http_responder.node.on_recv(context, 
 					     function(content, response){
 						 var _content = JSON.parse(content);
-						 _incoming.add(_content);
+						 if(_content.hasOwnProperty('msg'))
+						     _incoming.add(_content);
 						 if(_content.cli_id === undefined)
 						     _content.cli_id = ids.alloc();
 						 //проверить активно ли соединение
@@ -40,9 +43,9 @@ function response_holder(_incoming, modules){
 						     if(packet)
 							 response.end(packet);
 						 } else {
-						     //если много ждёт, то завершаем и оставляем не более 2
+						     //если много ждёт, то завершаем и оставляем не более 3
 						     for(cli_id in responses){				 
-							 while(responses[cli_id].length > 2){
+							 while(responses[cli_id].length > 3){
 							     responses[cli_id].pop().end();
 							 }
 						     }
@@ -62,8 +65,9 @@ function response_holder(_incoming, modules){
 function packet_sender(_outgoig, _holder){
     this.send = function(msg){
 	var response = _holder.get_waited_response(msg[0]);
-	if(response)
-	    response.end(msg[1]);
+	if(response){
+	    response.end(msg[1]);	    
+	}
 	else
 	    _holder.delayed_packets.push(msg);
     }

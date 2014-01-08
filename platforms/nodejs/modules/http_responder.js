@@ -10,7 +10,7 @@ function server_create(context, address){
     var server  = {
 	'ip' : context.ip = address,
 	'port' : context._url.port,
-	'contexts' : [context],
+	'contexts' : [],
 	'context_add' : function(context){
 	    this.contexts.push(context);
 	}
@@ -18,8 +18,8 @@ function server_create(context, address){
     server._server = http.createServer(function(request, response){
 					   var contexts = server.contexts;
 					   var headers = request.headers;
-					   for(i = 0; i < contexts.length;  i++){
-					       var context = contexts[i], _url = context._url;
+					   for(key in contexts){
+					       var context = contexts[key], _url = context._url;
 					       var request_url = url.parse(request.url,true);
 					       if(url.parse('http://' + headers.host).hostname == _url.hostname && request_url.pathname == _url.pathname ){	
 						   var content = '';
@@ -56,9 +56,8 @@ function server_create(context, address){
 						       context.data_cb(content, res);						                                    break;
 
 						   case 'POST' :
-						       var _cb = context.data_cb;
 						       request.on('data', function(data){
-								      _cb(data, res);
+								      context.data_cb(data, res);
 								 });
 						       break;
 						   }						   

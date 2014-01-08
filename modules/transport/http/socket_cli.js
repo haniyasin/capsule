@@ -2,7 +2,7 @@ var bb_allocator = require('../../../parts/bb_allocator.js');
 
 var id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
 
-function requests_holder(modules, type){
+function requests_holder(type, modules){
     var _requests = [];
     this.create_request = function(without_data){
 	if((type == 'xhr')&&(_requests.length > 3))
@@ -16,10 +16,11 @@ function requests_holder(modules, type){
 	request.on_closed(function(){
 			      for(key in _requests){
 				  if(_requests[key] == request){
+//				      console.log('deleted');
 				      _requests.splice(key,1);
                                       if(request.on_destroyed)
 					  request.on_destroyed();
-				      request.free();				      
+				      request.close();				      
 				  }
 			      }
 			  });
@@ -28,38 +29,39 @@ function requests_holder(modules, type){
 
     this.get_waited_request = function(){
 	if(_requests.length)
-	    return _requests[0];
+	    return _requests.shift();
 	else return null;
     }
 }
 
-function packet_sender(modules, context, _holder, cli_id, _incoming, _lpoller){
+function packet_sender(context, _holder, cli_id, _incoming, _lpoller, modules){
     this.send = function(msg){	
-	var request = _holder.get_waited_request();
-	if(!request)
-	    request = _holder.create_request(false);
+	var request = _holder.create_request(false);
 	var msg_json = JSON.stringify({'cli_id' : cli_id, 'msg' : msg});
 
+	//изначальная идея совместить возможность long pooling с задёрженной отправкой не выходит, надо переработать
 	if(request){
 	    request.on_recv(function(data){
-				if(data != 'undefined')
-				    _incoming.add(data);
+				if(data != undefined && data != 'undefined')
+				    _incoming.add(JSON.parse(data));
+				request.close();
 			    });
 	    request.open(context);
 	    request.send(msg_json);	    	    
 	}
-	else
-	    _lpoller.delayed_packets.push(msg_json);	    
+//	else{
+//	    _lpoller.delayed_packets.push(msg_json);	    	    
+//	}
     }
 }
 
-function lpoller(modules, context, _holder, _incoming){
-    var _timer;
+function lpoller(context, _holder, _incoming, cli_id, modules){
+    var _timer = null;
     this.delayed_packets = [];
     var _packets = this.delayed_packets;
     var _lpoller = this;
     this.try_poll = function(){	
-	if(typeof(_timer) == 'undefined'){
+	if(!_timer){
 	    _timer = modules.timer.js.create(function(){
 						 var _waited = _holder.get_waited_request();
 						 if(!_waited){
@@ -67,17 +69,15 @@ function lpoller(modules, context, _holder, _incoming){
 						     if(request){
 							 request.on_destroyed = function(){_lpoller.try_poll()};
 							 request.on_recv(function(data){
-									     console.log('data is',data);
-									     _incoming.add(data);
+									     if(data != undefined && data != 'undefined')
+										 _incoming.add(JSON.parse(data));
 									     request.close(); //в будущем надо учесть переиспользование объекта, возможно:)
 									 });
-							 request.open(context);				 
+							 request.open(context);
+							 request.send(JSON.stringify({'cli_id' : cli_id}));
 						     }
-						 } else {
-						     if(_packets.length > 0)
-							 _waited.send(_packets.shift());
 						 }
-					     }, 100, true);	
+					     }, 200, true);	
 	}
     }
 
@@ -94,9 +94,9 @@ exports.create = function(context, type, modules){
     var cli_id = id_allocator.alloc(); //надо бы научиться сервером генерировать
     var _incoming = new utils.msg_queue();
     //реализовать выбор транспорта, xhr или script
-    var _holder = new requests_holder(modules, type);
-    var _lpoller = new lpoller(modules, context, _holder, _incoming);
-    var _sender = new packet_sender(modules, context, _holder, cli_id, _incoming, _lpoller);
+    var _holder = new requests_holder(type, modules);
+    var _lpoller = new lpoller(context, _holder, _incoming, cli_id, modules);
+    var _sender = new packet_sender(context, _holder, cli_id, _incoming, _lpoller, modules);
     //надо везде подключить receiver
     return {
 	'type' : 'client',
