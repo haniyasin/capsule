@@ -73,10 +73,10 @@ function frames_io_doer(socket, modules){
 	for(key in frames){
 	    if(frames[key].t > 5){
 		if(!frames[key].p.length){
-		    delete frames[key];		
+		    frames.splice(key,1);		
 		}else {
 		    console.log('нихрена не отправляется, надо вываливаться');
-		    console.log(frames);		    
+		    console.log(frames[key]);		    
 		}
 		continue;		
 	    }
@@ -85,56 +85,53 @@ function frames_io_doer(socket, modules){
     }
     
     var received_msgs = [];
-    var received_frames_ids = {};
+    var past_frames = {};
     function msg_receiver(msg){
-	if(!received_frames_ids.hasOwnProperty(msg.i))
-	    received_frames_ids[msg.i] = true;
-	else
-	    return; //not parsing frames which is received twice
-
 	var cur_frame = get_current_frame();
-	//extracting packets and assemble msg
-	if(msg.p.length){
-	    var cur_msg;
-	    for(packet in msg.p){
-		if(!received_msgs.hasOwnProperty(msg.p[packet].i)){
-		    received_msgs.push(cur_msg = {
-					   'i' : msg.p[packet].i,
-					   'p' : [],
-					   'c' : -1
-				       });
-		} 
-		else
-		    cur_msg = received_msgs[msg.p[packet].i];
-		cur_msg.p[msg.p[packet].n] = msg.p[packet].d;
-		if(msg.p[packet].hasOwnProperty('c'))
-		    cur_msg.c = msg.p[packet].c;
-		
-		if(cur_msg.c == cur_msg.p.length){
-		    _on_msg(cur_msg.p.join(''));
-		}
+	
+	//not parsing frames which is received twice
+	if(!past_frames.hasOwnProperty(msg.i)){   
+	    past_frames[msg.i] = true;
+	    //extracting packets and assemble msg
+	    if(msg.p.length){
+		var cur_msg;
+		for(packet in msg.p){
+		    if(!received_msgs.hasOwnProperty(msg.p[packet].i)){
+			received_msgs.push(cur_msg = {
+					       'i' : msg.p[packet].i,
+					       'p' : [],
+					       'c' : -1
+					   });
+		    } 
+		    else
+			cur_msg = received_msgs[msg.p[packet].i];
+		    cur_msg.p[msg.p[packet].n] = msg.p[packet].d;
+		    if(msg.p[packet].hasOwnProperty('c'))
+			cur_msg.c = msg.p[packet].c;
 		    
+		    if(cur_msg.c == cur_msg.p.length){
+			_on_msg(cur_msg.p.join(''));
+		    }
+		    //		}		    
+		}
 	    }
+
+	    //adding received frames' ids in frame from outgoing queue
+	    cur_frame.r.push(msg.i);
+
 	}
-
-	//adding received frames' ids in frame from outgoing queue
-	cur_frame.r.push(msg.i);
-
 	//deleting delivered frames from outgoing queue
-	if(msg.r){
-	    //console.log(msg.r, frames);	    
-	}
 	for(received in msg.r){
 	    for(key in frames){
 		if(frames[key].i == msg.r[received]){
 		    //необходимо реализовать возвращение использованных msg_id
-		    //for(packet in frames[key].p){
-			//freeing used for messages ids
-		//	frames[key].p[packet].i.free();
-		  //  }
+			//for(packet in frames[key].p){
+		    //freeing used for messages ids
+		    //	frames[key].p[packet].i.free();
+		    //  }
 		    //freeing used for frames ids
-		    id_allocator.free(frames[key].i);
-		    delete frames[key];		    
+		    //		    id_allocator.free(frames[key].i);
+		    frames.splice(key,1);		    
 		}
 	    } 
 	}
