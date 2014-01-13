@@ -9,7 +9,7 @@ exports.test = function(context, modules){
 					     socket.send(msg)
 					 });
 			  for(ind = 0; ind < 100; ind++){
-			      socket.send({'number' : ind});
+			      socket.send({"number" : ind});
 			  }	
 		      })    
     socket.listen();

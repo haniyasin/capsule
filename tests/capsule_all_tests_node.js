@@ -17,15 +17,15 @@ with(modules){
 //    ttimer.test(modules.timer);
     tuuid.test(modules.uuid.node);
 
-    thsocket.test({ 'url' : 'http://localhost:8810/socket', 'method' : 'POST'}, modules);
+    thsocket.test({ 'url' : 'http://localhost:8810/sockethh.js', 'method' : 'POST'}, modules);
 
     if(socket_type == 'srv'){
 	
 	var exporter = require('../platforms/browser/exporter/exporter.js');
-  //  var cb_sync = cb_synchronizer.create();
-  //  exporter.create('platforms/browser/exporter/capsule.json', http_responder.node ,function(web_capsule){
-//			web_capsule.to_http('http://localhost:8810/');
-//		    });
+	var cb_sync = cb_synchronizer.create();
+	exporter.create('platforms/browser/exporter/capsule.json', http_responder.node ,function(web_capsule){
+			web_capsule.to_http('http://localhost:8810/');
+			});
     }
 //    test_transport(transport);
 

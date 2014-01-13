@@ -8,16 +8,16 @@ exports.test = function(context, modules){
     var socket_cli = require('../../../modules/transport/http/socket_cli.js');
     var socket = socket_cli.create(context, 'xhr', modules);
     
-    var summ = 0;
+    var msg_summ = 0;
     var recv_counter = 0;
     socket.on_recv(function(msg){
-		       summ += msg.number;
+		       msg_summ += msg.number;
 		       recv_counter++;
-		       if(recv_counter  == 190 && summ == 9045)
-			   console.log(m200 + '(' + recv_counter + ',' + summ + ')[PASSED]');
+		       if(recv_counter  == 190 && msg_summ == 9045)
+			   console.log(m200 + '(' + recv_counter + ',' + msg_summ + ')[PASSED]');
 		   })
     
     for(ind = 0; ind != 100; ind++){
-	socket.send({'number' : ind});
+	socket.send({"number" : ind});
     }
 }

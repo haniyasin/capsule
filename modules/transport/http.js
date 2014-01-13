@@ -76,7 +76,7 @@ function frames_io_doer(socket, modules){
 		    frames.splice(key,1);		
 		}else {
 		    console.log('нихрена не отправляется, надо вываливаться');
-		    console.log(frames[key]);		    
+//		    console.log(frames[key]);		    
 		}
 		continue;		
 	    }

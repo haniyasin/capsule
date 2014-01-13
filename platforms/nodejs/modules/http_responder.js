@@ -19,9 +19,10 @@ function server_create(context, address){
 					   var contexts = server.contexts;
 					   var headers = request.headers;
 					   for(key in contexts){
-					       var context = contexts[key], _url = context._url;
-					       var request_url = url.parse(request.url,true);
-					       if(url.parse('http://' + headers.host).hostname == _url.hostname && request_url.pathname == _url.pathname ){	
+					       var context = contexts[key],
+					       _url = context._url,
+					       request_url = url.parse(request.url,true);
+					       if(url.parse('http://' + headers.host).hostname == _url.hostname && request_url.pathname == _url.pathname){	
 						   var content = '';
 						   var res = {
 						       '_response' : response,
@@ -56,9 +57,11 @@ function server_create(context, address){
 						       context.data_cb(content, res);						                                    break;
 
 						   case 'POST' :
-						       request.on('data', function(data){
-								      context.data_cb(data, res);
+						       (function(context){ 
+							    request.on('data', function(data){
+										    context.data_cb(data, res);
 								 });
+							})(context)
 						       break;
 						   }						   
 					       }
