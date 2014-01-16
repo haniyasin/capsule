@@ -22,14 +22,15 @@ function response_holder(_incoming, modules){
     var _packets = this.delayed_packets;
 
     this.activate = function(context){
+	ids.alloc();
 	//нужно выбирать доступный http_responder,  а не хардкодится на node
 	modules.http_responder.node.on_recv(context, 
 					     function(content, response){
 						 var _content = JSON.parse(content);
+						 if(_content.cli_id == 0)
+						     _content.cli_id = ids.alloc();
 						 if(_content.hasOwnProperty('msg'))
 						     _incoming.add(_content);
-						 if(_content.cli_id === undefined)
-						     _content.cli_id = ids.alloc();
 						 //проверить активно ли соединение
 						 response.on_close(function(){
 								       for(key in responses[_content.cli_id]){
@@ -62,35 +63,22 @@ function response_holder(_incoming, modules){
     }
 }
 
-function packet_sender(_outgoig, _holder){
+function packet_sender(_holder){
     this.send = function(msg){
-	var response = _holder.get_waited_response(msg[0]);
+	var response = _holder.get_waited_response(msg.cli_id);
 	if(response){
-	    response.end(msg[1]);	    
+	    response.end(JSON.stringify(msg));	    
 	}
 	else
-	    _holder.delayed_packets.push(msg);
+	    _holder.delayed_packets.push([msg.cli_id, JSON.stringify(msg)]);
     }
-}
-
-function packet_receiver(_incoming){
-    var _callback;
-    this.handler_add = function(callback){
-	_callback = callback;
-    }
-    this.dispatch = function(msg){
-	_callback(msg.cli_id, msg.msg);
-    }   
 }
 
 exports.create = function(context, modules){
     var utils = require('../../../parts/utils.js');
-    var _incoming = new utils.msg_queue(), _outgoing = new utils.msg_queue();
+    var _incoming = new utils.msg_queue();
     var _holder = new response_holder(_incoming, modules);
-    var _sender = new packet_sender(_outgoing, _holder);
-    _outgoing.on_add(function(msg){_sender.send(msg)});
-    var _receiver = new packet_receiver(_incoming);
-    _incoming.on_add(function(msg){_receiver.dispatch(msg)});
+    var _sender = new packet_sender(_holder);
     
     return {
 	'type' : 'server',
@@ -99,19 +87,19 @@ exports.create = function(context, modules){
 	},
 	'on_connect' : function(onconnect){
 	    var clients = {};
-	    _receiver.handler_add(function(cli_id, msg){
-				      if(typeof(clients[cli_id]) == 'undefined'){
-					  onconnect({	    
-							'send' : function(msg){
-							    _outgoing.add([cli_id, JSON.stringify(msg)])
-							},
-							'on_recv' : function(callback){
-							    clients[cli_id] = callback;  
-							}
-						    });
-				      } else
-					  clients[cli_id](msg);
-				  })
+	    _incoming.on_add(function(msg){
+				 if(typeof(clients[msg.cli_id]) == 'undefined'){
+				     onconnect({	    
+						   'send' : function(data){
+						       _sender.send({"cli_id" : msg.cli_id, "msg" : data})
+						   },
+						   'on_recv' : function(callback){
+						       clients[msg.cli_id] = callback;  
+						   }
+					       });
+				 } else
+				     clients[msg.cli_id](msg.msg);
+			     });
 	},
 	'close' : function(){
 	    _holder.deactivate();

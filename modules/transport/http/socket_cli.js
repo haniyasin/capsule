@@ -1,10 +1,13 @@
 var bb_allocator = require('../../../parts/bb_allocator.js');
+var utils = require('../../../parts/utils.js');
+var cb_synchronizer = require('../../../parts/cb_synchronizer.js');
 
 var id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
 
 function requests_holder(type, modules){
     var _requests = [];
     this.create_request = function(without_data){
+	//this is hack for limit of several concurent XMLHttpRequest
 	if((type == 'xhr')&&(_requests.length > 3))
 	    return null;
 	  
@@ -20,7 +23,6 @@ function requests_holder(type, modules){
 				      _requests.splice(key,1);
                                       if(request.on_destroyed)
 					  request.on_destroyed();
-				      request.close();				      
 				  }
 			      }
 			  });
@@ -34,28 +36,32 @@ function requests_holder(type, modules){
     }
 }
 
-function packet_sender(context, _holder, cli_id, _incoming, _lpoller, modules){
+function packet_sender(context, _holder, _incoming, _lpoller, modules){
     this.send = function(msg){	
 	var request = _holder.create_request(false);
-	var msg_json = JSON.stringify({'cli_id' : cli_id, 'msg' : msg});
-
+	var msg_json = JSON.stringify({'cli_id' : context.cli_id, 'msg' : msg});
 	//изначальная идея совместить возможность long pooling с задёрженной отправкой не выходит, надо переработать
 	if(request){
 	    request.on_recv(function(data){
-				if(data != undefined && data != 'undefined')
-				    _incoming.add(JSON.parse(data));
+				//ignoring reply without data and undefined reply
+				if(data != undefined && data != 'undefined' && data.length > 0){
+				    var pdata = JSON.parse(data);
+				    if(pdata.hasOwnProperty('cli_id'))
+					context.cli_id = pdata.cli_id;
+				    _incoming.add(pdata.msg);
+				}
 				request.close();
 			    });
 	    request.open(context);
 	    request.send(msg_json);	    	    
 	}
-//	else{
-//	    _lpoller.delayed_packets.push(msg_json);	    	    
-//	}
+	else{
+	    _lpoller.delayed_packets.push(msg_json);	    	    
+	}
     }
 }
 
-function lpoller(context, _holder, _incoming, cli_id, modules){
+function lpoller(context, _holder, _incoming, modules){
     var _timer = null;
     this.delayed_packets = [];
     var _packets = this.delayed_packets;
@@ -69,12 +75,16 @@ function lpoller(context, _holder, _incoming, cli_id, modules){
 						     if(request){
 							 request.on_destroyed = function(){_lpoller.try_poll()};
 							 request.on_recv(function(data){
-									     if(data != undefined && data != 'undefined')
-										 _incoming.add(JSON.parse(data));
+									     if(data != undefined && data != 'undefined' && data.length > 0){
+										 var pdata = JSON.parse(data);
+										 if(pdata.hasOwnProperty('cli_id'))
+										     context.cli_id = pdata.cli_id;
+										 _incoming.add(pdata.msg);
+									     }
 									     request.close(); //в будущем надо учесть переиспользование объекта, возможно:)
 									 });
 							 request.open(context);
-							 request.send(JSON.stringify({'cli_id' : cli_id}));
+							 request.send(JSON.stringify({'cli_id' : context.cli_id}));
 						     }
 						 }
 					     }, 200, true);	
@@ -90,25 +100,31 @@ function lpoller(context, _holder, _incoming, cli_id, modules){
 }
 
 exports.create = function(context, type, modules){
-    var utils = require('../../../parts/utils.js');
-    var cli_id = id_allocator.alloc(); //надо бы научиться сервером генерировать
     var _incoming = new utils.msg_queue();
     //реализовать выбор транспорта, xhr или script
     var _holder = new requests_holder(type, modules);
-    var _lpoller = new lpoller(context, _holder, _incoming, cli_id, modules);
-    var _sender = new packet_sender(context, _holder, cli_id, _incoming, _lpoller, modules);
-    //надо везде подключить receiver
+    context.cli_id = 0;
+    var _lpoller = new lpoller(context, _holder, _incoming, modules);
+    var _sender = new packet_sender(context, _holder, _incoming, _lpoller, modules);
+    var incoming_sync = cb_synchronizer.create();
+    var _on_recv = function(){};
     return {
-	'type' : 'client',
+	'connect' : function(callback){
+	    _incoming.on_add(incoming_sync.add(_on_recv));
+	    incoming_sync.after_all = function(){
+		_incoming.on_add(_on_recv);
+		_lpoller.try_poll();
+		callback();
+	    };
+	    _sender.send({});
+	},
 	'send' : function(msg){
-	    _lpoller.try_poll();
 	    _sender.send(msg);
 	},
 	'on_recv' : function(callback){
-	    _incoming.on_add(callback);
-	    _lpoller.try_poll();
+	    _incoming.on_add(_on_recv = callback);
 	},
-	'deactivate' : function(){
+	'disconnect' : function(){
 	    _lpoller.stop();
 	}
     }

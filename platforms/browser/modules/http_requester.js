@@ -24,10 +24,12 @@ function script_allocator(){
 	    script_tag.setAttribute('id','s' + id);
 	    rca[id] = function(reply){
                 head.removeChild(script_tag);
+		script_tag = null;
                 ids.free(id);
                 rca[id] = undefined;
 		_on_closed();
-                recv_cb(reply);
+		//этот оверхед нужно будет пофиксить, а то как-то неверно получается:)
+                recv_cb(JSON.stringify(reply));
 	    }
 	    //прилепить сюда ещё превышение времени ожидание по таймеру надобно:)
 	    return {
@@ -53,7 +55,10 @@ function script_allocator(){
 		this._req.activate(data);
 	    },
 	    'close' : function(){
-                head.removeChild(script_tag);
+		if(script_tag){		    
+                    head.removeChild(script_tag);
+		    _on_closed();
+		}
 	    },
 	    'on_recv' : function(callback){
 		_on_recv = callback;

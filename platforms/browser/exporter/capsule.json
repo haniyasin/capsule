@@ -18,6 +18,7 @@
 	    "preload" : false,
 
 	    "bb_allocator" : "parts/bb_allocator.js",
+	    "cb_synchronizer" : "parts/cb_synchronizer.js",
 	    "base32" : "dependencies/base32.js",
 	    "utils" : "parts/utils.js"
 	},
