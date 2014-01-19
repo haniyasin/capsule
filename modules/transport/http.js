@@ -212,6 +212,9 @@ exports.create = function(context, features, modules){
 	_msg_packer = new msg_packer(_frames_io_doer);
 	
 	return {
+	    'connect' : function(callback){
+		socket.connect(callback);
+	    },
 	    'on_msg' : function(callback){
 		_frames_io_doer.on_msg(callback);
 		_frames_io_doer.activate();		
