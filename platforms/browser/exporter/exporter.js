@@ -1,32 +1,7 @@
 var fs = require('fs');
 var cb_synchronizer = require('../../../parts/cb_synchronizer.js');
 
-var types = {"envelop" : 1,
-	     "module" : 2,
-	     "script" : 3
-	    };
 
-function module_load_emitter(path, code, current,  module_name, inline){
-    
-    this.emit_declare = function(){
-	if(inline){
-	    var func_name = module_name;
-	    if(module_name == 'this')
-		func_name = 'upper';
-	    return "function _" + func_name + "(module, exports, require){\n" + code + "\n};" + 
-		"module_loader.add(\"" + path + "\",_" + func_name + ");";
-	} else 
-	    return  "module_loader.add(\"" + path + "\"," + JSON.stringify(code) + ");";
-    }
-    
-    this.emit_load = function(){
-	if(module_name == 'this')
-	    return "current = module_loader.load(\'" + path + "\');";
-
-	return 'current.'+ module_name  + ' = ' + "module_loader.load(\'" + path + "\');";
-    }
-
-}
 
 function objects_tree_assembler(definition, current, type, download, preload, head, inline){
     var assembler = '',
