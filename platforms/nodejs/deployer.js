@@ -6,15 +6,16 @@ var types = {"envelop" : 1,
 	    };
 
 function nodejs_assembler(dir){
-    var s = {	
+    var s = {
 	flags : { 'preload' : false
-	},
+		},
 	type : types.envelope,
-	block : '',
-	block_load  : ''
     }
     
-    var constructor = '';
+    var block = '',
+    block_load  = '';
+
+    var childs = [];
     
 
     this.set_flag = function(name, value){
@@ -28,53 +29,56 @@ function nodejs_assembler(dir){
     
     this.push_state = function(state){
 	for(key in state){
-	    if( key == 'block')
-		s.block = state.block += s.block;
-	    else
-		s[key] = state[key]
+	    s[key] = state[key]
 	}
     }
 
     this.pop_state = function(){
-	var state = {}
-	for(key in s){
-	    if( key == 'block')
-		state.block = '';
-	    else
-		state[key] = s[key]
-	}
-	return state;
+	return s;
     }
 
-    this.start_block = function(block_name){
+    this.create_child = function(name){
+	var assembler = new nodejs_assembler(dir);
+	childs.push([name, assembler]);
+	return assembler;
     }
 
-    this.end_block = function(block_name){
-	s.block +=  'current.' + block_name + "= ";
-	s.block += '(function(current){';
-	if(!s.flags.preload){
-	    s.block += 'current.load=' + '(function(current){ return function(){' + s.block_load + '}})(current);';			         
+    this.find_child = function(name){
+	for(child in childs){
+	    if(childs[child][0] == name)
+		return childs[child][1];
 	}
-	s.block += 'return current;})({});\n';
+	return null;
+    }
+
+    this.generate = function(){
+	for(child_ind in childs){
+	    var child = childs[child_ind];
+            block += 'current.' + child[0] + ' = ' + child[1].generate();
+ 	}
+
+	var generated = "(function(current){" + block;
+	if(s.flags.preload == false){
+	    generated += 'current.load=' + '(function(current){ return function(){' + block_load  + '}})(current);';			         
+	}else
+	    generated += block_load;
+	generated += 'return current;})({});\n'; //тут надо вписать имя родителя	
+
+	return generated;
     }
 
     this.do_file = function(module_name, file_path){
-	var _block_load = 'current';
+	block_load += 'current';
 	if(module_name != 'this')
-	    _block_load += '.' + module_name;
+	    block_load += '.' + module_name;
 
-	_block_load += ' = ' + "require(" + file_path + ');\n';	    
-	if(!s.flags.preload)
-	    s.block_load += _block_load;    
-	else
-	    s.block += _block_load + 'tttt' ;	    
+	block_load += ' = ' + "require(" + file_path + ');\n';	    
 
-//	block_load = '';
-	console.log(file_path, dir + '/deploed/' + file_path); // копирование файлов
+//	console.log(file_path, dir + '/deploed/' + file_path); // копирование файлов
     }
 
     this.print = function(){
-	console.log(s.block);
+	console.log(this.generate());
     }
 }    
 
@@ -91,12 +95,13 @@ function tree_walker(tree, assembler){
 		assembler.do_file(key, tree[key]);
 	}
 	else if(typeof(tree[key]) == 'object'){
-	    var state = assembler.pop_state();
-	    console.log(key, state.flags.preload)
-	    assembler.start_block(key);
-	    tree_walker(tree[key], assembler);
-	    assembler.end_block(key);
-	    assembler.push_state(state);
+	    var child_assembler = assembler.find_child(key);
+	    if(!child_assembler){
+		var state = assembler.pop_state();
+		var child_assembler = assembler.create_child(key);
+		child_assembler.push_state(state);		
+	    }
+	    tree_walker(tree[key], child_assembler);
 	}
     }
 }
@@ -117,8 +122,7 @@ exports.assemble = function(dir){
 	    tree_walker(JSON.parse(fs.readFileSync(dir + '/' + filenames[ind]).toString()), assembler);
 	}
     }
-    console.log('eeeeeeeeeeeeeeeee\n\n')
-    assembler.print();		    
+    assembler.print();		    //Нужно реализовать сброс в файлы, а пока дебажнопринтим
 }
 
 exports.deploy = function(dir){

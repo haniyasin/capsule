@@ -1,4 +1,9 @@
 {
+    "capsule" : {
+	"modules" : {
+	    "figa" : "modules/figa.js"
+	}
+    },
     "dsa" : {
 	"mq" : "dsa_mq/mq.js"
     }
