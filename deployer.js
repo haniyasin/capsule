@@ -9,52 +9,61 @@ function find_deployers(){
     return deployers;
 }
 
-var params = {
-    'platforms' :{ //platforms must be readed from platforms directory
-	'--nodejs' : 'nodejs',
-	'--node-webkit' : 'node-webkit',
-	'--browser' : 'browser'
-    },
-    'actions' : {
-	'assemble' : 'assemble',
-	'deploy' : 'deploy',
-	'run' : 'run'	
-    }
-}
-
-function parse_args(argv){
+function parse_args(argv, deployers){
     var config = {
 	'platform' : 'nodejs',
 	'action' : 'assemble',
 	'dir' : null
     };
 
-    for(arg in argv){
-	if(params.platforms.hasOwnProperty(argv[arg]))
-	    config.platform = params.platforms[argv[arg]];
-	else if(params.actions.hasOwnProperty(argv[arg]))
-	    config.action = params.actions[argv[arg]];	
-	else if(arg > 1)
-	config.dir = argv[arg];
-    }
+
+    if(argv.length < 4)
+	return null;
     
-    if(!config.dir)
-	config.fail = true;
+    if(deployers.hasOwnProperty(argv[2]))
+	config.platform = argv[2];
+    else {
+	console.log("ERROR: [[", argv[2], "]] is not a platform name. ");
+	return null;
+    }
+
+    if(deployers.hasOwnProperty(config.platform)){
+	if(argv[3] == 'list'){
+	    var avaible_actions = [];
+	    for(action in deployers[config.platform]){
+		avaible_actions.push(action);
+	    }		
+	    console.log("Avaible actions is: [[ ", avaible_actions.join(','), " ]]")
+	    return null;
+	}else if(deployers[config.platform].hasOwnProperty(argv[3])){
+	    config.action = argv[3];
+	}else{
+	    console.log("ERROR: action [[ ", argv[3], " ]] isn't avaible. Please use action [[ list ]] to list avaible actions");
+	    return null;
+	}
+    }
+
+    if(argv.length == [5]){
+	//проверяем существование директории
+	config.dir = argv[5];	
+    }
+    else{
+	console.log("ERROR: configs_directory is missed");
+	return null;	
+    }
 
     return config;
 }
 
-var config = parse_args(process.argv);
 var deployers = find_deployers();
-var selected_deployer;
-if(deployers.hasOwnProperty(config.platform))
-    selected_deployer = deployers[config.platform];
-else config.fail = true;
+var config = parse_args(process.argv, deployers);
+if(config){
+    var selected_deployer = deployers[config.platform];
+    selected_deployer[config.action](config.dir);
+}else
+    console.log("\ndeployers.js [platform] [action] [configs_directory]\n"
+		+ "platform - platform from platforms directory if exist\n"
+		+ "action - supported action this platform. May be to know is using list action\n"
+		+ "configs_directory - is directory where configs and further produced temporary files is stored\n");
 
-if(config.fail)
-    console.log("использовать надо как-то так deployer params [action] [directory]");
 
-console.log(deployers)
-selected_deployer[config.action](config.dir);
-
-//console.log(config);
