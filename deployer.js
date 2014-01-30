@@ -29,23 +29,26 @@ function parse_args(argv, deployers){
 
     if(deployers.hasOwnProperty(config.platform)){
 	if(argv[3] == 'list'){
-	    var avaible_actions = [];
+	    var available_actions = [];
 	    for(action in deployers[config.platform]){
 		avaible_actions.push(action);
 	    }		
-	    console.log("Avaible actions is: [[ ", avaible_actions.join(','), " ]]")
+	    console.log("Available actions is: [[ ", avaible_actions.join(','), " ]]")
 	    return null;
 	}else if(deployers[config.platform].hasOwnProperty(argv[3])){
 	    config.action = argv[3];
 	}else{
-	    console.log("ERROR: action [[ ", argv[3], " ]] isn't avaible. Please use action [[ list ]] to list avaible actions");
+	    console.log("ERROR: action [[ ", argv[3], " ]] isn't available. Please use action [[ list ]] to list actions");
 	    return null;
 	}
     }
 
     if(argv.length == [5]){
 	//проверяем существование директории
-	config.dir = argv[5];	
+	if(fs.existsSync(argv[4]))
+	    config.dir = argv[4];
+	else 
+	    return null;	
     }
     else{
 	console.log("ERROR: configs_directory is missed");
@@ -63,7 +66,7 @@ if(config){
 }else
     console.log("\ndeployers.js [platform] [action] [configs_directory]\n"
 		+ "platform - platform from platforms directory if exist\n"
-		+ "action - supported action this platform. May be to know is using list action\n"
+		+ "action - supported action this platform. May to know is using list action\n"
 		+ "configs_directory - is directory where configs and further produced temporary files is stored\n");
 
 

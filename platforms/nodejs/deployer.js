@@ -13,7 +13,8 @@ function nodejs_assembler(dir){
     }
     
     var block = '',
-    block_load  = '';
+    block_load  = '',
+    files_to_copy = '';
 
     var childs = [];
     
@@ -52,17 +53,28 @@ function nodejs_assembler(dir){
     }
 
     this.generate = function(){
+	var generated = {
+	    constructor : '',
+	    files_to_copy : ''
+	}
+
 	for(child_ind in childs){
 	    var child = childs[child_ind];
-            block += 'current.' + child[0] + ' = ' + child[1].generate();
+	    var child_generated = child[1].generate();
+	    
+            block += 'current.' + child[0] + ' = ' + child_generated.constructor;
+	    generated.files_to_copy += child_generated.files_to_copy;
  	}
 
-	var generated = "(function(current){" + block;
+	generated.constructor += "(function(current){" + block;
+
 	if(s.flags.preload == false){
-	    generated += 'current.load=' + '(function(current){ return function(){' + block_load  + '}})(current);';			         
+	    generated.constructor += 'current.load=' + '(function(current){ return function(){' + block_load  + '}})(current);';			         
 	}else
-	    generated += block_load;
-	generated += 'return current;})({});\n'; //тут надо вписать имя родителя	
+	    generated.constructor += block_load;
+	generated.constructor += 'return current;})({});\n'; //тут надо вписать имя родителя	
+
+	generated.files_to_copy += files_to_copy;
 
 	return generated;
     }
@@ -72,13 +84,9 @@ function nodejs_assembler(dir){
 	if(module_name != 'this')
 	    block_load += '.' + module_name;
 
-	block_load += ' = ' + "require(" + file_path + ');\n';	    
+	block_load += ' = ' + "require('" + file_path + "');\n";	    
 
-//	console.log(file_path, dir + '/deploed/' + file_path); // копирование файлов
-    }
-
-    this.print = function(){
-	console.log(this.generate());
+	files_to_copy += file_path + ',' + dir + '/assembled/' + file_path + "\n";
     }
 }    
 
@@ -122,7 +130,14 @@ exports.assemble = function(dir){
 	    tree_walker(JSON.parse(fs.readFileSync(dir + '/' + filenames[ind]).toString()), assembler);
 	}
     }
-    assembler.print();		    //Нужно реализовать сброс в файлы, а пока дебажнопринтим
+
+    dir += '/assembled/';
+    if(!fs.existsSync(dir))
+	fs.mkdir(dir);
+    var generated = assembler.generate();
+    fs.writeFileSync(dir + 'constructor.js', generated.constructor);
+    console.log(generated.files_to_copy)
+//    eval(generated.files_to_copy);
 }
 
 exports.deploy = function(dir){
