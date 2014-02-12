@@ -1,4 +1,5 @@
-//browser assembler
+var dutils = require('../../parts/deployer_utils.js');
+
 function module_load_emitter(path, code, current,  module_name, inline){
    
     this.emit_declare = function(){
@@ -20,50 +21,18 @@ function module_load_emitter(path, code, current,  module_name, inline){
     }    
 }
 
-function browser_assembler(){
-    var s = {	
-	flags : {
-	},
-	type : types.envelope,
-	head : null, //html head tag
-	block : '',
-	block_load : ''
-    }
-    
-    var files = [];
-    var constructor = '';
-    
+var assembler_constructor = dutils.assembler_constructor;
 
-    this.set_flag = function(name, value){
-	s.flags[name] = value;
-    }
+assembler_constructor.prototype.block = '';
+assembler_constructor.prototype.block_load = '';
+assembler_constructor.prototype.files_to_copy = '';
+
+head : null, //html head tag
+block += "var head = document.getElementsByTagName('head')[0];";		
     
-    this.set_type = function(name){
-	if(name  == 'script'){
-	    s.type = types.script;
-	    if(!s.head){
-		s.head = true;
-		block += "var head = document.getElementsByTagName('head')[0];";		
-	    }
-	} else {
-	    if(name == 'module')
-		s.type = types.module;			
-	}
-    }
+assembler_constructor.prototype.generate = function(){
     
-    this.push_state = function(state){
-	for(key in state){
-	    s[key] = state[key]
-	}
-    }
-
-    this.pop_state = function(){
-	return s;
-    }
-
-    this.start_block = function(block_name){
-    }
-
+}
     this.end_block = function(block_name){
 	constructor +=  'current.' + block_name + "= ";
 	constructor += '(function(current){';
@@ -76,30 +45,29 @@ function browser_assembler(){
 	s.block_load = '';
     }
 
-    this.do_file = function(name){
-	var content = fs.readFileSync(name,"utf8");
-	if(s.type == types.script){
-	    var tag = '_' + key;
-	    block += tag + " = document.createElement('script');" + tag + ".setAttribute('type', 'text/javascript');" + tag + ".setAttribute('src', '" + name +  "');" +  "head.appendChild(" + tag + ");";
-	    files.push([name, content]);
-	} else {
-	    if(s.type == types.module){
-		var module_load = new module_load_emitter(name, content, current, key, s.flags.inline);
-//тут сплошные недоработаки с текущей позицией		
-		block +=  module_load.emit_declare();
+assembler_constructor.prototype..do_file = function(name){
+    var content = fs.readFileSync(name,"utf8");
+    if(s.type == types.script){
+	var tag = '_' + key;
+	block += tag + " = document.createElement('script');" + tag + ".setAttribute('type', 'text/javascript');" + tag + ".setAttribute('src', '" + name +  "');" +  "head.appendChild(" + tag + ");";
+	files.push([name, content]);
+    } else {
+	if(s.type == types.module){
+	    var module_load = new module_load_emitter(name, content, current, key, s.flags.inline);
+	    //тут сплошные недоработаки с текущей позицией		
+	    block +=  module_load.emit_declare();
 		var _block_load = module_load.emit_load();
-		
-		if(!flags.preload)
-		    block_load += _block_load; //НЕРОБЕД
-		else 
-		    block += _block_load;
-	    }
+	    
+	    if(!flags.preload)
+		block_load += _block_load; //НЕРОБЕД
+	    else 
+		block += _block_load;
 	}
     }
 }
 
-exports.assemble = function(){
-	    
+exports.assemble = function(dir){
+    dutils.assemble(dir, assembler_constructor);    
 }
 
 exports.deploy = function(){
