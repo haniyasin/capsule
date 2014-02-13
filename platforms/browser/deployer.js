@@ -1,6 +1,8 @@
+var fs = require('fs');
 var dutils = require('../../parts/deployer_utils.js');
+var cb_synchronizer = require('../../parts/cb_synchronizer.js');
 
-function module_load_emitter(path, code, current,  module_name, inline){
+function module_load_emitter(path, code, module_name, inline){
    
     this.emit_declare = function(){
 	if(inline){
@@ -21,53 +23,83 @@ function module_load_emitter(path, code, current,  module_name, inline){
     }    
 }
 
-var assembler_constructor = dutils.assembler_constructor;
+function assembler_constructor(dir){
+    var assembler = new dutils.assembler_constructor(dir);
+    assembler.constructor = assembler_constructor;
+    assembler.block = '';
+    assembler.block_load = '';
+    assembler.files_to_copy = [];
 
-assembler_constructor.prototype.block = '';
-assembler_constructor.prototype.block_load = '';
-assembler_constructor.prototype.files_to_copy = '';
-
-head : null, //html head tag
-block += "var head = document.getElementsByTagName('head')[0];";		
-    
-assembler_constructor.prototype.generate = function(){
-    
-}
-    this.end_block = function(block_name){
-	constructor +=  'current.' + block_name + "= ";
-	constructor += '(function(current){';
-	if(!s.flags.preload){
-	    constructor += 'current.load=' + '(function(current){ return function(){' + block_load + '}})(current);';			         
+    assembler.generate = function(){
+	var generated = {
+	    constructor : ''
 	}
-	constructor += 'return current;})({});';
-
-	s.block = '';
-	s.block_load = '';
-    }
-
-assembler_constructor.prototype..do_file = function(name){
-    var content = fs.readFileSync(name,"utf8");
-    if(s.type == types.script){
-	var tag = '_' + key;
-	block += tag + " = document.createElement('script');" + tag + ".setAttribute('type', 'text/javascript');" + tag + ".setAttribute('src', '" + name +  "');" +  "head.appendChild(" + tag + ");";
-	files.push([name, content]);
-    } else {
-	if(s.type == types.module){
-	    var module_load = new module_load_emitter(name, content, current, key, s.flags.inline);
-	    //тут сплошные недоработаки с текущей позицией		
-	    block +=  module_load.emit_declare();
-		var _block_load = module_load.emit_load();
+	
+	for(child_ind in this.childs){
+	    var child = this.childs[child_ind];
+	    var child_generated = child[1].generate();
 	    
-	    if(!flags.preload)
-		block_load += _block_load; //НЕРОБЕД
-	    else 
-		block += _block_load;
+            this.block += 'current.' + child[0] + ' = ' + child_generated.constructor;
+	    this.files_to_copy = this.files_to_copy.concat(child[1].files_to_copy);
+	}
+	
+	generated.constructor += "(function(current){" + this.block;
+	
+	if(this.s.flags.preload == false){
+	    generated.constructor += 'current.load=' + '(function(current){ return function(){' + this.block_load  + '}})(current);';			         
+	}else
+	    generated.constructor += this.block_load;
+	generated.constructor += 'return current;})({});\n'; //тут надо вписать имя родителя	
+	
+	return generated;
+    }
+
+    assembler.do_file = function(name, file_path){
+	if(this.s.type == dutils.types.script){
+	    var tag = '_' + name;
+	    this.block += tag + " = document.createElement('script');" + tag + ".setAttribute('type', 'text/javascript');" + tag + ".setAttribute('src', '" + name +  "');" +  "head.appendChild(" + tag + ");";
+
+	    this.files_to_copy.push([file_path, this.dir + '/assembled/' + file_path]);	
+	} else {
+	    var content = fs.readFileSync(file_path,"utf8");
+	    if(this.s.type == dutils.types.module){
+		var module_load = new module_load_emitter(file_path, content, name, this.s.flags.inline);
+		this.block +=  module_load.emit_declare();
+		var _block_load = module_load.emit_load();
+		
+		if(!this.s.flags.preload)
+		    this.block_load += _block_load; //НЕРОБЕД
+		else 
+		    this.block += _block_load;
+	    }
 	}
     }
+
+    return assembler;
 }
+
+
 
 exports.assemble = function(dir){
-    dutils.assemble(dir, assembler_constructor);    
+    var assembler = assembler_constructor(dir);
+    var generated = dutils.assemble(dir, assembler);
+    generated.constructor = "var head = document.getElementsByTagName('head')[0];" + generated.constructor;  
+    fs.writeFileSync(dir + '/assembled/capsule_constructor.js', generated.constructor);
+    var files_to_copy = assembler.files_to_copy;
+    var cb_sync = cb_synchronizer.create();
+    cb_sync.after_all = function(){
+	fs.writeFile(dir + '/assembled/files_to_copy.json', JSON.stringify(files_to_copy));	
+    }
+    for(file in files_to_copy){
+	(function(file){
+	     fs.readFile(files_to_copy[file][0], cb_sync.add(function(err, content){
+			     if(!err){
+				 files_to_copy[file][0] = content.toString();
+			     }else
+				 console.log('something is going wrong in file reading')
+			 }));	    
+	 })(file)
+    }
 }
 
 exports.deploy = function(){

@@ -44,8 +44,10 @@ function assembler_constructor(dir){
     }
     
     this.set_type = function(name){
-	if(name == 'module')
-	    this.s.type = types.module;			
+	if(types.hasOwnProperty(name)){
+	    this.s.type = types[name];
+	}else
+	    console.log('unexpectial type')
     }
     
     this.push_state = function(state){
@@ -57,7 +59,7 @@ function assembler_constructor(dir){
     }
 
     this.create_child = function(name){
-	var assembler = new assembler_constructor(dir);
+	var assembler = this.constructor(dir);
 	this.childs.push([name, assembler]);
 	return assembler;
     }
@@ -69,7 +71,6 @@ function assembler_constructor(dir){
 	}
 	return null;
     }
-
 }
 
 exports.tree_walker = tree_walker;
@@ -78,7 +79,7 @@ exports.assembler_constructor = assembler_constructor;
 
 exports.types = types;
 
-exports.assemble = function(dir, assembler_constructor){    
+exports.assemble = function(dir, assembler){    
     var filenames = fs.readdirSync(dir);
     var config = { };
     try {
@@ -87,7 +88,6 @@ exports.assemble = function(dir, assembler_constructor){
 	console.log('config.json не существует, а надо бы');
 	console.log(x.message);
     }
-    var assembler = new assembler_constructor(dir);
     for(ind in filenames){
 	if(filenames[ind].substr(filenames[ind].length - 4,4) == 'json' &&
 	   filenames[ind] != 'config.json'){
@@ -98,8 +98,6 @@ exports.assemble = function(dir, assembler_constructor){
     dir += '/assembled/';
     if(!fs.existsSync(dir))
 	fs.mkdir(dir);
-    var generated = assembler.generate();
-    fs.writeFileSync(dir + 'constructor.js', generated.constructor);
-    console.log(generated.files_to_copy)
-//    eval(generated.files_to_copy);
+
+    return assembler.generate();
 }
