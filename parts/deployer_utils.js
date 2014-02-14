@@ -79,15 +79,20 @@ exports.assembler_constructor = assembler_constructor;
 
 exports.types = types;
 
-exports.assemble = function(dir, assembler){    
-    var filenames = fs.readdirSync(dir);
-    var config = { };
+exports.config = function(dir){
     try {
-	config = JSON.parse(fs.readFileSync(dir + '/config.json').toString());		
+	this.values = JSON.parse(fs.readFileSync(dir + '/config.json').toString());		
+        this.write = function(){
+	    fs.writeFile(dir + '/config.json', JSON.stringify(this.values));
+	}	
     } catch (x) {
 	console.log('config.json не существует, а надо бы');
 	console.log(x.message);
-    }
+    }    
+}
+
+exports.assemble = function(dir, assembler){    
+    var filenames = fs.readdirSync(dir);
     for(ind in filenames){
 	if(filenames[ind].substr(filenames[ind].length - 4,4) == 'json' &&
 	   filenames[ind] != 'config.json'){

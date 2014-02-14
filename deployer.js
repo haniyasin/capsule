@@ -1,4 +1,5 @@
 var fs = require('fs');
+var dutils = require('./parts/deployer_utils.js');
 
 function find_deployers(){
     var platforms_names = fs.readdirSync('platforms');
@@ -62,7 +63,8 @@ var deployers = find_deployers();
 var config = parse_args(process.argv, deployers);
 if(config){
     var selected_deployer = deployers[config.platform];
-    selected_deployer[config.action](config.dir);
+    var deployer_config = new dutils.config(config.dir);
+    selected_deployer[config.action](config.dir, deployer_config);
 }else
     console.log("\ndeployers.js [platform] [action] [configs_directory]\n"
 		+ "platform - platform from platforms directory if exist\n"

@@ -78,9 +78,50 @@ function assembler_constructor(dir){
     return assembler;
 }
 
+function deploy_on_files(dir, config){
+    console.log('to files');    
+}
 
+function deploy_on_http(dir, config){
+    if(config.values.state == 'assembled'){	
+	var http_responder = require('../nodejs/modules/http_responder.js');
+	http_responder.on_recv({ 'url' : config.values.deploy_url + "/capsule.htm"}, 
+				function (context, response){
+				    fs.readFile('platforms/browser/capsule.htm', function(err, data)
+						{
+						    response.end(data);
+						});
+				},
+				function(error){console.log('failed', error)})  
+	fs.readFile(dir + '/assembled/constructor.js', function(err, constructor_content){
+			if(err){
+			    console.log('ERROR cannot read constructor.js', dir);
+			    return;
+			}
+			http_responder.on_recv({ 'url' : config.values.deploy_url + '/constructor.js'}, 
+						function (context, response){				
+						    response.end(constructor_content);
+						},
+						function(error){console.log('failed export _construct_func', error)})
+		    })
+	fs.readFile(dir + '/assembled/files_to_copy.json', function(err, content){
+			var files_to_deploy = JSON.parse(content);
+			for(var i = 0;i < files_to_deploy.length; i++){
+			    (function(file){
+			    console.log(file[1])
+				 http_responder.on_recv({ 'url' : config.values.deploy_url + '/' + file[1]}, 
+							 function (context, response){
+							     response.end(file[0]);
+							 },
+							 function(error){console.log('failed export object', error)});
+			     })(files_to_deploy[i]);
+    			}	    			
+		    });
+    } else
+	console.log('please to assemble before deploing!');
+}
 
-exports.assemble = function(dir){
+exports.assemble = function(dir, config){
     var assembler = assembler_constructor(dir);
     var generated = dutils.assemble(dir, assembler);
     generated.constructor = "var head = document.getElementsByTagName('head')[0];" + generated.constructor;  
@@ -100,9 +141,22 @@ exports.assemble = function(dir){
 			 }));	    
 	 })(file)
     }
+    config.values.state = 'assembled';
+    config.write();
 }
 
-exports.deploy = function(){
+exports.deploy = function(dir, config){
+    switch(config.values.deploy_type){
+	case 'standalone' :
+	deploy_on_files(dir);
+	break;
+	case 'http' : 
+	deploy_on_http(dir, config);
+	break;
+	default :
+	console.log('ERROR: unknown deploy_type in config');
+	break;
+    }
 	    //копируем все файлы в папку для развёртывания, указанную в конфиге развёртывателя
 	    //далее либо используя exporter.js приготавливаем все файлы к раздаче через http
 	    //либо используя его же, упаковываем все файлы в парочку .js файлов и htm для локального
