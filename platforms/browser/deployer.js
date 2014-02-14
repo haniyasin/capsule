@@ -59,7 +59,7 @@ function assembler_constructor(dir){
 	    var tag = '_' + name;
 	    this.block += tag + " = document.createElement('script');" + tag + ".setAttribute('type', 'text/javascript');" + tag + ".setAttribute('src', '" + name +  "');" +  "head.appendChild(" + tag + ");";
 
-	    this.files_to_copy.push([file_path, this.dir + '/assembled/' + file_path]);	
+	    this.files_to_copy.push({ "path" : file_path, "new_path" : this.dir + '/assembled/' + file_path});	
 	} else {
 	    var content = fs.readFileSync(file_path,"utf8");
 	    if(this.s.type == dutils.types.module){
@@ -78,54 +78,47 @@ function assembler_constructor(dir){
     return assembler;
 }
 
-function deploy_on_files(dir, config){
-    console.log('to files');    
+function deploy_on_files(dir, config, capsule_files){
+    //need mkdirp
+    fs.writeFile(dir + '/deployed/capsule.htm', capsule_files.capsule);
+    fs.writeFile(dir + '/deployed/constructor.js', capsule_files.constructor);
+
+    for(file in capsule_files.files_to_copy){
+	var _file = capsule_files.files_to_copy[file];
+	fs.writeFile(_file.new_path,_file.data);
+    }    
 }
 
-function deploy_on_http(dir, config){
-    if(config.values.state == 'assembled'){	
-	var http_responder = require('../nodejs/modules/http_responder.js');
-	http_responder.on_recv({ 'url' : config.values.deploy_url + "/capsule.htm"}, 
-				function (context, response){
-				    fs.readFile('platforms/browser/capsule.htm', function(err, data)
-						{
-						    response.end(data);
-						});
-				},
-				function(error){console.log('failed', error)})  
-	fs.readFile(dir + '/assembled/constructor.js', function(err, constructor_content){
-			if(err){
-			    console.log('ERROR cannot read constructor.js', dir);
-			    return;
-			}
-			http_responder.on_recv({ 'url' : config.values.deploy_url + '/constructor.js'}, 
-						function (context, response){				
-						    response.end(constructor_content);
-						},
-						function(error){console.log('failed export _construct_func', error)})
-		    })
-	fs.readFile(dir + '/assembled/files_to_copy.json', function(err, content){
-			var files_to_deploy = JSON.parse(content);
-			for(var i = 0;i < files_to_deploy.length; i++){
-			    (function(file){
-			    console.log(file[1])
-				 http_responder.on_recv({ 'url' : config.values.deploy_url + '/' + file[1]}, 
-							 function (context, response){
-							     response.end(file[0]);
-							 },
-							 function(error){console.log('failed export object', error)});
-			     })(files_to_deploy[i]);
-    			}	    			
-		    });
-    } else
-	console.log('please to assemble before deploing!');
+function deploy_on_http(dir, config, capsule_files){
+    var http_responder = require('../nodejs/modules/http_responder.js');
+    http_responder.on_recv({ 'url' : config.values.deploy_url + "/capsule.htm"}, 
+			   function (context, response){
+					       response.end(capsule_files.capsule);
+			   },
+			   function(error){console.log('failed', error)})  
+    http_responder.on_recv({ 'url' : config.values.deploy_url + '/constructor.js'}, 
+			   function (context, response){				
+			       response.end(capsule_files.constructor);
+			   },
+			   function(error){console.log('failed export _construct_func', error)})
+
+    for(var i = 0;i < capsule_files.files_to_copy.length; i++){
+	(function(file){
+	     console.log(file.path)
+	     http_responder.on_recv({ 'url' : config.values.deploy_url + '/' + file.path}, 
+				    function (context, response){
+					response.end(file.data);
+				    },
+				    function(error){console.log('failed export object', error)});
+	 })(capsule_files.files_to_copy[i]);
+    }	    			
 }
 
 exports.assemble = function(dir, config){
     var assembler = assembler_constructor(dir);
     var generated = dutils.assemble(dir, assembler);
     generated.constructor = "var head = document.getElementsByTagName('head')[0];" + generated.constructor;  
-    fs.writeFileSync(dir + '/assembled/capsule_constructor.js', generated.constructor);
+    fs.writeFile(dir + '/assembled/constructor.js', generated.constructor);
     var files_to_copy = assembler.files_to_copy;
     var cb_sync = cb_synchronizer.create();
     cb_sync.after_all = function(){
@@ -133,9 +126,9 @@ exports.assemble = function(dir, config){
     }
     for(file in files_to_copy){
 	(function(file){
-	     fs.readFile(files_to_copy[file][0], cb_sync.add(function(err, content){
+	     fs.readFile(files_to_copy[file].path, cb_sync.add(function(err, content){
 			     if(!err){
-				 files_to_copy[file][0] = content.toString();
+				 files_to_copy[file].data = content.toString();
 			     }else
 				 console.log('something is going wrong in file reading')
 			 }));	    
@@ -146,20 +139,40 @@ exports.assemble = function(dir, config){
 }
 
 exports.deploy = function(dir, config){
-    switch(config.values.deploy_type){
-	case 'standalone' :
-	deploy_on_files(dir);
-	break;
-	case 'http' : 
-	deploy_on_http(dir, config);
-	break;
-	default :
-	console.log('ERROR: unknown deploy_type in config');
-	break;
+    if(config.values.state != 'assembled'){
+	console.log('please to assemble before deploing!');
+	return;
     }
-	    //копируем все файлы в папку для развёртывания, указанную в конфиге развёртывателя
-	    //далее либо используя exporter.js приготавливаем все файлы к раздаче через http
-	    //либо используя его же, упаковываем все файлы в парочку .js файлов и htm для локального
+
+    var file_reading_sync = cb_synchronizer.create();
+    var capsule_files = {};
+    fs.readFile('platforms/browser/capsule.htm', 
+		file_reading_sync.add(function(err, data){
+					  capsule_files.capsule = data.toString();
+				      }));
+    
+    fs.readFile(dir + '/assembled/constructor.js', 
+		file_reading_sync.add(function(err, data){
+					  capsule_files.constructor = data.toString();
+		}));
+		
+    fs.readFile(dir + '/assembled/files_to_copy.json', 
+		file_reading_sync.add(function(err, data){
+					  capsule_files.files_to_copy = JSON.parse(data.toString());
+				      }));
+   file_reading_sync.after_all = function(){
+       switch(config.values.deploy_type){
+       case 'standalone' :
+	   deploy_on_files(dir, config, capsule_files);
+	   break;
+       case 'http' : 
+	   deploy_on_http(dir, config, capsule_files);
+	   break;
+       default :
+	   console.log('ERROR: unknown deploy_type in config');
+	   break;
+       }
+   }
 	    //запуска в браузере или запуске в браузере с любого http сервера, способного раздавать файлы
 }
 

@@ -56,5 +56,6 @@
 	    "socket_cli" : "tests/transport/http/socket_cli.js"
 	}
 
-    }
+    },
+    "capsulated" : "tests/deployer/browser/capsulated.js"
 }
