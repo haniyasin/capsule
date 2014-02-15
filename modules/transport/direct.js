@@ -1,39 +1,55 @@
 var transport = require('../transport.js');
 var callbacks = new Array();
 
-exports.create = function(address, features){
-    callbacks[address] = new Array();
-    if(features & transport.features.router){
+exports.create = function(context, features, modules){
+    callbacks[context.port] = new Array();
+    if(features & transport.features.server){
         return {
-	    address : address,
-	    on_msg : function (msg_id, callback){
-		callbacks[address]["r" + msg_id] = callback;
-	    },
-	    send : function(msg_id, msg_body, callback){
+	    on_connect : function(callback){
 		if(callback != null)
-		    callbacks[address]["r" + msg_id] = callback;
-		if(callbacks[address]["d" + msg_id])
-		    callbacks[address]["d" + msg_id](msg_id,msg_body);
-		else console.log("router: Callback on", msg_id, "is not setted")
+		    callbacks[context.port][0] = function(type, uuid, msg){
+			switch(type){
+			    case 'connect' :
+			    return {
+				on_msg : function (callback){
+				    callbacks[context.port]["s" + uuid] = callback;
+				},
+				send : function(msg){
+				    if(callbacks[context.port]["c" + uuid] === Function)
+					callbacks[context.port]["c" + uuid](msg);
+				    else console.log("server: Callback on", msg_id, "is not setted");
+				}
+			    }
+			    
+			    case 'msg' :
+			    if(callbacks[context.port]["s" + uuid] === Function)
+				callbacks[context.port]["s" + uuid](msg);
+			    break;
+			}
+		    }
 	    },
-	    destroy : function(){}
+	    destroy : function(){
+		callbacks[context.port].splice(0,1);
+	    }
 	}		    
-    }else if (features & transport.features.dealer){
+    }else if (features & transport.features.client){
+	//генерируем тут uuid
+	//var uuid = modules.uuid.create()
 	return {
-	    address : address,
-	    on_msg : function (msg_id, callback){
-		callbacks[address]["d" + msg_id] = callback;
+	    connect : function(){
+		callbacks[context.port][0]('connect', uuid);
 	    },
-	    send : function(msg_id, msg_body, callback){
-		if(callback != null)
-		    callbacks[address]["d" + msg_id] = callback;		   
-		if(callbacks[address]["r" + msg_id])
-		    callbacks[address]["r" + msg_id](msg_id,msg_body);
-		else if (callbacks[address]['r' + 0])
-		    callbacks[address]["r" + 0](msg_id,msg_body);
-		else console.log("dealer: Callback on", msg_id, "is not setted")
+	    on_msg : function (callback){
+		callbacks[context.port]["c" + uuid] = callback;
 	    },
-	    destroy : function(){}	
+	    send : function(msg){
+		if(callbacks[address] === Function)
+		    callbacks[address][0]('msg',uuid, msg);
+		else console.log("client: Callback is not setted")
+	    },
+	    destroy : function(){
+		delete callbacks[context.port]["c" + uuid];
+	    }	
 	}
     }
 }

@@ -248,9 +248,9 @@ exports.create = function(context, features, modules){
 						  _frames_io_doer.on_msg(callback);
 						  _frames_io_doer.activate();
 					      },
-					      'send' : function(msg, callback){
+					      'send' : function(msg){
 						  if(msg.length > 0){
-						      var _msg = _msg_packer.pack(msg, callback);
+						      var _msg = _msg_packer.pack(msg);
 						      _frames_io_doer.msg_add(_msg);
 						      _frames_io_doer.activate();		    
 						  } else
