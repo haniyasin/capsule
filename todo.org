@@ -1,5 +1,5 @@
 * browser/capsule
-** exporter
+** deployer
 + implement dependencies resolving mechanics
 + implement online download script and module and integrating that technic to dependecies resolving for
   download modules what need for loading other module
@@ -12,5 +12,4 @@
 ** http_requester|http_responent|http_sockets -
    + bug with reply, which consist string 'undefined'. Now is hacked around this.
 
-** modules/transport/direct
-   need fixes for more socket like server api
+
