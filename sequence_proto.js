@@ -13,12 +13,12 @@
  * технологии, которые изучал:) 
  */
 
-sequence(['c', fs.readFile, './sequent_proto.js'],
-	 ['c', fs.writeFile, './sequent_proto.js.copy', 'ret[0][0]'],
-	 function(ret){
+sequence(['c', fs.readFile, './sequence_proto.js'],
+	 ['c', fs.writeFile, './sequence_proto.js.copy', 'ret[0][0]'],
+	 ['nf', function(ret){
 	     //печатаем текст файла
 	     console.log(ret[0][0])
-	 }
+	 }]
 	);
 
 /*
@@ -29,30 +29,36 @@ sequence(['c', fs.readFile, './sequent_proto.js'],
  * передаётся в качестве параметра fs.readFile
  */
 
-sequence(['cb', fs.readFile, './sequent_proto.js'],
+sequence(['cb', fs.readFile, './sequence_proto.js'],
 	 ['s', 'storage', 'create', {'backend' : 'srb'}],
-	 function(ret){
+	 ['nf',function(ret){
 	     //печатаем object_info для нахождения нашего файла
 	     console.log(ret[1][0])
-	 },
+	 }],
 	 ['s', 'storage', 'extract', 'ret[1][0]', '*'],
 	 ['cb', fs.writeFile, './sequence_proto.js.copy', 'ret[3][0]'],
-	 function(ret){
+	 ['nf',function(ret){
 	     //печатаем содержимое файла
 	     console.log(ret[3][0])
-	 }
+	 }]
 	);
 
-/*
+/* 
  * сb - function with callback. Функция, где последний аргумент это callback, который вызывается,
  * когда дело, ради которой функцию вызвали - сделано. Поскольку существует множество различных соглашений
  * среди функций, делающих дело асинхронно(одни принимают один callback, другие несколько, одни в начале, 
  * другие в конце, а иные и возвращают некий объект, с помощью которого можно назначить callback или узнать
  * статус операции. В силу всего этого, function with callback будет иметь бекэнды, и когда то или иное 
  * соглашение не будет укладываться в концепт function with callback, будет добавлен ещё один тип
+ *
  * s - service. Сервис в рамках концепции dsa, то есть посыл ему сообщения. Тут тоже есть нюасны, так как
  * сервис может посылать в ответ разные сообщения, то надо доработать на какие сообщения реагировать и как
+ *
+ * nf - near function. Функция, исполняющаяся там, где была запущена последовательность. То есть можно
+ * рассматривать её как каллбэк без замыкания
  * 
+ * ff - far function. Фунция, испольняющаяся там, где был исполнен последний элемент последовательности.
+ * Предначначена для промежуточной обработки данных
  */
 
 //juicer
@@ -73,11 +79,11 @@ react('filter',
 react('prepare_finest_juice', 
       function(next, fruit){
 	  sequence(['s', 'juicer', 'squeeze_out',  fruit],
-		      function(sequence, ret, next){
+		   ['ff', function(sequence, ret, next){
 			  if(ret[0].sort == 'second') //juice first sort
 			      sequence.push('s', 'juicer', 'filter', 'ret[0]')
 			  else next(ret[0]);
-		      },
+		      }],
 		   ['c', next, 'ret.last.aqua'])
       });
 
