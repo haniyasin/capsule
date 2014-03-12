@@ -27,7 +27,7 @@
 		    "preload" : false,
 		    "this" : "modules/transport/http.js",
 		    "socket_cli" : "modules/transport/http/socket_cli.js",
-		    "socket_srv" : "modules/tranposrt/http/socket_srv.js"
+		    "socket_srv" : "modules/transport/http/socket_srv.js"
 		}
 	    },
 	    "http_requester" : "platforms/nodejs/modules/http_requester.js",

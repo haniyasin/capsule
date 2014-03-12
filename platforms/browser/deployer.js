@@ -59,7 +59,8 @@ function assembler_constructor(dir){
 	    var tag = '_' + name;
 	    this.block += tag + " = document.createElement('script');" + tag + ".setAttribute('type', 'text/javascript');" + tag + ".setAttribute('src', '" + name +  "');" +  "head.appendChild(" + tag + ");";
 
-	    this.files_to_copy.push({ "path" : file_path, "new_path" : this.dir + '/assembled/' + file_path});	
+	    this.files_to_copy.push({ "path" : file_path,
+				      "new_path" : this.dir + '/assembled/' + file_path});	
 	} else {
 	    var content = fs.readFileSync(file_path,"utf8");
 	    if(this.s.type == dutils.types.module){
@@ -155,25 +156,25 @@ exports.deploy = function(dir, config){
 		file_reading_sync.add(function(err, data){
 					  capsule_files.constructor = data.toString();
 		}));
-		
+    
     fs.readFile(dir + '/assembled/files_to_copy.json', 
 		file_reading_sync.add(function(err, data){
 					  capsule_files.files_to_copy = JSON.parse(data.toString());
 				      }));
-   file_reading_sync.after_all = function(){
-       switch(config.values.deploy_type){
-       case 'standalone' :
-	   deploy_on_files(dir, config, capsule_files);
-	   break;
-       case 'http' : 
-	   deploy_on_http(dir, config, capsule_files);
-	   break;
-       default :
-	   console.log('ERROR: unknown deploy_type in config');
-	   break;
-       }
-   }
-	    //запуска в браузере или запуске в браузере с любого http сервера, способного раздавать файлы
+    file_reading_sync.after_all = function(){
+	switch(config.values.deploy_type){
+	case 'standalone' :
+	    deploy_on_files(dir, config, capsule_files);
+	    break;
+	case 'http' : 
+	    deploy_on_http(dir, config, capsule_files);
+	    break;
+	default :
+	    console.log('ERROR: unknown deploy_type in config');
+	    break;
+	}
+    }
+    //запуска в браузере или запуске в браузере с любого http сервера, способного раздавать файлы
 }
 
 exports.run = function(){

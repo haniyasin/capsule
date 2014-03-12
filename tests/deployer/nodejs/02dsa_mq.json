@@ -1,10 +1,10 @@
 {
     "capsule" : {
 	"modules" : {
-	    "figa" : "modules/figa.js"
+	    "figa" : "modules/uuid.js"
 	}
     },
     "dsa" : {
-	"mq" : "dsa_mq/mq.js"
+	"mq" : "modules/uuid.js"
     }
 }

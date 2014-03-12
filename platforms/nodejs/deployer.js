@@ -1,4 +1,7 @@
 var fs = require('fs');
+var mkpath = require('../../dependencies/mkpath.js');
+var path = require('path');
+
 var dutils = require('../../parts/deployer_utils.js');
 
 function assembler_constructor(dir){
@@ -38,22 +41,41 @@ function assembler_constructor(dir){
 	if(module_name != 'this')
 	    this.block_load += '.' + module_name;
 	
-	this.block_load += ' = ' + "require('" + file_path + "');\n";	    
+	this.block_load += ' = ' + "require('./" + file_path + "');\n";	    
 
-	this.files_to_copy.push([file_path, this.dir + '/assembled/' + file_path]);
+	this.files_to_copy.push({"path" : file_path, 
+				 "new_path" : this.dir + '/assembled/' + file_path});
     }
 
     return assembler;
 }
 
-exports.assemble = function(dir){
+exports.assemble = function(dir, config){
     var assembler = assembler_constructor(dir);
     var generated = dutils.assemble(dir, assembler);
-    fs.writeFileSync(dir + '/assembled/capsule_constructor.js', generated.constructor);
-    console.log(assembler.files_to_copy)
+    fs.writeFile(dir + '/assembled/capsule_constructor.js', "exports.capsule =" + generated.constructor);
+    fs.writeFile(dir + '/assembled/files_to_copy.json', JSON.stringify(assembler.files_to_copy));
+    
+    var files_to_copy = assembler.files_to_copy;
+    for(file in files_to_copy){
+	(function(file){
+	     fs.readFile(files_to_copy[file].path, function(err, content){
+			     if(!err){
+//				 console.log(path.dirname(files_to_copy[file].new_path));
+				 mkpath.sync(path.dirname(files_to_copy[file].new_path));
+				 fs.writeFile(files_to_copy[file].new_path, content);
+			     }else {
+				 console.log('something is going wrong in file reading');
+			     }
+			 });	    
+	 })(file)	
+    }
+
+    config.values.state = 'assembled';
+    config.write();
 }
 
-exports.deploy = function(dir){
+exports.deploy = function(dir, config){
     //копируем все файлы в папку для развёртывания, указанную в конфиге развёртывателя
 },
 
