@@ -1,0 +1,14 @@
+{
+    "preload" : true,
+    
+    "capsule" : {
+	"tests" : {
+	    "uuid" : "tests/modules/uuid.js",
+	    "timer" : "tests/modules/timer.js",
+	    
+	    "transport" : {
+		"direct" : "tests/modules/transport/direct.js"
+	    }
+	}
+    }
+}

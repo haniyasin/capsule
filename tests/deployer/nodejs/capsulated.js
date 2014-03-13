@@ -1,3 +1,4 @@
-var capsule = require('./assembled/capsule_constructor.js');
+var capsule = require('./assembled/capsule_constructor.js').capsule.capsule;
 
-console.log(capsule.capsule.capsule.modules.uuid.generate_str());
+capsule.tests.transport.direct.test(capsule);
+//capsule.tests.timer.test(capsule);
