@@ -43,19 +43,6 @@
 		}
 	    },
 	    "http_requester" : "platforms/browser/modules/http_requester.js"	    
-	},
-
-	"tests" : {
-	    "download" : false,
-	    "preload" : false,
-
-	    "uuid" : "tests/uuid.js",
-	    "timer" : "tests/timer.js",
-	    "transport_direct" : "tests/transport/direct.js",
-            "http_requester" : "tests/http_requester.js",
-	    "socket_cli" : "tests/transport/http/socket_cli.js"
 	}
-
-    },
-    "capsulated" : "tests/deployer/browser/capsulated.js"
+    }
 }

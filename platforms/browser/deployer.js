@@ -1,4 +1,7 @@
 var fs = require('fs');
+var mkpath = require('../../dependencies/mkpath.js');
+var path = require('path');
+
 var dutils = require('../../parts/deployer_utils.js');
 var cb_synchronizer = require('../../parts/cb_synchronizer.js');
 
@@ -57,10 +60,10 @@ function assembler_constructor(dir){
     assembler.do_file = function(name, file_path){
 	if(this.s.type == dutils.types.script){
 	    var tag = '_' + name;
-	    this.block += tag + " = document.createElement('script');" + tag + ".setAttribute('type', 'text/javascript');" + tag + ".setAttribute('src', '" + name +  "');" +  "head.appendChild(" + tag + ");";
+	    this.block += tag + " = document.createElement('script');" + tag + ".setAttribute('type', 'text/javascript');" + tag + ".setAttribute('src', '" + file_path +  "');" +  "head.appendChild(" + tag + ");";
 
 	    this.files_to_copy.push({ "path" : file_path,
-				      "new_path" : this.dir + '/assembled/' + file_path});	
+				      "new_path" : this.dir + '/deployed/' + file_path});	
 	} else {
 	    var content = fs.readFileSync(file_path,"utf8");
 	    if(this.s.type == dutils.types.module){
@@ -80,13 +83,15 @@ function assembler_constructor(dir){
 }
 
 function deploy_on_files(dir, config, capsule_files){
-    //need mkdirp
-    fs.writeFile(dir + '/deployed/capsule.htm', capsule_files.capsule);
-    fs.writeFile(dir + '/deployed/constructor.js', capsule_files.constructor);
+    mkpath.sync(dir + '/deployed');
+    fs.writeFileSync(dir + '/deployed/capsule.htm', capsule_files.capsule);
+    fs.writeFileSync(dir + '/deployed/constructor.js', capsule_files.constructor);
 
     for(file in capsule_files.files_to_copy){
 	var _file = capsule_files.files_to_copy[file];
-	fs.writeFile(_file.new_path,_file.data);
+	mkpath.sync(path.dirname(_file.new_path));
+	console.log(_file.new_path)
+	fs.writeFileSync(_file.new_path,_file.data);
     }    
 }
 
@@ -118,12 +123,12 @@ function deploy_on_http(dir, config, capsule_files){
 exports.assemble = function(dir, config){
     var assembler = assembler_constructor(dir);
     var generated = dutils.assemble(dir, assembler);
-    generated.constructor = "var head = document.getElementsByTagName('head')[0];" + generated.constructor;  
-    fs.writeFile(dir + '/assembled/constructor.js', generated.constructor);
+    generated.constructor = "var head = document.getElementsByTagName('head')[0]; function constructor(module_loader){\n return " + generated.constructor + '}\n';  
+    fs.writeFileSync(dir + '/assembled/constructor.js', generated.constructor);
     var files_to_copy = assembler.files_to_copy;
     var cb_sync = cb_synchronizer.create();
     cb_sync.after_all = function(){
-	fs.writeFile(dir + '/assembled/files_to_copy.json', JSON.stringify(files_to_copy));	
+	fs.writeFileSync(dir + '/assembled/files_to_copy.json', JSON.stringify(files_to_copy));	
     }
     for(file in files_to_copy){
 	(function(file){
@@ -147,6 +152,7 @@ exports.deploy = function(dir, config){
 
     var file_reading_sync = cb_synchronizer.create();
     var capsule_files = {};
+
     fs.readFile('platforms/browser/capsule.htm', 
 		file_reading_sync.add(function(err, data){
 					  capsule_files.capsule = data.toString();

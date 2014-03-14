@@ -1,0 +1,8 @@
+{
+    "preload" : true,
+    "inline" : true,
+
+    "capsule" : {
+	"capsulated" : "tests/deployer/browser/capsulated.js"
+    }
+}

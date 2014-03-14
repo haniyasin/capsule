@@ -83,7 +83,7 @@ exports.config = function(dir){
     try {
 	this.values = JSON.parse(fs.readFileSync(dir + '/config.json').toString());		
         this.write = function(){
-	    fs.writeFile(dir + '/config.json', JSON.stringify(this.values));
+	    fs.writeFileSync(dir + '/config.json', JSON.stringify(this.values));
 	}	
     } catch (x) {
 	console.log('config.json не существует, а надо бы');
