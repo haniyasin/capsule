@@ -23,8 +23,8 @@ function response_holder(_incoming, modules){
 
     this.activate = function(context){
 	ids.alloc();
-	//нужно выбирать доступный http_responder,  а не хардкодится на node
-	modules.http_responder.node.on_recv(context, 
+	//нужно выбирать доступный http_responder
+	modules.http_responder.on_recv(context, 
 					     function(content, response){
 						 var _content = JSON.parse(content);
 						 if(_content.cli_id == 0)

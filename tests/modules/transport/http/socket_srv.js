@@ -1,8 +1,8 @@
 var DEBUG = 1;
 exports.test = function(context, modules){
     console.log("transport.server testing is started...");
-    var socket_srv = require('../../../modules/transport/http/socket_srv.js');
-    var socket = socket_srv.create(context, modules);
+
+    var socket = modules.transport.http.socket_srv.create(context, modules);
 
     socket.on_connect(function(socket){
 			  socket.on_recv(function(msg){

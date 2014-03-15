@@ -5,11 +5,11 @@ var m200 = 'test with 100 messages and 100 messages with reply is ';
 //}
 exports.test = function(context, modules){
     console.log("transport.client testing is started...");
-    var socket_cli = require('../../../modules/transport/http/socket_cli.js');
-    var socket = socket_cli.create(context, 'script', modules);
+    var socket = modules.transport.http.socket_cli.create(context, 'script', modules);
     
     var msg_summ = 0;
     var recv_counter = 0;
+
     socket.on_recv(function(msg){
 		       console.log(msg_summ, recv_counter);
 		       msg_summ += msg.number;

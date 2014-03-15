@@ -15,22 +15,24 @@ function assembler_constructor(dir){
     assembler.generate = function(){
 	var generated = {
 	    constructor : ''
-	}
+	};
 	
-	for(child_ind in this.childs){
-	    var child = this.childs[child_ind];
-	    var child_generated = child[1].generate();
-	    
-            this.block += 'current.' + child[0] + ' = ' + child_generated.constructor;
-	    this.files_to_copy = this.files_to_copy.concat(child[1].files_to_copy);
-	}
-	
-	generated.constructor += "(function(current){" + this.block;
+	generated.constructor += "(function(current){";
 	
 	if(this.s.flags.preload == false){
 	    generated.constructor += 'current.load=' + '(function(current){ return function(){' + this.block_load  + '}})(current);';			         
 	}else
 	    generated.constructor += this.block_load;
+
+
+	for(child_ind in this.childs){
+	    var child = this.childs[child_ind];
+	    var child_generated = child[1].generate();
+	    
+            generated.constructor += 'current.' + child[0] + ' = ' + child_generated.constructor;
+	    this.files_to_copy = this.files_to_copy.concat(child[1].files_to_copy);
+	}
+
 	generated.constructor += 'return current;})({});\n'; //тут надо вписать имя родителя	
 	
 	return generated;

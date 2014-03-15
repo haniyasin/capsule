@@ -20,19 +20,20 @@
 	    "timer" : {
 		"js" : "modules/timer.js"
 	    },
+	    "http_requester" : "platforms/nodejs/modules/http_requester.js",
+            "http_responder" : "platforms/nodejs/modules/http_responder.js",
+	    "sequence" : "modules/sequence.js",
+
 	    "transport" : {
 		"this" : "modules/transport.js",
-		"direct" : "modules/transport/direct.js",
 		"http" : {
-		    "preload" : false,
+		    "preload" : true,
 		    "this" : "modules/transport/http.js",
 		    "socket_cli" : "modules/transport/http/socket_cli.js",
 		    "socket_srv" : "modules/transport/http/socket_srv.js"
-		}
-	    },
-	    "http_requester" : "platforms/nodejs/modules/http_requester.js",
-            "http_responder" : "platforms/nodejs/modules/http_responder.js",
-	    "sequence" : "modules/sequence.js"
+		},
+		"direct" : "modules/transport/direct.js"
+	    }
 	}
     }
 }
