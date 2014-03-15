@@ -7,12 +7,7 @@
       //need depends functionality
       var loader = new module_loader();
       var environment = constructor(loader);
-//      console.log(JSON.stringify(environment));
-      var tt = uuid.v1;
-//      console.log("uuid is", JSON.stringify(tt));
-//      console.log('dfdfdf', environment.capsule.modules.uuid.generate_str());
-      environment.capsule.tests.timer.test(environment.capsule);
-      environment.capsule.tests.transport.direct.test(environment.capsule);
+	environment.capsulated.main(environment.capsule);
       }
     </script>
   </head>

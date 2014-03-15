@@ -8,19 +8,30 @@ exports.test = function(context, modules){
     var socket = modules.transport.http.socket_cli.create(context, 'script', modules);
     
     var msg_summ = 0;
+    var max_msg_summ;
     var recv_counter = 0;
+    
+    while(recv_counter < 100){
+	msg_summ += recv_counter++;
+    }
 
+    console.log("max msg_summ is: ", max_msg_summ = msg_summ);
+    msg_summ = 0;
+    recv_counter = 0;
+    
     socket.on_recv(function(msg){
-		       console.log(msg_summ, recv_counter);
+		       if(recv_counter > 90)
+			   console.log(msg_summ, recv_counter);
 		       msg_summ += msg.number;
 		       recv_counter++;
-		       if(recv_counter  == 191 && msg_summ == 9045)
+		       if(recv_counter  == 100 &&
+			  msg_summ ==  max_msg_summ)
 			   console.log(m200 + '(' + recv_counter + ',' + msg_summ + ')[PASSED]');
 		   })
     
     socket.connect(function(){
-		       console.log('tthh');
-		       for(ind = 0; ind != 100; ind++){
+		       console.log('connection is established');
+		       for(ind = 0; ind != 50; ind++){
 			   socket.send({"number" : ind});
 		       }
 		   })

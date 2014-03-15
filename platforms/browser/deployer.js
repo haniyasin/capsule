@@ -57,16 +57,6 @@ function assembler_constructor(dir){
 	    script_inline : ''
 	}
 	
-	for(child_ind in this.childs){
-	    var child = this.childs[child_ind];
-	    var child_generated = child[1].generate();
-	    
-            this.block += 'current.' + child[0] + ' = ' + child_generated.constructor;
-	    this.script_inline += child[1].script_inline;
-	    this.files_to_copy = this.files_to_copy.concat(child[1].files_to_copy);
-	}
-	
-	generated.script_inline = this.script_inline;
 	generated.constructor += "(function(current){" + this.block;
 
 	if(this.s.depend){
@@ -79,8 +69,18 @@ function assembler_constructor(dir){
 	    generated.constructor += 'current.load=' + '(function(current){ return function(){' + this.block_load  + '}})(current);';			         
 	}else
 	    generated.constructor += this.block_load;
-	generated.constructor += 'return current;})({});\n'; //тут надо вписать имя родителя	
 	
+	for(child_ind in this.childs){
+	    var child = this.childs[child_ind];
+	    var child_generated = child[1].generate();
+	    
+            generated.constructor += 'current.' + child[0] + ' = ' + child_generated.constructor;
+	    generated.script_inline += child[1].script_inline;
+	    this.files_to_copy = this.files_to_copy.concat(child[1].files_to_copy);
+	}
+
+	generated.constructor += 'return current;})({});\n'; //тут надо вписать имя родителя	
+
 	return generated;
     }
 

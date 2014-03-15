@@ -8,7 +8,7 @@ exports.test = function(context, modules){
 			  socket.on_recv(function(msg){
 					     socket.send(msg);
 					 });
-			  for(ind = 0; ind < 100; ind++){
+			  for(ind = 50; ind < 100; ind++){
 			      socket.send({"number" : ind});
 			  }	
 		      })    

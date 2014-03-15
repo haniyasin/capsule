@@ -31,19 +31,17 @@
 	    "timer" : {
 		"js" : "modules/timer.js"
 	    },
+	    "http_requester" : "platforms/browser/modules/http_requester.js",
+
 	    "transport" : {
 		"this" : "modules/transport.js",
 		"direct" : "modules/transport/direct.js",
 		"http" : {
-		    "preload" : false,
-
 		    "this" : "modules/transport/http.js",
-		    "lib" : {
-			"socket_cli" : "modules/transport/http/socket_cli.js"
-		    }		    
+		    "socket_cli" : "modules/transport/http/socket_cli.js",
+		    "socket_srv" : "modules/transport/http/socket_srv.js"
 		}
-	    },
-	    "http_requester" : "platforms/browser/modules/http_requester.js"	    
+	    }
 	}
     }
 }

@@ -205,7 +205,7 @@ exports.create = function(context, features, modules){
 	var incoming;
 	    //здесь необходимо как-то сделать выбор то ли script, то ли xhr бекэнда, а пока xhr и post по дефолту
 	context.method = 'POST';	
-	var socket_cli = require('./http/socket_cli.js');
+	var socket_cli = modules.transport.http.socket_cli;
 	var socket = socket_cli.create(context, 'xhr', modules);
 
 	_frames_io_doer = new frames_io_doer(socket, modules);
@@ -236,7 +236,7 @@ exports.create = function(context, features, modules){
     else if(features & transport.features.server){
 	var clients = [];
 	var _on_connect;
-	var socket_srv = require('./http/socket_srv.js');
+	var socket_srv = modules.transport.http.socket_srv;
 	var socket = socket_srv.create(context, modules);
 
 	socket.on_connect(function(socket){

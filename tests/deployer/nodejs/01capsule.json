@@ -27,7 +27,6 @@
 	    "transport" : {
 		"this" : "modules/transport.js",
 		"http" : {
-		    "preload" : true,
 		    "this" : "modules/transport/http.js",
 		    "socket_cli" : "modules/transport/http/socket_cli.js",
 		    "socket_srv" : "modules/transport/http/socket_srv.js"
