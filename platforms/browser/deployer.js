@@ -5,6 +5,23 @@ var path = require('path');
 var dutils = require('../../parts/deployer_utils.js');
 var cb_synchronizer = require('../../parts/cb_synchronizer.js');
 
+function depend_resolver(depend){
+    var depends = depend.split(',');
+    this.remove_depend(depend_str);
+    this.set_hooks = function(){	
+	for(ind in depends){
+	    //var element = tree.find(depends[ind]
+	    //element.set_depend_hook(this, depends[ind] устанавливаем хук так,чтобы когда зависимость
+	    //появлялась вызывала нас так - dresolver.remove_depend(depend_str), где depend_str это
+	    // переданная нами depends[ind]
+	}
+
+	//
+    }
+
+    this.generate();
+}
+
 function module_load_emitter(path, code, module_name, inline){
    
     this.emit_declare = function(){
@@ -51,7 +68,13 @@ function assembler_constructor(dir){
 	
 	generated.script_inline = this.script_inline;
 	generated.constructor += "(function(current){" + this.block;
-	
+
+	if(this.s.depend){
+	    var dresolver = depend_resolver(this.s.depend);
+	    dresolver.set_hooks();
+	    dresolver.generate();
+	}
+
 	if(this.s.flags.preload == false){
 	    generated.constructor += 'current.load=' + '(function(current){ return function(){' + this.block_load  + '}})(current);';			         
 	}else
@@ -62,8 +85,9 @@ function assembler_constructor(dir){
     }
 
     assembler.do_file = function(name, file_path){
+	var flags = this.s.flags;
 	if(this.s.type == dutils.types.script){
-	    if(this.s.flags.inline){
+	    if(flags.inline){
 		this.script_inline += fs.readFileSync(file_path, "utf8");
 	    }
 	    else {
@@ -77,14 +101,14 @@ function assembler_constructor(dir){
 					  "new_path" : this.dir + '/deployed/' + file_path});	
 	    }
 	} else {
-	    var content = fs.readFileSync(file_path,"utf8");
 	    if(this.s.type == dutils.types.module){
-		var module_load = new module_load_emitter(file_path, content, name, this.s.flags.inline);
+		var content = fs.readFileSync(file_path,"utf8");
+		var module_load = new module_load_emitter(file_path, content, name, flags.inline);
 		this.block +=  module_load.emit_declare();
 		var _block_load = module_load.emit_load();
 		
-		if(!this.s.flags.preload)
-		    this.block_load += _block_load; //НЕРОБЕД
+		if(!flags.preload)
+		    this.block_load += _block_load;		    
 		else 
 		    this.block += _block_load;
 	    }

@@ -1,1 +1,1 @@
-{"state":"assembled","deploy_type":"standalone","deploy_url":"http://localhost:8810/capdep"}
+{"state":"assembled","deploy_type":"http","deploy_url":"http://localhost:8810/capdep"}

@@ -1,7 +1,6 @@
 <html>
   <head>
     <title>Browser Capsule Prototype</title>
-    <script type="text/javascript" src="platforms/browser/module_loader.js"></script>
     <script type="text/javascript" src="constructor.js"></script>
     <script type="text/javascript">
       function start(){
@@ -10,9 +9,9 @@
       var environment = constructor(loader);
 //      console.log(JSON.stringify(environment));
       var tt = uuid.v1;
-      console.log("uuid is", JSON.stringify(tt));
+//      console.log("uuid is", JSON.stringify(tt));
 //      console.log('dfdfdf', environment.capsule.modules.uuid.generate_str());
-//      environment.capsule.tests.timer.test(environment.capsule);
+      environment.capsule.tests.timer.test(environment.capsule);
       environment.capsule.tests.transport.direct.test(environment.capsule);
       }
     </script>
