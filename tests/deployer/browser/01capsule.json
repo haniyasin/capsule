@@ -5,6 +5,7 @@
 
     "scripts" : {
 	"type" : "script",
+	"inline" : true,
 
 	"uuid" : "dependencies/uuid.js",
 	"Compositer" : "parts/Compositer.js",

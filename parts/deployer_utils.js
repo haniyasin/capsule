@@ -9,22 +9,28 @@ function tree_walker(tree, assembler){
     for(var key in tree){
 	if(typeof(tree[key]) == 'boolean')
 	    assembler.set_flag(key,tree[key]);
-
-	if(typeof(tree[key]) == 'string'){
-	    if(key == 'type')
-		assembler.set_type(tree[key]);
-	    else 
-		assembler.do_file(key, tree[key]);
-	}
-	else if(typeof(tree[key]) == 'object'){
-	    var child_assembler = assembler.find_child(key);
-	    if(!child_assembler){
-		var state = assembler.pop_state();
-		var child_assembler = assembler.create_child(key);
-		child_assembler.push_state(state);		
+	else
+	    if(typeof(tree[key]) == 'string'){
+		if(key == 'type')
+		    assembler.set_type(tree[key]);
+		else 
+		    if(key == 'depend')
+			assembler.s.depend = tree[key];
+		else 
+		    assembler.do_file(key, tree[key]);
 	    }
-	    tree_walker(tree[key], child_assembler);
-	}
+	else 
+	    if(typeof(tree[key]) == 'object'){
+		var child_assembler = assembler.find_child(key);
+		if(!child_assembler){
+		    var state = assembler.pop_state();
+		    var child_assembler = assembler.create_child(key);
+		    child_assembler.push_state(state);		
+		}
+		tree_walker(tree[key], child_assembler);
+	    }
+	else
+	    console.log('unexpectial key', key);
     }
 }
 
@@ -33,7 +39,8 @@ function assembler_constructor(dir){
     this.s = {
 	flags : { 'preload' : false
 		},
-	type : types.envelope
+	type : types.envelope,
+	depend : null
     }
 
     this.childs = [];

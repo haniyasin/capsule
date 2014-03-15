@@ -1,11 +1,11 @@
 * browser/capsule
 ** deployer
-+ implement dependencies resolving mechanics
-+ implement online download script and module and integrating that technic to dependecies resolving for
++ to implement dependencies resolving mechanics
++ to implement online download script and module and integrating that technic to dependecies resolving for
   download modules what need for loading other module
 + to do a code cleanup for a readability and the code reusing purpose
-+ some optimization
-+ implement more efficient and controlable loading <script> javascript, may be through union many 
++ to do some optimization
++ to implement more efficient and controlable loading <script> javascript, may be through union many 
    files in one and loading that code like a modules but into global scope
   
 
@@ -13,3 +13,4 @@
    + bug with reply, which consist string 'undefined'. Now is hacked around this.
 
 
+   

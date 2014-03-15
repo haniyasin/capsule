@@ -6,16 +6,14 @@
     <script type="text/javascript">
       function start(){
       //need depends functionality
-      //settimeout is just HACK insteed depends
       var loader = new module_loader();
       var environment = constructor(loader);
-      setTimeout(function(){
-      console.log(JSON.stringify(environment));
-      console.log(window.uuid);
+//      console.log(JSON.stringify(environment));
+      var tt = uuid.v1;
+      console.log("uuid is", JSON.stringify(tt));
 //      console.log('dfdfdf', environment.capsule.modules.uuid.generate_str());
 //      environment.capsule.tests.timer.test(environment.capsule);
       environment.capsule.tests.transport.direct.test(environment.capsule);
-      }, 2000);
       }
     </script>
   </head>
