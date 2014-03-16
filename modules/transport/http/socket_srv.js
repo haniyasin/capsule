@@ -66,9 +66,8 @@ function response_holder(_incoming, modules){
 function packet_sender(_holder){
     this.send = function(msg){
 	var response = _holder.get_waited_response(msg.cli_id);
-	if(response){
-	    response.end(JSON.stringify(msg));	    
-	}
+	if(response)
+	    response.end(JSON.stringify(msg));
 	else
 	    _holder.delayed_packets.push([msg.cli_id, JSON.stringify(msg)]);
     }
@@ -85,11 +84,11 @@ exports.create = function(context, modules){
 	'listen' : function(){
 	    _holder.activate(context);
 	},
-	'on_connect' : function(onconnect){
+	'on_connect' : function(connect_cb){
 	    var clients = {};
 	    _incoming.on_add(function(msg){
 				 if(typeof(clients[msg.cli_id]) == 'undefined'){
-				     onconnect({	    
+				     connect_cb({	    
 						   'send' : function(data){
 						       _sender.send({"cli_id" : msg.cli_id, "msg" : data})
 						   },

@@ -21,12 +21,14 @@ exports.test = function(context, modules){
     
     socket.on_recv(function(msg){
 		       if(recv_counter > 90)
-			   console.log(msg_summ, recv_counter);
+		       console.log(msg.number, recv_counter);
 		       msg_summ += msg.number;
 		       recv_counter++;
 		       if(recv_counter  == 100 &&
-			  msg_summ ==  max_msg_summ)
+			  msg_summ ==  max_msg_summ){
 			   console.log(m200 + '(' + recv_counter + ',' + msg_summ + ')[PASSED]');
+			   socket.disconnect();			   
+		       }
 		   })
     var end_sending = false;
     socket.on_disconnected(function(e){

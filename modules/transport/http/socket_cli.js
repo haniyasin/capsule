@@ -5,6 +5,7 @@ var cb_synchronizer = require('../../../parts/cb_synchronizer.js');
 var id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
 
 function requests_holder(type, modules){
+    var _requests_to_continue = [];
     var _requests = [];
     this.success_metr = 0; //counter of success or failed
     this.on_disconnected = function(){};
@@ -17,7 +18,8 @@ function requests_holder(type, modules){
 	this.success_metr++;
 
 	if(without_data)
-	    _requests.push(request);
+	    _requests_to_continue.push(request);
+	_requests.push(request);
 	//вписать сюда свой установщик каллбека, который вставляет код удаления request
 	request.on_closed(function(){
 			      for(key in _requests){
@@ -32,9 +34,15 @@ function requests_holder(type, modules){
     }
 
     this.get_waited_request = function(){
-	if(_requests.length)
-	    return _requests.shift();
+	if(_requests_to_continue.length)
+	    return _requests_to_continue.shift();
 	else return null;
+    }
+
+    this.close_all_requests = function(){
+	for(ind in _requests){
+	    _requests[ind].close();
+	}
     }
 }
 
@@ -50,6 +58,7 @@ function packet_sender(context, _holder, _incoming, _lpoller, modules){
 				    var pdata = JSON.parse(data);
 				    if(pdata.hasOwnProperty('cli_id'))
 					context.cli_id = pdata.cli_id;
+
 				    _incoming.add(pdata.msg);
 				}
 				request.close();
@@ -81,7 +90,6 @@ function lpoller(context, _holder, _incoming, modules){
 						 if(!_waited){
 						     var request = _holder.create_request(true);
 						     if(request){
-							 request.on_destroyed = function(){_lpoller.try_poll()};
 							 request.on_recv(function(data){
 									     if(data != undefined && data != 'undefined' && data.length > 0){
 										 var pdata = JSON.parse(data);
@@ -107,6 +115,7 @@ function lpoller(context, _holder, _incoming, modules){
 
     this.stop = function(){
 	if(typeof(_timer) == 'object'){
+	    console.log('timer is destroyed');
 	    _timer.destroy();
             _timer = undefined;	    
 	}
@@ -124,10 +133,14 @@ exports.create = function(context, type, modules){
     var _on_recv = function(){};
     return {
 	'connect' : function(callback){
-	    console.log('dfdfd');
-	    _incoming.on_add(_on_recv);
-	    _lpoller.try_poll();
-	    callback();
+	    _incoming.on_add(incoming_sync.add(_on_recv));
+	    //waiting for server answer with allocated id for us
+	    incoming_sync.after_all = function(){
+		_incoming.on_add(_on_recv);
+		_lpoller.try_poll();
+		callback();
+	    }
+	    _sender.send({});
 	},
 	'send' : function(msg){
 	    _sender.send(msg);
