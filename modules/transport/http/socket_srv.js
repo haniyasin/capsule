@@ -58,8 +58,8 @@ function response_holder(_incoming, modules){
 					     function(error){console.log('response_holder is failed', error)})    
     }
 
-    this.deactivate = function(){
-	//нужно написать деактивацию и добавить соответствующие возможности в http_respondent
+    this.deactivate = function(context){
+	modules.http_responder.remove_callback(context);	
     }
 }
 
@@ -101,7 +101,7 @@ exports.create = function(context, modules){
 			     });
 	},
 	'close' : function(){
-	    _holder.deactivate();
+	    _holder.deactivate(context);
 	}	    
 	
     }

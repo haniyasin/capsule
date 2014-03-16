@@ -115,7 +115,6 @@ function lpoller(context, _holder, _incoming, modules){
 
     this.stop = function(){
 	if(typeof(_timer) == 'object'){
-	    console.log('timer is destroyed');
 	    _timer.destroy();
             _timer = undefined;	    
 	}
