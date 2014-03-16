@@ -40,7 +40,7 @@ function request(){
 				    response.on('close', _on_closed);
 				    response.on('timeout', _on_closed)
 				});
-	    _req.on('error', function(e){_on_closed();console.log(e.message)});
+	    _req.on('error', function(e){_on_closed(); _on_error(e);});
 	    _req.on('socket', function(sock){
 			socket = sock;
 		    });
@@ -60,7 +60,8 @@ function request(){
 	'on_closed' : function(closed_cb){
 	    _on_closed = closed_cb;
 	},
-	'on_err' : function(error_cb){
+	'on_error' : function(error_cb){
+	    _on_error = error_cb;
 	}
     }
 }

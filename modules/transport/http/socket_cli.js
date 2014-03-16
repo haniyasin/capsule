@@ -6,12 +6,15 @@ var id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
 
 function requests_holder(type, modules){
     var _requests = [];
+    this.success_metr = 0; //counter of success or failed
+    this.on_disconnected = function(){};
     this.create_request = function(without_data){
 	//this is hack for limit of several concurent XMLHttpRequest
 	if((type == 'xhr')&&(_requests.length > 3))
 	    return null;
 	  
 	var request = modules.http_requester.create(type);
+	this.success_metr++;
 
 	if(without_data)
 	    _requests.push(request);
@@ -19,7 +22,6 @@ function requests_holder(type, modules){
 	request.on_closed(function(){
 			      for(key in _requests){
 				  if(_requests[key] == request){
-//				      console.log('deleted');
 				      _requests.splice(key,1);
                                       if(request.on_destroyed)
 					  request.on_destroyed();
@@ -52,6 +54,12 @@ function packet_sender(context, _holder, _incoming, _lpoller, modules){
 				}
 				request.close();
 			    });
+	    request.on_error(function(e){
+				 if(--_holder.success_metr == 1){
+				     _lpoller.stop();
+				     _holder.on_disconnected(e);
+				 }
+			     });
 	    request.open(context);
 	    request.send(msg_json);	    	    
 	}
@@ -83,6 +91,12 @@ function lpoller(context, _holder, _incoming, modules){
 									     }
 									     request.close(); //в будущем надо учесть переиспользование объекта, возможно:)
 									 });
+							 request.on_error(function(e){
+									      if(--_holder.success_metr == 1){
+										  _lpoller.stop();
+										  _holder.on_disconnected(e);
+									      }
+									  });
 							 request.open(context);
 							 request.send(JSON.stringify({'cli_id' : context.cli_id}));
 						     }
@@ -110,19 +124,19 @@ exports.create = function(context, type, modules){
     var _on_recv = function(){};
     return {
 	'connect' : function(callback){
-	    _incoming.on_add(incoming_sync.add(_on_recv));
-	    incoming_sync.after_all = function(){
-		_incoming.on_add(_on_recv);
-		_lpoller.try_poll();
-		callback();
-	    };
-	    _sender.send({});
+	    console.log('dfdfd');
+	    _incoming.on_add(_on_recv);
+	    _lpoller.try_poll();
+	    callback();
 	},
 	'send' : function(msg){
 	    _sender.send(msg);
 	},
 	'on_recv' : function(callback){
 	    _incoming.on_add(_on_recv = callback);
+	},
+	'on_disconnected' : function(callback){
+	     _holder.on_disconnected = callback;
 	},
 	'disconnect' : function(){
 	    _lpoller.stop();

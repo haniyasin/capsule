@@ -28,10 +28,17 @@ exports.test = function(context, modules){
 			  msg_summ ==  max_msg_summ)
 			   console.log(m200 + '(' + recv_counter + ',' + msg_summ + ')[PASSED]');
 		   })
+    var end_sending = false;
+    socket.on_disconnected(function(e){
+			     console.log('connection is failed');
+			     end_sending = true;
+			 })
     
     socket.connect(function(){
 		       console.log('connection is established');
 		       for(ind = 0; ind != 50; ind++){
+			   if(end_sending)
+			       break;
 			   socket.send({"number" : ind});
 		       }
 		   })
