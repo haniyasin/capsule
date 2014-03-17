@@ -1,11 +1,11 @@
 var _uuid;
-if(typeof(module) != 'undefined')  
-    _uuid = require('node-uuid');
-else if(window.uuid)
+if(typeof(window) == 'object')
     _uuid = uuid;
+else
+    _uuid = require('../dependencies/uuid.js');
 
 exports.generate_str = function(){
-    return uuid.v1();
+    return _uuid.v1();
 }
 
 exports.generate_bin = function(){

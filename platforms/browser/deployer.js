@@ -161,7 +161,12 @@ exports.assemble = function(dir, config){
     generated.constructor = generated.script_inline 
 	+ "var head = document.getElementsByTagName('head')[0]; "
 	+ "function constructor(module_loader){\n return " 
-	+ generated.constructor + '}\n';  
+	+ generated.constructor + '}\n';
+    if(config.values.hasOwnProperty('entry'))
+	generated.constructor += 'function starter(env){ env.' + config.values.entry + '(env);}';
+    else
+	console.log('entry point must will be setted in config.js');
+
     fs.writeFileSync(dir + '/assembled/constructor.js', generated.constructor);
     var files_to_copy = assembler.files_to_copy;
     var cb_sync = cb_synchronizer.create();

@@ -55,7 +55,7 @@ function assembler_constructor(dir){
 exports.assemble = function(dir, config){
     var assembler = assembler_constructor(dir);
     var generated = dutils.assemble(dir, assembler);
-    fs.writeFile(dir + '/assembled/capsule_constructor.js', "exports.capsule =" + generated.constructor);
+    fs.writeFile(dir + '/assembled/constructor.js', "exports.environment =" + generated.constructor);
     fs.writeFile(dir + '/assembled/files_to_copy.json', JSON.stringify(assembler.files_to_copy));
     
     var files_to_copy = assembler.files_to_copy;
@@ -81,6 +81,13 @@ exports.deploy = function(dir, config){
     //копируем все файлы в папку для развёртывания, указанную в конфиге развёртывателя
 },
 
-exports.run = function(dir){
-    //запускаем, в качестве параметра запуска используем id, выданный при развёртывании
+exports.run = function(dir, config){
+    
+    var env = require('../../' + dir + '/assembled/constructor.js').environment;
+//    console.log(__dirname);
+    if(config.values.hasOwnProperty('entry')){
+	new Function('env', 'env.' + config.values.entry + '(env);')(env);
+    }
+    else
+	console.log('entry point must will be setted in config.js');
 }        

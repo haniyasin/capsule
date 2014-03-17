@@ -66,7 +66,7 @@ function script_allocator(){
 	    'on_closed' : function(callback){
 		_on_closed = callback;
 	    },
-            'on_err' : function(callback){
+            'on_error' : function(callback){
 		_on_error = callback;
 	    }	    
 	}

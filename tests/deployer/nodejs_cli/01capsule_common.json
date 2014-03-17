@@ -2,15 +2,6 @@
     "download" : true,
     "preload" : true,
     "inline" : true,
-
-    "scripts" : {
-	"type" : "script",
-	"inline" : true,
-
-	"uuid" : "dependencies/uuid.js",
-	"Compositer" : "parts/Compositer.js",
-	"module_loader" : "platforms/browser/module_loader.js"
-    },
     
     "capsule" : {
 	"type" : "module",
@@ -31,8 +22,6 @@
 	    "timer" : {
 		"js" : "modules/timer.js"
 	    },
-	    "http_requester" : "platforms/browser/modules/http_requester.js",
-
 	    "transport" : {
 		"this" : "modules/transport.js",
 		"direct" : "modules/transport/direct.js",
