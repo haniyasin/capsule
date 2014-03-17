@@ -14,7 +14,7 @@
  */
 
 sequence(['c', fs.readFile, './sequence_proto.js'],
-	 ['c', fs.writeFile, './sequence_proto.js.copy', 'ret[0][0]'],
+	 ['c', fs.writeFile, './sequence_proto.js.copy', 'stack[0][0]'],
 	 ['fn', function(context, stack){
 	     //печатаем текст файла
 	     console.log(stack[0][1])
@@ -29,17 +29,17 @@ sequence(['c', fs.readFile, './sequence_proto.js'],
  * передаётся в качестве параметра fs.readFile
  */
 
-sequence(['cb', fs.readFile, './sequence_proto.js'],
+sequence(['c', fs.readFile, './sequence_proto.js'],
 	 ['s', 'storage', 'create', {'backend' : 'srb'}],
-	 ['fn',function(context, ret){
+	 ['fn',function(context, stack){
 	     //печатаем object_info для нахождения нашего файла
-	     console.log(ret[1][0])
+	     console.log(stack[1][0])
 	 }],
-	 ['s', 'storage', 'extract', 'ret[1][0]', '*'],
-	 ['cb', fs.writeFile, './sequence_proto.js.copy', 'ret[3][0]'],
-	 ['fn',function(ret){
+	 ['s', 'storage', 'extract', 'stack[1][0]', '*'],
+	 ['c', fs.writeFile, './sequence_proto.js.copy', 'stack[3][0]'],
+	 ['fn',function(stack){
 	     //печатаем содержимое файла
-	     console.log(ret[3][0])
+	     console.log(stack[3][0])
 	 }]
 	);
 
@@ -56,10 +56,10 @@ sequence(['cb', fs.readFile, './sequence_proto.js'],
  * s, service_id, message_name, arg1, arg2, etc - service. Сервис в рамках концепции dsa, то есть посыл ему сообщения. Тут тоже есть нюасны, так как
  * сервис может посылать в ответ разные сообщения, то надо доработать на какие сообщения реагировать и как
  *
- * fn, function(context, sequence, ret, next) - near function. Функция, исполняющаяся там, где была запущена последовательность. То есть можно
+ * fn, function(context, sequence, stack, next) - near function. Функция, исполняющаяся там, где была запущена последовательность. То есть можно
  * рассматривать её как каллбэк без замыкания
  * 
- * ff, function(sequence, ret, next) - far function. Фунция, испольняющаяся там, где был исполнен последний элемент последовательности.
+ * ff, function(sequence, stack, next) - far function. Функция, испольняющаяся там, где был исполнен последний элемент последовательности.
  * Предначначена для промежуточной обработки данных
  */
 
@@ -81,25 +81,25 @@ react('filter',
 react('prepare_finest_juice', 
       function(next, fruit){
 	  sequence(['s', 'juicer', 'squeeze_out',  fruit],
-		   ['ff', function(sequence, ret, next){
+		   ['ff', function(sequence, stack, next){
 			  if(ret[0].sort == 'second') //juice first sort
-			      sequence.push('s', 'juicer', 'filter', 'ret[0]')
-			  else next(ret[0]);
+			      sequence.push('s', 'juicer', 'filter', 'stack[0]')
+			  else next(stack[0]);
 		      }],
-		   ['c', next, 'ret.last.aqua'])
+		   ['c', next, 'stack.last.aqua'])
       });
 
 
 sequence(
-    ['juicer', 'prepare_finest_juice', { "type" : "apple", "sort" : "golden", "body" : "ddffpp"}],
-    [context, 'set', 'cup', 'ret[0]']
+    ['s', 'juicer', 'prepare_finest_juice', { "type" : "apple", "sort" : "golden", "body" : "ddffpp"}],
+    ['s', context.service, 'set', 'cup', 'stack[0]']
 );
 
 /*
  * уже по сложнее, с модификацией последовательности. В последовательность можно вставлять, но только в то
  * место, где находишся. В данном случае, если сок получился не очень хорошего качестве, его фильтруют.
  * И уже после того, когда сок точно первого сорта, его наливают в кружку родительскому контексту
- * В этом примере появляется такая концепция как context. Если ret - это что-то вроде стека для всей 
+ * В этом примере появляется такая концепция как context. Если stack - это что-то вроде стека для всей 
  * последовательности, временные данные, то context - это данные над которыми идёт работа и одновременно место для результата работы. context нечно постоянное, потенциально приспособленное для сохранения в хранилище
  * и с прозрачным доступом. context  доступен как с помощью полей get и set, так и как сервис, используя
  * context.service. context хранится там, где чаще всего используется. Скорее всего это некоторое облако 
@@ -123,8 +123,8 @@ function lamp_men(context, react, send, sequence){
     react('give', function(next){
 	      //создаст контекст, который по id идентичен самому сервису
 	      sequence(['c', dsa.get, lamp],
-		       ['s', ret[0], 'power_on'],
-		       ['s', next.service, 'ret[0]']);
+		       ['s', stack[0], 'power_on'],
+		       ['s', next.service, 'stack[0]']);
 	  });
     react('take', function(next, lamp){
 	      sequence(['s', lamp, 'power_off'],
@@ -138,8 +138,8 @@ function lamp_men(context, react, send, sequence){
 function human(context, react, send, sequence){
     react('put_lamp_on', function(next, table){
 	      sequence(['s', 'lamp_men', 'give'],
-		       ['s', human, 'put_on_the_table', table, ret[0]],
-		       ['c', next, 'ret[0]']
+		       ['s', human, 'put_on_the_table', table, 'stack[0]'],
+		       ['c', next, 'stack[0]']
 		      ) 
 	  });
     
@@ -152,13 +152,66 @@ function human(context, react, send, sequence){
 //ask put_lamp_on
 
 sequence(['s',human, 'put_lamp_on', table],
-	 ['s',context.service, 'set', 'lamp', 'ret[0]']);
+	 ['s',context.service, 'set', 'lamp', 'stack[0]']);
 
 //ask remove lamp from
 sequence(['s', context.service, 'get', 'lamp'],
-	 [human, 'remove_lamp_from', table, 'ret[0]']);
+	 [human, 'remove_lamp_from', table, 'stack[0]']);
 
 /*
  * самый сложный вариант, учитывающий уже нюансы, создания объектов, когда dsa создаёт контекст для сервиса.
  * В принципе ничего особенного в сравнении с предыдущими примерами, просто показывает как появляются объекты
+ */
+
+
+////////////////PARALLEL
+
+sequence(['pc', fs.readFile, 'text.txt'],
+	 ['pc', fs.readFile, 'image.gif'],
+	 ['fn', function(context, stack){
+	      console.log(stack[0].toString().length)
+	      console.log(stack[1].toString().length)
+	  }]
+	)
+
+/*
+ * p - parallel. Можно ставить перед любым типом вызова - c,s,fn,ff. 
+ * Parallel значит вызов будет сделан параллельно другому, не последовательно. В нашем случае два вызова
+ * чтения файлов будут сделаны параллельно, а затем, когда их результаты будут получены - вызовется fn.
+ * То есть был бы в нашем случае один вызов pc, а не два, он был бы вызван и затем уже был бы вызван fn.
+ * Поэтому p имеет смысл для 2х и более элементов. 
+ * 
+ */
+
+function read_text(callback){
+    fs.readFile('text.txt', callback);
+}
+
+function read_image(callback){
+    fs.readFile('image.gif', callback);
+}
+
+var adapter_text = sequence.alloc_adapter();
+var adapter_image = sequence.alloc_adapter();
+
+read_text(adapter_text);
+read_image(adapter_image);
+
+sequence(['pa', adapter_text],
+	 ['pa', adapter_image],
+	 ['fn', function(context, stack){
+	      console.log(stack[0].toString().length)
+	      console.log(stack[1].toString().length)
+	  }]
+)
+
+/*
+ * С точки зрения работы, этот пример делает тоже самое, что и предыдущий. Но использует адаптеры.
+ * Adapter - это специальный объект-функция, которую можно передавать в любой вызов, где требуется
+ * callback. Затем этот адаптер можно использовать как элемент последовательности, подобно обычному вызову.
+ * adapter позволяет вставить в последовательность вызовы, которые совершаются где-то глубоко в фукнциях,
+ * внедра которых вы не имете доступа, но передаёте callback.
+ * Также adapter удобен тогда, когда вы просто физически не можете в рамках одной последовательности, в рамках
+ *одной функции и контекста сделать всю нужную работу, но не хотите при этом терять связности кода.  
+ *
  */
