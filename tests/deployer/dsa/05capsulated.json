@@ -1,0 +1,8 @@
+{
+    "type" : "module",
+
+    "preload" : true,
+    "inline" : true,
+
+    "capsulated" : "tests/deployer/dsa/capsulated.js"
+}
