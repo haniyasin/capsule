@@ -1,5 +1,6 @@
 exports.main = function(env){
     var capsule = env.capsule;
+    var sloader = env.dsa.service_loader;
 
     var mqnode1 = env.dsa.mq.create(capsule);
     var mqnode2 = env.dsa.mq.create(capsule);
@@ -26,20 +27,28 @@ exports.main = function(env){
 
     mqnode3.on_msg('dfdfdfswww', function(msg){
 		       console.log('node3 is printing', msg);
-		       mqnode3.msg('dfdfdfswwe', 'привет');
+		       mqnode3.send('dfdfdfswwe', 'приветы');
 		   })
-    mqnode1.msg('dfdfdfswww', 'привет');
-    mqnode4.msg('dfdfdfswww', 'привет');
+    mqnode1.send('dfdfdfswww', 'привето');
+    mqnode4.send('dfdfdfswww', 'привету');
 
     mqnode1.on_msg('dfdfdfswwe', function(msg){
 		       console.log('node1 is printing', msg);
 		   })
-    mqnode2.msg('dfdfdfswww', 'привет');
-    mqnode3.msg('dfdfdfswwe', 'привет');
-    mqnode2.msg('dfdfdfswwe', 'привет');
+    mqnode2.send('dfdfdfswww', 'привеф');
+    mqnode3.send('dfdfdfswwe', 'приветп');
+    mqnode2.send('dfdfdfswwe', 'приветр');
 
-    mqnode1.deactivate();
-    mqnode2.deactivate();
-    mqnode3.deactivate();
-    mqnode4.deactivate();
+//    mqnode1.deactivate();
+//    mqnode2.deactivate();
+//    mqnode3.deactivate();
+//    mqnode4.deactivate();
+
+    var _mq = env.dsa.mq.create(capsule);
+//    _mq.activate();
+    var sid = sloader.load('tests/test_set/service_one', _mq, env);    
+    _mq.send(sid, ["set", "gg", "ttte"]);
+    _mq.send(sid, ["ping", "ttt"]);
+    _mq.send(sid, ["pong", "tttg"]);
+    _mq.send(sid, ["init", "ttta"]);
 }

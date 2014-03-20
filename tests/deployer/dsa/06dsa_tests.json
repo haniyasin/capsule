@@ -1,0 +1,11 @@
+{
+    "dsa" : {
+	"tests" : {
+	    "preload" : false,
+
+	    "test_set" : {
+		"service_one" : "dsa/tests/test_set/service_one.js"		
+	    }
+	}
+    }
+}
