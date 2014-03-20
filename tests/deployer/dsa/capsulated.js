@@ -44,11 +44,27 @@ exports.main = function(env){
 //    mqnode3.deactivate();
 //    mqnode4.deactivate();
 
-    var _mq = env.dsa.mq.create(capsule);
+//    var _mq = env.dsa.mq.create(capsule);
+   
 //    _mq.activate();
-    var sid = sloader.load('tests/test_set/service_one', _mq, env);    
-    _mq.send(sid, ["set", "gg", "ttte"]);
-    _mq.send(sid, ["ping", "ttt"]);
-    _mq.send(sid, ["pong", "tttg"]);
-    _mq.send(sid, ["init", "ttta"]);
+    var _mq = mqnode1;
+    var sid = sloader.load('tests/test_set/service_one', mqnode1, env);    
+    _mq.send(sid, [null, "set", "gg", "ttte"]);
+    _mq.send(sid, [null, "ping", "ttt"]);
+    _mq.send(sid, [null, "pong", "tttg"]);
+    _mq.send(sid, [null, "init", "ttta"]);
+
+    var seq = env.capsule.modules.sequence;
+    seq.mq_send = _mq.send;
+    
+    seq.sequence(['s', sid, 'set', 'gg', 'ttte'],
+	     ['s', sid, 'get', 'gg'],
+	     ['ff', function(next, stack, sequence){
+		  console.log(stack);
+		  stack.push('hai');
+		  stack.last = 'hai';
+	      }],
+		 ['ff', function(next ,stack, sequence){
+		      console.log(stack.last);
+		  }]);
 }
