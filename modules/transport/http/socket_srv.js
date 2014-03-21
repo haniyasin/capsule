@@ -27,8 +27,11 @@ function response_holder(_incoming, modules){
 	modules.http_responder.on_recv(context, 
 					     function(content, response){
 						 var _content = JSON.parse(content);
-						 if(_content.cli_id == 0)
+						 var connect_type = false;
+						 if(_content.cli_id == 0){
 						     _content.cli_id = ids.alloc();
+						     connect_type = true;
+						 }
 						 if(_content.hasOwnProperty('msg'))
 						     _incoming.add(_content);
 						 //проверить активно ли соединение
@@ -43,7 +46,10 @@ function response_holder(_incoming, modules){
 						     var packet = get_by_cli_id(_packets, _content.cli_id);
 						     if(packet)
 							 response.end(packet);
-						 } else {
+						 } else 
+						     if(connect_type)
+							 response.end(JSON.stringify({"cli_id" : _content.cli_id}));
+						 else {
 						     //если много ждёт, то завершаем и оставляем не более 3
 						     for(cli_id in responses){				 
 							 while(responses[cli_id].length > 3){
