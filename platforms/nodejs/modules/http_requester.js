@@ -57,7 +57,7 @@ function request(){
 	'on_recv' : function(recv_cb){
 	    _on_load = recv_cb;
 	},
-	'on_closed' : function(closed_cb){
+	'on_close' : function(closed_cb){
 	    _on_closed = closed_cb;
 	},
 	'on_error' : function(error_cb){

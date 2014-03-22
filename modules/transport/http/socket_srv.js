@@ -27,13 +27,16 @@ function response_holder(_incoming, modules){
 	modules.http_responder.on_recv(context, 
 					     function(content, response){
 						 var _content = JSON.parse(content);
+
 						 var connect_type = false;
 						 if(_content.cli_id == 0){
 						     _content.cli_id = ids.alloc();
 						     connect_type = true;
 						 }
+
 						 if(_content.hasOwnProperty('msg'))
 						     _incoming.add(_content);
+
 						 //проверить активно ли соединение
 						 response.on_close(function(){
 								       for(key in responses[_content.cli_id]){

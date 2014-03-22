@@ -12,7 +12,7 @@ function frames_sender(socket, modules){
 	//resending frame every 5 second
 	if(!frame.ti || cur_time - frame.ti > 5000 ){
 	    frame.ti = cur_time;
-//	    console.log(frame.p);
+	    console.log(frame.p);
 	    socket.send(frame);	       
 	    frame.t++;
 	}    
@@ -72,7 +72,7 @@ function frames_sender(socket, modules){
 
     this.deactivate = function(){
 	if(activated)
-	    resend_timer.close();
+	    resend_timer.destroy();
     }
 }
 
@@ -110,8 +110,9 @@ function get_blank_frame(){
     return { 'i' : frame_id_allocator.alloc(), 's' : 10, 'p' : [], 't' : 0, 'r' : [], 'ti' : 0};
 }
 
-function msg_packer(frames_sender){
+function msg_packer(frames_sender, modules){
     var msg_id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
+    var short_frame_timer = null;
 
     var cur_frame = get_blank_frame();
 
@@ -120,6 +121,14 @@ function msg_packer(frames_sender){
     }
 
     this.add = function(msg){
+	//creating timer for periodically sending incompleted frame
+	if(!short_frame_timer)
+	    modules.timer.js.create(function(){
+					if(cur_frame.p.length){
+					    frames_sender.add(cur_frame)
+					    cur_frame = get_blank_frame();					 
+					}
+				    }, 200, true);
 	var packets = []; //[msg_id, packet_number,
 	
 	var msg_id = msg_id_allocator.alloc();
@@ -148,6 +157,13 @@ function msg_packer(frames_sender){
 	    cur_frame.p.push(packets[packet]);
 	    cur_frame.s += packets[packet].s;
 	}
+
+	//последний фрейм, пусть и наполовину пустой, когда-нибудь то надо отправлять всё равно:)
+    }
+
+    this.deactivate = function(){
+	if(short_frame_timer)
+	    short_frame_timer.destroy();
     }
 }
 
@@ -210,7 +226,7 @@ exports.create = function(context, features, capsule){
 	var socket = socket_cli.create(context, 'xhr', modules);
 
 	var _frames_sender = new frames_sender(socket, modules);
-	var _msg_packer = new msg_packer(_frames_sender);
+	var _msg_packer = new msg_packer(_frames_sender, modules);
 	var _frames_receiver = new frames_receiver(_frames_sender, _msg_packer, socket, modules);
 	var _msg_unpacker = new msg_unpacker(_frames_receiver);
 	
@@ -229,6 +245,7 @@ exports.create = function(context, features, capsule){
 	    },
 	    "destroy" : function(){
 		_frames_sender.deactivate();
+		msg_packer.deactivate();
 		socket.close();
 	    },
 	    "on_destroy" : function(callback){
@@ -245,10 +262,10 @@ exports.create = function(context, features, capsule){
 	
 	socket.on_connect(function(csocket){
 			      var _frames_sender = new frames_sender(csocket, modules);
-			      var _msg_packer = new msg_packer(_frames_sender);
+			      var _msg_packer = new msg_packer(_frames_sender, modules);
 			      var _frames_receiver = new frames_receiver(_frames_sender, _msg_packer, csocket, modules);
 			      var _msg_unpacker = new msg_unpacker(_frames_receiver);
-			      clients.push(_frames_sender);
+			      clients.push({"frame_sender" :_frames_sender, "msg_packer" :_msg_packer});
 			      
 			      _on_connect({
 					      "on_msg" : function(callback){
@@ -274,7 +291,8 @@ exports.create = function(context, features, capsule){
 	    },
 	    "destroy" : function(){
 		for(key in clients){
-		    clients[key].deactivate();
+		    clients[key].frame_sender.deactivate();
+		    clients[key].msg_packer.deactivate();
 		}		
 		socket.close();
 		clients = null;

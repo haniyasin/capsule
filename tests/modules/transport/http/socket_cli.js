@@ -26,10 +26,12 @@ exports.test = function(context, modules){
 			 })
     
     socket.connect(function(){
+		       console.log('connection is established');
 		       socket.on_recv(function(msg){
 					  if(recv_counter > 90)
 					      console.log(msg.number, recv_counter);
 					  msg_summ += msg.number;
+					  console.log(msg_summ, recv_counter, max_msg_summ);
 					  recv_counter++;
 					  if(recv_counter  == 100 &&
 					     msg_summ ==  max_msg_summ){
@@ -37,9 +39,7 @@ exports.test = function(context, modules){
 					      socket.disconnect();			   
 					  }
 				      })
-
-		       console.log('connection is established');
-		       for(ind = 0; ind != 50; ind++){
+		       for(ind = 0; ind < 50; ind++){
 			   if(end_sending)
 			       break;
 			   socket.send({"number" : ind});

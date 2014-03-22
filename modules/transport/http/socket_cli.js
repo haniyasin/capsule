@@ -5,28 +5,23 @@ var cb_synchronizer = require('../../../parts/cb_synchronizer.js');
 var id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
 
 function requests_holder(type, modules){
-    var _requests = [];
+    var requests_allocated = 0;
     this.success_metr = 0; //counter of success or failed
     this.on_disconnect = function(){};
     this.create_request = function(){
 	//this is hack for limit of several concurent XMLHttpRequest
-	if((type == 'xhr')&&(_requests.length > 3))
-	    return null;
+	if((type == 'xhr')&&(requests_allocated > 2))
+	    return null;	    
 	  
 	var request = modules.http_requester.create(type);
 	this.success_metr++;
 
-	_requests.push(request);
-	//вписать сюда свой установщик каллбека, который вставляет код удаления request
-	request.on_closed(function(){
-			      for(key in _requests){
-				  if(_requests[key] == request){
-				      _requests.splice(key,1);
-                                      if(request.on_destroyed)
-					  request.on_destroyed();
-				  }
-			      }
+	request.on_close(function(){
+			     requests_allocated--;
+			     if(request.hasOwnProperty('on_destroy'))
+				 request.on_destroy();
 			  });
+	requests_allocated++;
 	return request;
     }
 
@@ -76,11 +71,18 @@ function lpoller(context, _holder, _incoming, modules){
     this.delayed_packets = [];
     var _packets = this.delayed_packets;
     var _lpoller = this;
+    var request = null;
     this.try_poll = function(){	
 	if(!_timer){
 	    _timer = modules.timer.js.create(function(){
-						 var request = _holder.create_request(true);
+						 if(request)
+						     return; //request not needed, becouse current still alive
+						 var request = _holder.create_request();
 						 if(request){
+						     request.on_destroy = function(){
+							 console.log('eeee');
+							 request = null;
+						     };
 						     request.on_recv(function(data){
 									 if(data != undefined && data != 'undefined' && data.length > 0){
 									     var pdata = JSON.parse(data);
@@ -101,8 +103,10 @@ function lpoller(context, _holder, _incoming, modules){
 							 request.send(_packets.shift());
 						     else
 							 request.send(JSON.stringify({'cli_id' : context.cli_id}));
-						 }else
+						 }else{
 						     console.log('lpoller.try_poll: cannot create request');
+						     console.log(_packets);
+						 }
 					     }, 200, true);	
 	}
     }

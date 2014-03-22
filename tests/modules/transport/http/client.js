@@ -10,7 +10,7 @@ exports.test = function(context, capsule){
 		      trans.on_msg(function(msg){
 				       console.log(msg);
 				   })
-		      for(var ind = 0; ind < 50; ind++){
+		      for(var ind = 0; ind < 35; ind++){
 			  trans.send('blah blah, tuk tuk lalala, hohoh, ya ya ya ga' + ind);			 
 		      }
 		  });
