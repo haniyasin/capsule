@@ -31,7 +31,6 @@ function request(){
 	    _url.method = context.method;
 	    _url.headers = {
 		'connection' : 'close',
-		'Content-length' : 6000,  //нужно реализовать передачу размера
 		'Expect' : ''
 	    }
 	    _req = http.request(_url, function(response){
@@ -46,6 +45,7 @@ function request(){
 		    });
 	},
 	'send' : function(data){
+	    _req.setHeader('Content-length', data.length);
 	    _req.end(data);
 	},
 	'close' : function(){

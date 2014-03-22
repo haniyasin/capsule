@@ -12,7 +12,6 @@ function frames_sender(socket, modules){
 	//resending frame every 5 second
 	if(!frame.ti || cur_time - frame.ti > 5000 ){
 	    frame.ti = cur_time;
-	    console.log(frame.p);
 	    socket.send(frame);	       
 	    frame.t++;
 	}    

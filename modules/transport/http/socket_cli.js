@@ -80,7 +80,7 @@ function lpoller(context, _holder, _incoming, modules){
 						 var request = _holder.create_request();
 						 if(request){
 						     request.on_destroy = function(){
-							 console.log('eeee');
+							 //console.log('eeee');
 							 request = null;
 						     };
 						     request.on_recv(function(data){
