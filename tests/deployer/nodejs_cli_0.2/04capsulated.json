@@ -1,0 +1,8 @@
+{
+    "type" : "module",
+
+    "preload" : true,
+    "inline" : true,
+
+    "capsulated" : "tests/deployer/nodejs_cli_0.2/capsulated.js"
+}

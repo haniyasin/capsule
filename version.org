@@ -15,6 +15,7 @@
    all plans is done, only code cleaning and bug fixes is needed
 
 ** v0.2
++ sequence module integrating and using within capsule modules
 + low level storage modules for nodejs, browser.
   simple api: stat, create, delete, read_chunk, append_chunk
 + hi level storage module, using low level modules as backend

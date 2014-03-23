@@ -1,0 +1,15 @@
+{
+    "capsule" : {
+	"dependencies" : {
+	    "uuid" : "dependencies/uuid.js"
+	},
+	"modules" : {
+	    "http_requester" : "platforms/nodejs/modules/http_requester.js",
+            "http_responder" : "platforms/nodejs/modules/http_responder.js",
+	    "storage" :{
+		"low_level" : "platforms/nodejs/modules/storage/low_level.js"
+	    },
+	    "sequence" : "modules/sequence.js"
+	}
+    }
+}
