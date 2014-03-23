@@ -99,28 +99,31 @@ function lpoller(context, _holder, _incoming, modules){
 
     this.try_poll = function(){	
 	if(!poll_timer){
-	    poll_timer = modules.timer.js.create(function(){
-						 if(request)
-						     return; //the new request is not needed, because current still alive
-						 var request = _holder.create_request();
-						 if(request){
-						     request.on_destroy = function(){
-							 //console.log('eeee');
-							 request = null;
-						     };
+	    poll_timer = modules.timer.js.create(
+		function(){
+		    if(request)
+			return; //the new request is not needed, because current still alive
+		    var request = _holder.create_request();
+		    if(request){
+			request.on_destroy = function(){
+			    //console.log('eeee');
+			    request = null;
+			};
 
-						     request.on_recv(_incoming.get_process_msg(request, _holder));
+			request.on_recv(_incoming.get_process_msg(request, _holder));
 
-						     request.open(context);
-						     if(_packets.length)
-							 request.send(_packets.shift());
-						     else
-							 request.send(JSON.stringify({'cli_id' : context.cli_id}));
-						 }else{
-						     console.log('lpoller.try_poll: cannot create request');
-						     console.log("packets is: " + _packets);
-						 }
-					     }, 200, true);	
+			request.open(context);
+			//в будущем неплохо бы реализовать упаковку данных в url, что даст возможность
+			//не отправлять send и дольше удерживать request,  также предусмотреть multipart
+			if(_packets.length)
+			    request.send(_packets.shift());
+			else
+			    request.send(JSON.stringify({'cli_id' : context.cli_id}));
+		    }else{
+			console.log('lpoller.try_poll: cannot create request');
+			//console.log("packets is: " + _packets);
+		    }
+		}, 200, true);	
 	}
     }
 

@@ -28,7 +28,7 @@ function response_holder(_incoming, modules){
 	    function(){
 		//если много ждёт, то завершаем и оставляем не более 3
 		for(cli_id in responses){				 
-		    while(responses[cli_id].length > 3){
+		    while(responses[cli_id].length > 2){
 			responses[cli_id].pop().end();
 		    }
 		}
@@ -43,8 +43,10 @@ function response_holder(_incoming, modules){
 					   response.on_close(
 					       function(){
 						   for(key in responses[_content.cli_id]){
-						       if(responses[_content.cli_id][key] == response)
+						       if(responses[_content.cli_id][key] == response){
 							   responses[_content.cli_id].splice(key,1);
+							   console.log('eeee');
+						       }
 						   }
 					       });
 

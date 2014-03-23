@@ -79,14 +79,14 @@ function frames_receiver(frames_sender, msg_packer, socket, modules){
     var _on_packets = function(packets){console.log(packets)};
     var past_frames = {};
     socket.on_recv(function(msg){
-//		       console.log('hahaha' + msg);
+		       //console.log('hahaha' + msg);
 		       if(msg.r)
 			   frames_sender.remove_delivered(msg.r);
 		       
 		       //not parsing frames which is received twice
 		       if(!past_frames.hasOwnProperty(msg.i)){   
 			   past_frames[msg.i] = true;
-			   
+			   //console.log('ggg')
 			   //adding received frames' ids in frame from outgoing queue
 			   msg_packer.confirm_receiving(msg.i);
 		       }
@@ -123,7 +123,7 @@ function msg_packer(frames_sender, modules){
 	//creating timer for periodically sending incompleted frame
 	if(!short_frame_timer)
 	    modules.timer.js.create(function(){
-					if(cur_frame.p.length){
+					if(cur_frame.p.length || cur_frame.r.length){
 					    frames_sender.add(cur_frame)
 					    cur_frame = get_blank_frame();					 
 					}
