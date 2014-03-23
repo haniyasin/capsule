@@ -1,0 +1,27 @@
+* v0.1 experimental - is current version 
+  first ready to use version of capsule. Many bugs is still here:)
+
+* how versions is marked
+** experimental
+   all functionality is completed, but critical bugs is still here
+** beta
+   critical bugs is mostly fixed
+** final
+   no changes, only bug fixes
+
+* plans
+
+** v0.1
+   all plans is done, only code cleaning and bug fixes is needed
+
+** v0.2
++ low level storage modules for nodejs, browser.
+  simple api: stat, create, delete, read_chunk, append_chunk
++ hi level storage module, using low level modules as backend
+  api is more like storage service from dsa: stat, create, delete, update, extract
++ udp based implementations sockets modules like http/sockets with partially rewriting
+  transport/http into multi-backends transport with http/sockets and upd/sockets backends.
+
+** v0.3
++ binary_container
++ compositer_layers
