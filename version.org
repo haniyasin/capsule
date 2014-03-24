@@ -22,7 +22,8 @@
   api is more like storage service from dsa: stat, create, delete, update, extract
 + udp based implementations sockets modules like http/sockets with partially rewriting
   transport/http into multi-backends transport with http/sockets and upd/sockets backends.
-
++ node-webkit as platform and deployer target.
+  node-webkit specific code for Compositer and etc. Probably not much work is needed.
 ** v0.3
 + binary_container
 + compositer_layers

@@ -12,11 +12,41 @@ exports.main = function(env){
     var modules = capsule.modules;
     var id = 'stor.data';
     var ll = capsule.modules.storage.low_level;
-    
-    ll.stat(id, function(err, stat){console.log(stat);});
-    ll.append(id, 'vataing', function(){console.log('written');});
-    ll.read(id, function(err,data){console.log(data.toString());});    
+    var stor = capsule.modules.storage;
+//    ll.append(id, 'vataing', function(){console.log('written');});
+//    ll.read(id, 0, 3, function(err,data){console.log(data);});    
     ll.delete(id, function(){console.log('object is deleted');});
 
-    console.log('eeee');
+    stor.update(id, {
+		    "blini" : {
+			"s_tvorogom" : {
+			    "odin" : "vkusniy",
+			    "dva" : "klassniy",
+			    "chetire" : "uzhasen",
+			    "nichego" : 0,
+			    "eshechego" : 0
+			},
+			"yagodnie" : {
+			    "s_chernikoy" : {
+			    },
+			    "s_malinoy" : {
+				"tri" : "myagkiy",
+				"DESatiy" : "sochniy",
+				"vkusniye" : true
+			    }
+			}
+		    },
+		    "yagodi" : {
+			"lesniye": {
+			    "polyannie" : {
+				"zelen" : 88,
+				"lubyashie_svet" : {
+				    "shipovnik" : "vkusnota"
+				}
+			    }
+			}
+		    }
+		}, function(){
+		    stor.extract(id, null, function(){}, capsule);
+		}, capsule);
 }

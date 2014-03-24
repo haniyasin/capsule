@@ -5,13 +5,6 @@
 var fs = require('fs');
 
 /*
- * getting stat info about object by id
- */
-
-exports.stat = function(id, cb,capsule){
-    fs.stat(id, cb);  
-}
-/*
  * deleting object by id
  */
 
@@ -28,8 +21,21 @@ exports.append = function(id, data, cb, capsule){
 
 /*
  * reading object by id
+ * 
+ * cb(err, content); err may be - cannot read as need, nonexistent, underlay_err
  */
 
-exports.read = function(id, cb, capsule){
-    fs.readFile(id, cb)
+exports.read = function(id, position, length, cb, capsule){
+    var content = new Buffer(length);
+    fs.open(id, 'r', function(err, fd){
+		if(err)
+		    cb(err, null);
+		else
+		    fs.read(fd, content, 0, length, position, function(err, readed_bytes, content){
+				if(readed_bytes != length)
+				    err = 'cannot read as need';
+				else
+				    cb(err, content.toString());
+			    });
+	    });
 }
