@@ -9,21 +9,25 @@ function request(){
     var _on_error;
 
     return {
-	'send_once' : function(context, data, recv_cb, closed_cb, err_cb){
+	'send_once' : function(context, data, recv_cb, closed_cb, error_cb){
 	    var _url = url.parse(context.url, true);
 	    _url.method = context.method;
 	    _url.headers = {
 		'connection' : 'close',
-		'Content-length' : data.length(),
+		'Content-length' : data.length,
 		'Expect' : ''
 	    }
 	    _req = new http.request(_url, function(response){
+					response.setTimeout(2000);
 					response.on('data', function(data){ 
 							recv_cb(data.toString());
 						    });
+					response.on('close', closed_cb);
+					response.on('timeout', closed_cb)
 				    });
 	    _req.on('close', closed_cb);
-	    _req.on('error', err_cb);
+	    _req.on('error', error_cb);
+//	    console.log(data);
 	    _req.end(data);
 	},
 	'open' : function(context){
@@ -66,9 +70,9 @@ function request(){
     }
 }
 
-exports.send = function(context, data, data_cb, error_cb){
+exports.send = function(context, data, recv_cb, closed_cb, error_cb){
     var _request = new request();
-    _request.send_once(arguments);
+    _request.send_once(context, data, recv_cb, closed_cb, error_cb);
 }
 
 exports.create = function(){

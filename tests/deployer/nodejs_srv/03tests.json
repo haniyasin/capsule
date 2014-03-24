@@ -6,7 +6,9 @@
 	    "modules" :{
 		"uuid" : "tests/modules/uuid.js",
 		"timer" : "tests/modules/timer.js",
-		
+		"http_requester" : "tests/modules/http_requester.js",
+		"http_responder" : "tests/modules/http_responder.js",
+
 		"transport" : {
 		    "direct" : "tests/modules/transport/direct.js",
 		    
