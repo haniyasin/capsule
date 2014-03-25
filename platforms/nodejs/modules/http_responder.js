@@ -38,7 +38,8 @@ function server_create(context, address){
 	    'end' : function(data){
 		{
 		    //нужна реализация работы с mimetype
-		    this._response.writeHead(200, {														  'Cache-Control' : 'no-cache' });
+		    this._response.writeHead(200, {														  'Cache-Control' : 'no-cache', 
+ 																				  'Access-Control-Allow-Origin' : '*'});
 		    this._response.end(this.header + data + this.footer);
 		}
 	    },

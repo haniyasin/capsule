@@ -133,7 +133,7 @@ function xhr_request(){
     };
 
     this.on_recv = function(callback){
-	_on_load =_req.onload = function(){ recv_cb(_req.responseText) };
+	_on_load =_req.onload = function(){ callback(_req.responseText) };
     };
 
     this.on_close = function(callback){

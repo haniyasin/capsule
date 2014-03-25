@@ -221,7 +221,7 @@ exports.create = function(context, features, capsule){
     if(features & transport.features.client){
 	    //здесь необходимо как-то сделать выбор то ли script, то ли xhr бекэнда, а пока xhr и post по дефолту
 	var socket_cli = modules.transport.http.socket_cli;
-	var socket = socket_cli.create(context, 'script', modules);
+	var socket = socket_cli.create(context, 'xhr', modules);
 
 	var _frames_sender = new frames_sender(socket, modules);
 	var _msg_packer = new msg_packer(_frames_sender, modules);
