@@ -18,7 +18,7 @@ function request(){
 		'Expect' : ''
 	    }
 	    _req = new http.request(_url, function(response){
-					response.setTimeout(2000);
+					response.setTimeout(5000);
 					response.on('data', function(data){ 
 							recv_cb(data.toString());
 						    });
@@ -76,5 +76,5 @@ exports.send = function(context, data, recv_cb, closed_cb, error_cb){
 }
 
 exports.create = function(){
-    return request();
+    return new request();
 }

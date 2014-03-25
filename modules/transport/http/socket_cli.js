@@ -13,7 +13,7 @@ function requests_holder(type, modules){
     this.on_disconnect = function(){};
     this.create_request = function(){
 	//this is hack for limit of several concurent XMLHttpRequest
-	if((type == 'xhr')&&(this.requests_allocated > 5))
+	if((type == 'xhr')&&(this.requests_allocated > 3))
 	    return null;	    
 	  
 	var request = modules.http_requester.create(type);
@@ -91,23 +91,27 @@ function packet_sender(context, _holder, _incoming, _lpoller, modules){
 }
 
 function lpoller(context, _holder, _incoming, modules){
-    var poll_timer = null;
+    var poll_timer = 0;
     this.delayed_packets = [];
     var _packets = this.delayed_packets;
     var self = this;
-    var request = null;
+    var request = 0;
 
     this.try_poll = function(){	
 	if(!poll_timer){
 	    poll_timer = modules.timer.js.create(
 		function(){
 		    if(request)
-			return; //the new request is not needed, because current still alive
-		    var request = _holder.create_request();
+		    {
+		//	console.log('req stil alive');
+			return; //the new request is not needed, because current still alive		
+		    }
+		//    console.log('req is dead');
+		    request = _holder.create_request();
 		    if(request){
 			request.on_destroy = function(){
 			    //console.log('eeee');
-			    request = null;
+			    request = 0;
 			};
 
 			request.on_recv(_incoming.get_process_msg(request, _holder));

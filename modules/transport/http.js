@@ -84,7 +84,7 @@ function frames_receiver(frames_sender, msg_packer, socket, modules){
 			   frames_sender.remove_delivered(msg.r);
 		       
 		       //not parsing frames which is received twice
-		       if(!past_frames.hasOwnProperty(msg.i)){   
+		       if(!past_frames.hasOwnProperty(msg.i) && msg.p.length > 0){   
 			   past_frames[msg.i] = true;
 			   //console.log('ggg')
 			   //adding received frames' ids in frame from outgoing queue
@@ -125,7 +125,7 @@ function msg_packer(frames_sender, modules){
 	    modules.timer.js.create(function(){
 					if(cur_frame.p.length || cur_frame.r.length){
 					    frames_sender.add(cur_frame)
-					    cur_frame = get_blank_frame();					 
+					    cur_frame = get_blank_frame();				
 					}
 				    }, 200, true);
 	var packets = []; //[msg_id, packet_number,
@@ -220,9 +220,8 @@ exports.create = function(context, features, capsule){
     var modules = capsule.modules;
     if(features & transport.features.client){
 	    //здесь необходимо как-то сделать выбор то ли script, то ли xhr бекэнда, а пока xhr и post по дефолту
-	context.method = 'POST';	
 	var socket_cli = modules.transport.http.socket_cli;
-	var socket = socket_cli.create(context, 'xhr', modules);
+	var socket = socket_cli.create(context, 'script', modules);
 
 	var _frames_sender = new frames_sender(socket, modules);
 	var _msg_packer = new msg_packer(_frames_sender, modules);

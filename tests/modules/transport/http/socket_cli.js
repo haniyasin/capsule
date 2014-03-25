@@ -5,7 +5,7 @@ var m200 = 'test with 100 messages and 100 messages with reply is ';
 //}
 exports.test = function(context, modules){
     console.log("transport.client testing is started...");
-    var socket = modules.transport.http.socket_cli.create(context, 'script', modules);
+    var socket = modules.transport.http.socket_cli.create(context, 'xhr', modules);
     
     var msg_summ = 0;
     var max_msg_summ;

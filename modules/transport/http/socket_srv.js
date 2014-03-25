@@ -40,6 +40,10 @@ function response_holder(_incoming, modules){
 	modules.http_responder.on_recv(context, 
 				       function(content, response){
 					   //проверить активно ли соединение
+					   if(content == ''){
+					       console.log('empty request');
+					       return;
+					   }
 					   response.on_close(
 					       function(){
 						   for(key in responses[_content.cli_id]){
@@ -49,7 +53,6 @@ function response_holder(_incoming, modules){
 						       }
 						   }
 					       });
-
 					   var _content = JSON.parse(content);
 					   
 					   //client is connecting, first msg
@@ -84,7 +87,7 @@ function response_holder(_incoming, modules){
 
     this.deactivate = function(context){
 	modules.http_responder.remove_callback(context);	
-	extra_cleaner_timer.close();
+	extra_cleaner_timer.destroy();
     }
 }
 
