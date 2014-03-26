@@ -81,7 +81,7 @@ function script_request(){
 function xhr_request(){
     var _context;
     var _req = new XMLHttpRequest();
-    _req.timeout = 2000;
+    _req.timeout = 15000;
     var _on_load;
     var _on_close;
     var _on_error;

@@ -32,7 +32,7 @@ function response_holder(_incoming, modules){
 			responses[cli_id].pop().end();
 		    }
 		}
-	    }, 500, true);
+	    }, 2000, true);
 
 	ids.alloc();
 
@@ -46,11 +46,12 @@ function response_holder(_incoming, modules){
 					   }
 					   response.on_close(
 					       function(){
-						   for(key in responses[_content.cli_id]){
-						       if(responses[_content.cli_id][key] == response){
-							   responses[_content.cli_id].splice(key,1);
-							   console.log('eeee');
-						       }
+						   var _responses = responses[_content.cli_id];
+						   var rk = _responses.length -1;
+						   while(rk >= 0){
+						       if(responses[rk] == response)
+							   responses.splice(rk, 1);
+						       rk--;
 						   }
 					       });
 					   var _content = JSON.parse(content);

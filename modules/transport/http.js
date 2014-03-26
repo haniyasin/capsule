@@ -43,23 +43,17 @@ function frames_sender(socket, modules){
     }
 
     this.remove_delivered = function(ids){
-	var new_frames = [];
 	//deleting delivered frames from outgoing queue
 	for(ind in ids){
-	    for(key in frames){
-		if(frames[key].i == ids[ind]){
-		    //необходимо реализовать возвращение использованных msg_id
-			//for(packet in frames[key].p){
-		    //freeing used for messages ids
-		    //	frames[key].p[packet].i.free();
-		    //  }
-		    //freeing used for frames ids
-		    //		    id_allocator.free(frames[key].i);
-		}else
-		    new_frames.push(frames[key]);
-	    } 
+	    var fk = frames.length - 1;
+	    //loop in reverse because of conflicting splice and forward loop
+	    while(fk >= 0){
+		if(frames[fk].i == ids[ind]){
+		    frames.splice(fk, 1)		    
+		}
+		fk--;
+	    }
 	}
-	frames = new_frames;
     }
 
     this.activate = function(){
@@ -84,16 +78,16 @@ function frames_receiver(frames_sender, msg_packer, socket, modules){
 			   frames_sender.remove_delivered(msg.r);
 		       
 		       //not parsing frames which is received twice
-		       if(!past_frames.hasOwnProperty(msg.i) && msg.p.length > 0){   
+		       if(!past_frames.hasOwnProperty(msg.i) && 
+			  msg.p.length > 0){   
 			   past_frames[msg.i] = true;
 			   //console.log('ggg')
 			   //adding received frames' ids in frame from outgoing queue
 			   msg_packer.confirm_receiving(msg.i);
-		       }
-		       //if we are having packets - proccess packets
-		   //    console.log("msg is: ", msg.i, msg.p.length)
-		       if(msg.p.length)
+
+			   //if we are having packets - proccess packets
 			   _on_packets(msg.p);
+		       }
 		   });
 
     this.on_packets = function(callback){
