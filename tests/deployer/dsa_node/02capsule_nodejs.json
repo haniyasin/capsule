@@ -5,8 +5,7 @@
 	},
 	"modules" : {
 	    "http_requester" : "platforms/nodejs/modules/http_requester.js",
-            "http_responder" : "platforms/nodejs/modules/http_responder.js",
-	    "sequence" : "modules/sequence.js"
+            "http_responder" : "platforms/nodejs/modules/http_responder.js"
 	}
     }
 }

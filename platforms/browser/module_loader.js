@@ -109,16 +109,15 @@ function module_loader(){
 	var _module;
      	
 	switch(typeof(module)){
-	    case 'function' : //preload true
+	    case 'function' : //inline true
 	    _module = module;
 	    break;
 	    
-	    case 'string' : //preload false
+	    case 'string' : //inline false
 	    _module = new Function("module", "exports", "require", module);
 	    break;
 
 	    case 'object' : //already loaded module
-	    console.log('object is', module);
 	    return module.exports;
 	}
 
@@ -127,16 +126,14 @@ function module_loader(){
 	    'exports' : _exports
 	}
 
-	console.log('module is', typeof(module))
 	_module(module_definition, _exports, (function(loader){
 			     return function(path){
 				 return loader.load(path, base_path);
 			     }
 			 })(this));
 	
-	console.log('module path is', base_path + path);
-
-	modules.replace(base_path + path, module_definition); //replace module source or function with resultated object
+	//replace module source or function with resultated object
+	modules.replace(base_path + path, module_definition)
 
 	return module_definition.exports;	
     }

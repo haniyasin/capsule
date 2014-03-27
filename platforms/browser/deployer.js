@@ -203,6 +203,7 @@ exports.deploy = function(dir, config){
     
     fs.readFile(dir + '/assembled/constructor.js', 
 		file_reading_sync.add(function(err, data){
+					  // не проверяется ошибка, как и выше нигде не проверяются:D
 					  capsule_files.constructor = data.toString();
 		}));
     

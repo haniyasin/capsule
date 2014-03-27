@@ -1,0 +1,10 @@
+{
+    "dsa" : {	
+	"type" : "module",
+        "preload" : true,
+	"inline" : true,
+
+	"mq" : "dsa/mq.js",
+	"service_loader" : "dsa/service_loader.js"
+    }
+}

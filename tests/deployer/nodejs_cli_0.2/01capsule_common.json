@@ -22,9 +22,6 @@
 	    "timer" : {
 		"js" : "modules/timer.js"
 	    },
-	    "storage" : {
-		"this" : "modules/storage.js"
-	    },
 	    "transport" : {
 		"this" : "modules/transport.js",
 		"direct" : "modules/transport/direct.js",
@@ -33,7 +30,8 @@
 		    "socket_cli" : "modules/transport/http/socket_cli.js",
 		    "socket_srv" : "modules/transport/http/socket_srv.js"
 		}
-	    }
+	    },
+	    "sequence" : "modules/sequence.js"
 	}
     }
 }

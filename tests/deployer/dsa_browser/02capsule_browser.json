@@ -1,0 +1,16 @@
+{
+    "scripts" : {
+	"type" : "script",
+	"inline" : true,
+
+	"uuid" : "dependencies/uuid.js",
+	"Compositer" : "parts/Compositer.js",
+	"module_loader" : "platforms/browser/module_loader.js"
+    },
+    
+    "capsule" : {
+	"modules" : {
+	    "http_requester" : "platforms/browser/modules/http_requester.js"	    
+	}
+    }
+}
