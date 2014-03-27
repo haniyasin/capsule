@@ -1,35 +1,52 @@
 function module_loader(){
     var modules = (function(){
-	var _modules = [];
- 
-	this.add = function(path, module){
-	    _modules[_modules.length] = [path, module];
-	}
+		       var _modules = [];
 		       
-	this.add_array = function(array){
-	    _modules = _modules.concat(array);
-	}
-			   
-        this.get = function(path){
-            var module_founded = false;
-            for(i = 0; i < _modules.length; i++){
-		if(_modules[i][0] == path){
-                    module_founded = true;
-                    break;
-		}
-            }
-            if(module_founded)
-		return _modules[i][1];
-	    
-	    return null;
-	}
-	
-	this.remove = function(path){
-	    
-	}
-        return this;
-    })();
+		       function _find(path){
+			   for(i = 0; i < _modules.length; i++){
+			       if(_modules[i][0] == path)
+				   return i;
+			   }
+			   return null;			   
+		       }
 
+		       this.add = function(path, module){
+			   _modules.push([path, module]);
+		       };
+		       
+		       this.add_array = function(array){
+			   _modules = _modules.concat(array);
+		       };
+		       
+		       this.get = function(path){
+			   var pos = _find(path);
+			   if(pos == null)
+			       return null;
+
+			   return _modules[pos][1];
+		       };
+		       
+		       this.replace = function(path, module){
+			   var pos = _find(path);
+			   if(pos == null)
+			       return false;
+
+			   _modules[pos][1] = module;
+
+			   return true;
+		       };
+
+		       this.remove = function(path){
+			   var pos = _find(path);
+			   if(pos == null)
+			       return false;
+			   _modules.splice(pos,1);
+
+			   return true;
+		       }
+		       return this;
+		   })();
+    
     this.add = function(path, module) {
 	modules.add(path, module);
     }
@@ -89,18 +106,38 @@ function module_loader(){
 	var module = modules.get(base_path  + path);
 
 	var _exports = {};
+	var _module;
+     	
+	switch(typeof(module)){
+	    case 'function' : //preload true
+	    _module = module;
+	    break;
+	    
+	    case 'string' : //preload false
+	    _module = new Function("module", "exports", "require", module);
+	    break;
 
-	var _module = typeof(module) == 'function' ? module : new Function("module", "exports", "require", module);
+	    case 'object' : //already loaded module
+	    console.log('object is', module);
+	    return module.exports;
+	}
+
 	var module_definition = {
 	    'name' : '',
 	    'exports' : _exports
 	}
+
+	console.log('module is', typeof(module))
 	_module(module_definition, _exports, (function(loader){
 			     return function(path){
 				 return loader.load(path, base_path);
 			     }
 			 })(this));
 	
+	console.log('module path is', base_path + path);
+
+	modules.replace(base_path + path, module_definition); //replace module source or function with resultated object
+
 	return module_definition.exports;	
     }
 }
