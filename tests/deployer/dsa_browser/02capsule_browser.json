@@ -4,12 +4,15 @@
 	"inline" : true,
 
 	"uuid" : "dependencies/uuid.js",
-	"Compositer" : "parts/Compositer.js",
 	"module_loader" : "platforms/browser/module_loader.js"
     },
     
     "capsule" : {
 	"modules" : {
+	    "ui" : {
+		"Compositer" : "platforms/browser/modules/ui/Compositer.js",
+		"base_items" : "platforms/browser/modules/ui/base_items.js"
+	    },
 	    "http_requester" : "platforms/browser/modules/http_requester.js"	    
 	}
     }

@@ -5,6 +5,15 @@
 	"inline" : true,
 
 	"mq" : "dsa/mq.js",
-	"service_loader" : "dsa/service_loader.js"
+	"service_loader" : "dsa/service_loader.js",
+	"services" : {
+	    "ui" : "dsa/services/ui.js"
+	},
+	"parts" : {
+	    "ui" : {
+		"overlay_controls" : "dsa/parts/ui/overlay_controls.js",
+		"native_controls" : "dsa/parts/ui/native_controls.js"
+	    }
+	}
     }
 }
