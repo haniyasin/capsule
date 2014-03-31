@@ -1,8 +1,8 @@
 var http = require('http');
 var url = require('url');
 var dns = require('dns');
-var base32 = require('../../../dependencies/base32.js');
 
+var base32 = require('../../../dependencies/base32.js');
 // for storing active and unactive server contexts
 var servers = [];
 

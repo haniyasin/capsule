@@ -131,7 +131,7 @@ function deploy_on_files(dir, config, capsule_files){
     }    
 }
 
-function deploy_on_http(dir, config, capsule_files){
+function deploy_on_http(dir, config, capsule_files, capsule){
     var http_responder = require('../nodejs/modules/http_responder.js');
     http_responder.on_recv({ 'url' : config.values.deploy_url + "/capsule.htm"}, 
 			   function (context, response){

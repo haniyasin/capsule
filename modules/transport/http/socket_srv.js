@@ -1,4 +1,7 @@
-var bb_allocator = require('../../../parts/bb_allocator.js');
+/*
+ * server implementation api like sockets over http_responder
+ */
+
 function get_by_cli_id(array, cli_id, push){
     for(key in array){
 	if(array[key][0] == cli_id){
@@ -9,8 +12,8 @@ function get_by_cli_id(array, cli_id, push){
     }
     return null;	    
 }
-function response_holder(_incoming, modules){
-    var ids = new bb_allocator.create(bb_allocator.id_allocator);
+function response_holder(_incoming, capsule){
+    var ids = new capsule.parts.bb_allocator.create(bb_allocator.id_allocator);
     var responses = [];
     this.delayed_packets = [];
     var extra_cleaner_timer = null; //extra connection cleaner
@@ -24,7 +27,7 @@ function response_holder(_incoming, modules){
     }
 
     this.activate = function(context){
-	extra_cleaner_timer = modules.timer.js.create(
+	extra_cleaner_timer = capsule.modules.timer.js.create(
 	    function(){
 		//если много ждёт, то завершаем и оставляем не более 3
 		for(cli_id in responses){				 
@@ -37,7 +40,7 @@ function response_holder(_incoming, modules){
 	ids.alloc();
 
 	//нужно выбирать доступный http_responder
-	modules.http_responder.on_recv(context, 
+	capsule.modules.http_responder.on_recv(context, 
 				       function(content, response){
 					   //проверить активно ли соединение
 					   if(content == ''){
@@ -83,11 +86,11 @@ function response_holder(_incoming, modules){
 					       responses[_content.cli_id].push(response);	     
 					   }
 				       },
-				       function(error){console.log('response_holder is failed', error)})    
+				       function(error){console.log('response_holder is failed', error)});    
     }
 
     this.deactivate = function(context){
-	modules.http_responder.remove_callback(context);	
+	capsule.modules.http_responder.remove_callback(context);	
 	extra_cleaner_timer.destroy();
     }
 }
@@ -102,10 +105,10 @@ function packet_sender(_holder){
     }
 }
 
-exports.create = function(context, modules){
-    var utils = require('../../../parts/utils.js');
+exports.create = function(context, capsule){
+    var utils = capsule.parts.utils;
     var _incoming = new utils.msg_queue();
-    var _holder = new response_holder(_incoming, modules);
+    var _holder = new response_holder(_incoming, capsule);
     var _sender = new packet_sender(_holder);
     
     return {

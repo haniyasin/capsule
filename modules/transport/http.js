@@ -1,4 +1,3 @@
-var bb_allocator = require('../../parts/bb_allocator.js');
 var transport = require('../transport.js');
 
 function frames_sender(socket, modules){
@@ -98,12 +97,15 @@ function frames_receiver(frames_sender, msg_packer, socket, modules){
     }
 }
     
-var frame_id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
-function get_blank_frame(){
-    return { 'i' : frame_id_allocator.alloc(), 's' : 10, 'p' : [], 't' : 0, 'r' : [], 'ti' : 0};
-}
 
-function msg_packer(frames_sender, modules){
+function msg_packer(frames_sender, capsule){
+    var bb_allocator = capsule.parts.bb_allocator;
+    var modules = capsule.modules;
+    var frame_id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
+    function get_blank_frame(){
+	return { 'i' : frame_id_allocator.alloc(), 's' : 10, 'p' : [], 't' : 0, 'r' : [], 'ti' : 0};
+    }
+
     var msg_id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
     var short_frame_timer = null;
 
@@ -215,10 +217,10 @@ exports.create = function(context, features, capsule){
     if(features & transport.features.client){
 	    //здесь необходимо как-то сделать выбор то ли script, то ли xhr бекэнда, а пока xhr и post по дефолту
 	var socket_cli = modules.transport.http.socket_cli;
-	var socket = socket_cli.create(context, 'xhr', modules);
+	var socket = socket_cli.create(context, 'xhr', capsule);
 
 	var _frames_sender = new frames_sender(socket, modules);
-	var _msg_packer = new msg_packer(_frames_sender, modules);
+	var _msg_packer = new msg_packer(_frames_sender, capsule);
 	var _frames_receiver = new frames_receiver(_frames_sender, _msg_packer, socket, modules);
 	var _msg_unpacker = new msg_unpacker(_frames_receiver);
 	

@@ -1,0 +1,6 @@
+* using capsuled modules, parts
+  + loading with 'require' only in two cases
+     + in initialize module stage, before using methods which it expose through 'exports.' 
+     + if resource must be created on initialize stage, as rule it's happend with modules, which have
+       a difficult, not reusable background
+  + using modules and parts through 'capsule.' in all other cases

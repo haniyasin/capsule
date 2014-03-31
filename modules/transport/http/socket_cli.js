@@ -1,10 +1,9 @@
-var bb_allocator = require('../../../parts/bb_allocator.js');
-var utils = require('../../../parts/utils.js');
-var cb_synchronizer = require('../../../parts/cb_synchronizer.js');
+/*
+ * client implementation api like socket over http_requester
+ */
 
-var id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
-
-function requests_holder(type, modules){
+function requests_holder(type, capsule){
+    var modules = capsule.modules;
     var requests = []; 
     var self = this;
 
