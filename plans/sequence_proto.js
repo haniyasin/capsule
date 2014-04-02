@@ -37,7 +37,7 @@ sequence(['c', fs.readFile, './sequence_proto.js'],
 	 }],
 	 ['s', 'storage', 'extract', 'stack[1][0]', '*'],
 	 ['c', fs.writeFile, './sequence_proto.js.copy', 'stack[3][0]'],
-	 ['fn',function(stack){
+	 ['fn',function(context, stack){
 	     //печатаем содержимое файла
 	     console.log(stack[3][0])
 	 }]

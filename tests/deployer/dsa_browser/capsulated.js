@@ -48,82 +48,70 @@ exports.main = function(env){
    
 //    _mq.activate();
     var _mq = mqnode1;
-    var ui = sloader.load('services/ui', mqnode1, env);    
-    
-    _mq.send(ui, [null, 'init', 'overlay']);
-    _mq.send(ui, [null, "update",
+
+    var button = sloader.load('services/ui/overlay/button', mqnode1, env);    
+    var entry = sloader.load('services/ui/overlay/entry', mqnode1, env);
+    var panel = sloader.load('services/ui/overlay/panel', mqnode1, env);
+
+    var seq = capsule.modules.sequence;
+    seq.mq_send = _mq.send;
+
+    seq.sequence(['s', button, 'create',
 		  {
-		      "main" : {
-			  "type" : "frame",
+		      "label" : "go",
+		      "x" : "20%",
+		      "y" : "1%",
+		      "width" : "20%",
+		      "height" : "35%",
+		      
+		      "on_pressed" : [
+			  ['fn', function(context, stack){
+			       stack.push(stack.last = 'ttt');
+			   }],
+			  ['ff', function(next, stack, sequence){
+			       console.log(stack.last);
+			       console.log('eeee');
+			   }]
+		      ]
+		  }],
+		 ['s', button, 'create',
+		   {
+		       "label" : "nanana",
+		       "x" : "40%",
+		       "y" : "20%",
+		       "width" : "40%",
+		       "height" : "30%",
+		       
+		       "on_pressed" : [
+			   ['c', console.log, 'gobutton is pressed']
+		       ]
+		   }	
+		 ],	    
+		 ['s', entry, 'create',
+		  {
+		      "x" : "3%",
+		      "y" : "1%",
+		      "width" : "75%",
+		      "height" : "30%",
+		      
+		      "on_text_changed" : [
+			  ['ff', function(next, stack, sequence){
+			       console.log(stack.last);
+			   }]
+		      ] 
+		  }],
+		 ['s', panel, 'create',
+		  {
+		      "x" : '5%',
+		      "y" : '5%',
+		      "width" : "60%" ,
+		      "height" : "60%",
+		      "orientation" : "bottom"
+		  }],
+		 ['s', panel, 'add', 'stack[3][0]', 'stack[0][0]'],
+		 ['s', panel, 'add', 'stack[3][0]', 'stack[1][0]'],
+		 ['s', panel, 'add', 'stack[3][0]', 'stack[2][0]']);
 
-			  "x" : "0%",
-			  "y" : "0%",
-			  "width" : "100%",
-			  "height" : "100%",
-
-			  "childs" : {
-			      "wind" : {
-				  "type" : "frame",
-				  
-				  "x" : "40%",
-				  "y" : "40%",
-				  "width" : "10%",
-				  "height" : "10%",
-				  
-				  "childs" : {
-				      "spot" : {
-					  "type" : "image",
-					  
-					  "x" : "0%",
-					  "y" : "0%",
-					  "width" : "100%",
-					  "height" : "100%",
-					  "z_index" : "1",
-					  
-					  "source" : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2Bg+A8AAQMBAKJTBdAAAAAASUVORK5CYII='
-				      }
-				  }
-			      },
-			      "background" : {
-				  "type" : "image",
-
-				  "x" : "0%",
-				  "y" : "0%",
-				  "width" : "20%",
-				  "height" : "30%",
-				  "z_index" : "1",
-				  
-				  "source" : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2Bg+A8AAQMBAKJTBdAAAAAASUVORK5CYII='
-			      },
-			      
-			      "address" : {
-				  "type" : "entry",
-
-				  "x" : "3%",
-				  "y" : "1%",
-				  "width" : "75%",
-				  "height" : "10%",
-				  
-				  "on_text_changed" : [
-				      ['c', console.log, 'text is changed']
-				  ] 
-			      },
-			      "gobutton" : {
-				  "type" : "button",
-
-				  "label" : "go",
-				  "x" : "78%",
-				  "y" : "1%",
-				  "width" : "20%",
-				  "height" : "10%",
-				  
-				  "on_pressed" : [
-				      ['c', console.log, 'gobutton is pressed']
-				  ]
-			      }		    
-			  }
-		      }
-		  }]);
 /*    var sid = sloader.load('tests/test_set/service_one', mqnode1, env);    
     _mq.send(sid, [null, "set", "gg", "ttte"]);
     _mq.send(sid, [null, "ping", "ttt"]);

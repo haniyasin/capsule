@@ -38,7 +38,9 @@ function do_fn(elem, stack, args){
 function do_s(elem, stack, args){
 //    console.log("service elem is: " + elem);
     var service = elem. shift();
-//    var method = elem.shift();    
+
+    do_args(elem, stack);
+
     elem.unshift({"stack" : stack,
 		 "args" : args});
 
