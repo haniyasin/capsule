@@ -328,51 +328,73 @@ osprout.childs = [
 
 osprout.start();
 
-var sprout = {
-    service : {
+var sprout = [
+    {
 	name : 'main_panel',
-	target : panel,
+
+	type : 'service',
+	target : 1,
 	msg : 'create',
 	
-	width : '50%',
-	height : '50%',
-
-	next : {
-	    service : {
-		target : button,
-		msg : 'create',
-
-		width : '20%',
-		height : '10%',
-		
-		next : {
-		    "service" : {
-			target : 'main_panel',
-			msg : 'add',
-
-			id : 'parent'
-		    }
-		}
-	    },
-	    service : {
-		target : entry,
-		msg : 'create',
-
-		width : '30%',
-		height : '10%',
-		
-		next : {
-		    "service" : {
-			target : 'main_panel',
-			msg : 'add',
-
-			id : 'parent'
-		    }
-		}
+	args : [
+	    {
+		width : '50%',
+		height : '50%'    
 	    }
-	}
+	],
+
+	next : [
+	    {
+		type : 'service',
+		target : 2,
+		msg : 'create',
+
+		args : [
+		    {
+			width : '20%',
+			height : '10%'			    
+		    }
+		],
+		
+		next : [
+		    {
+			type : 'service',
+			msg : 'add',
+			target : 'main_panel',
+
+			args : [
+			    'parent'
+			]
+		    }
+		]
+	    },
+	    {
+		type : 'service',
+		msg : 'create',
+		target : 3,
+
+		args : [
+		    {
+			width : '30%',
+			height : '10%'    
+		    }
+		],
+		
+		next : [
+		    {
+			type : 'service',
+			msg : 'add',
+			target : 'main_panel',
+
+			args : [
+			    'parent'
+			]
+		    }
+		]
+	    }
+	]
     }
-}
+]
 
 /*
  * Во всех случаях делается одно и тоже - создаётся панель, создаются кнопка и ентри и добавляются на панель.
@@ -381,4 +403,33 @@ var sprout = {
  * говорилось, пока все проблемы решаем с помощью javascript,  это хоть как-то делает работу контролируемой
  * и приводит к результатам, вводить сейчас векторный, диаграммо подобный язык описания взаимодействия
  * совсем ни к чему, или к чему?))))))  
+ */
+
+service.panel.create({
+			 width : '50%',
+			 height : '50%'    
+		     }).sprout = {
+			 name : 'panel_main',
+			 next : function(sprout){
+			     service.button.create({
+						       width : '20%',
+						       height : '10%'			    
+						   }).sprout = {
+						       next : function(sprout){
+							   sprout.panel_main.add(sprout.parent);   
+						       }
+						   };
+			     service.entry.create({
+						      width : '30%',
+						      height : '10%'    
+						  }).sprout = {
+						      next : function(sprout){
+							  
+						      }
+						  }; 
+			 }
+		     };
+/*
+ * Ещё один пример, на объектах, требующий обязательного создания обёрток, что увеличивает количество
+ * сообщений и общей работы, да и тоже не собо читаемо вышло:)
  */
