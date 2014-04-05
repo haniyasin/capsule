@@ -433,3 +433,75 @@ service.panel.create({
  * Ещё один пример, на объектах, требующий обязательного создания обёрток, что увеличивает количество
  * сообщений и общей работы, да и тоже не собо читаемо вышло:)
  */
+
+//////////
+/////////// Всё выше уже история, надо обновить, окончательный пока вариант ниже:)
+
+var sprout = [
+    {
+	name : 'main_panel',
+	
+	action : ['s', 1, 'create', {
+		      width : '50%',
+		      height : '50%'    
+		  }],
+
+	next : [
+	    {
+		action : ['s', 2, 'create', {
+			      width : '20%',
+			      height : '10%'    
+			  }],
+		next : [
+		    {
+			action : ['s', 'main_panel', 'add', 'parent']
+		    }
+		]
+	    },
+	    {
+		action : ['s', 3, 'create',{
+			      width : '30%',
+			      height : '10%'    
+			  }],
+		
+		next : [
+		    {
+			action : ['s', 'main_panel', 'add', 'parent']
+		    }
+		]
+	    }
+	]
+    }
+]
+
+var seq = capsule.modules.sequence;
+
+var fs = require('fs');
+sprout = [
+    {
+	name : 'star',
+	action : ['c', fs.readFile, 'start'],
+
+	next : [
+	    {
+		'action' : ['f', function(stack, sprout_pusher){
+				console.log(stack.star[1].toString());
+			    }]   
+	    }
+	]
+    },
+    {
+	action : ['f', function(stack, sprout_pusher){
+		      stack.first = 'last';
+		  }],
+	next : [
+	    {
+		action : ['f', function(stack, sprout_pusher){
+			      console.log(stack.first);
+			  }]
+	    }
+	]
+    },
+]
+
+seq.run(sprout, {});

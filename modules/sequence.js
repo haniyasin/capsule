@@ -11,65 +11,64 @@ function do_args(args, stack){
 	}
     }
 }
-function do_c(elem, stack, args){
-    var func = elem[0];
-    elem.splice(0,1);
 
-    do_args(elem, stack);
+//calling local function with callback
+function function_with_cb_do(name, action, stack, next){
+    var func = action.shift();
+    do_args(action, stack);
 
-    elem[elem.length] = function(){
-	if(!stack.first)
-	    stack.first = arguments;
-	stack.push(stack.last = arguments);
-	element_execute(args, stack);	
+    action[action.length] = function(){
+	if(name)
+	    stack[name] = arguments;
+	sprout(next, stack);	
     }
-    func.apply(null,elem);
+
+    func.apply(null, action);
 }
 
-function do_fn(elem, stack, args){
-    var func = elem.shift();
+//passing message to service
+function service_do(action, stack, next){
+    var service = action.shift();
 
-//    console.log(stack);
-    func(null, stack);
+    do_args(action, stack);
 
-    element_execute(args, stack);
+    action.unshift({"stack" : stack,
+		 "next" : next});
+    exports.mq_send(service, action);
+    //further working with sprout doin inside service_loader
 }
 
-function do_s(elem, stack, args){
-//    console.log("service elem is: " + elem);
-    var service = elem. shift();
-
-    do_args(elem, stack);
-
-    elem.unshift({"stack" : stack,
-		 "args" : args});
-
-    exports.mq_send(service, elem);
-}
-
-function do_ff(elem, stack, args){
+//calling function
+function function_do(action, stack, next){
  //   console.log("far function elem is: " + elem);
-    var func = elem.shift();
-    var return_value = null;
-    func(function(){ return_value = arguments},
-	stack,
-	null); // need sequence push implementation    
+    var func = action.shift();
     
-    stack.push(return_value);
-    element_execute(args, stack);
+    func(stack,
+	null); // need sprout push implementation    
+
+    sprout(next, stack);
 }
 
-function element_execute(args, stack){
-    if(!args.length)
-	return;	
-    var elem = Array.prototype.shift.call(args);
-//    console.log("elem is: ", elem);
-    var type = elem.shift();
+function element_do(element, stack){
+    if(typeof(element) != 'object' || element == null)
+	return 'incorrect element';
+
+    if(!element.hasOwnProperty('action'))
+	return 'element has no action property';
+
+    var action =  element.action;
+    var next = element.hasOwnProperty('next') ? element.next : [];
+    var name = element.hasOwnProperty('name') ? element.name : 0;
+
+    if(!action.length)
+	return 'element.action is empty';	
+
+    var type = action.shift();
 
     switch(type){
 	// function with callback on last argument
     case 'c' : 
-	do_c(elem, stack, args);
+	function_with_cb_do(name, action, stack, next);
 	break;
 	
 	//adapter
@@ -78,48 +77,24 @@ function element_execute(args, stack){
 
 	//message to service
     case 's' : 
-	do_s(elem, stack, args);
+	service_do(action, stack, next);
 	break;
 
-	//function near. function within same context what and sequence runner
-    case 'fn' : 
-	do_fn(elem, stack, args);
-	break;
-	
 	//function far. function which is executed in same place as element before
-    case 'ff' : 
-	do_ff(elem, stack, args);
+    case 'f' : 
+	function_do(action, stack, next);
     break;
-
-	//parallel versions of elements
-    case 'pc' : 
-	break;
-
-    case 'pa' : 
-	break;
-
-    case 'ps' : 
-	break;
-
-    case 'pfn' : 
-	break;
-
-    case 'pff' : 
-	break;
    }    
 }
 
+function sprout(sprout, stack){
+    for(element in sprout){
+	var ret = element_do(sprout[element], stack);
+	if(typeof(ret) == 'string')
+	    console.log(ret);	
+    }    
+};
+
 exports.mq_send = function(){};
 
-exports.sequence = function(){
-    var stack = [];
-    stack["last"] = null;
-    stack["first"] = null;
-    
-    element_execute(arguments, stack);
-//    console.log(stack);
-}
-
-exports.sequence_continue = function(args, stack){
-    element_execute(args, stack);
-}
+exports.run = sprout;

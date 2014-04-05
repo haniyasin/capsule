@@ -12,121 +12,36 @@ exports.main = function(env){
 
 //    thttp.test({ 'url' : 'http://localhost:8810/krevetk/o', 'method' : 'POST'}, capsule);    
 
-    function do_service(){
-	
-    }
-
-    function sprout(sprout, trace){
-	if(typeof(trace) == undefined)
-	    trace = {};
-
-	for(element in sprout){
-	    if(sprout[element].hasOwnProperty('name'))
-		console.log('name is ', sprout[element].name);
-
-	    if(sprout[element].hasOwnProperty('type'))
-		switch(sprout){
-		    case 'service' : 
-		    
-		    break;
-		    
-		    case 'near_f' :
-		    break;
-
-		    case 'far_f' : 
-		    break;
-		}
-	    
-
-	}
-    }
-
-    service.panel.create({
-			     width : '50%',
-			     height : '50%'    
-			 }).sprout = {
-			     name : 'panel_main',
-			     next : function(sprout){
-				 service.button.create({
-							   width : '20%',
-							   height : '10%'			    
-						       }).sprout = {
-							   next : function(sprout){
-							       sprout.panel_main.add(sprout.parent);   
-							   }
-						       };
-				 service.entry.create({
-							  width : '30%',
-							  height : '10%'    
-						      }).sprout = {
-							  next : function(sprout){
-							      
-							  }
-						      }; 
-			     }
-			 };
-
     var sprout = [
 	{
 	    name : 'main_panel',
-
-	    type : 'service',
-	    target : 1,
-	    msg : 'create',
 	    
-	    args : [
-		{
-		    width : '50%',
-		    height : '50%'    
-		}
-	    ],
+	    action : ['s', 1, 'create', {
+				  width : '50%',
+				  height : '50%'    
+			      }],
 
 	    next : [
 		{
-		    type : 'service',
-		    target : 2,
-		    msg : 'create',
-
-		    args : [
-			{
-			    width : '20%',
-			    height : '10%'			    
-			}
-		    ],
-		    
+		    action : ['s', 2, 'create', {
+				  width : '20%',
+				  height : '10%'    
+			      }],
 		    next : [
 			{
-			    type : 'service',
-			    msg : 'add',
-			    target : 'main_panel',
-
-			    args : [
-				'parent'
-			    ]
+			    action : ['s', 'main_panel', 'add', 'parent']
 			}
 		    ]
 		},
 		{
-		    type : 'service',
-		    msg : 'create',
-		    target : 3,
-
-		    args : [
-			{
-			    width : '30%',
-			    height : '10%'    
-			}
-		    ],
+		    action : ['s', 3, 'create',{
+				  width : '30%',
+				  height : '10%'    
+			      }],
 		    
 		    next : [
 			{
-			    type : 'service',
-			    msg : 'add',
-			    target : 'main_panel',
-
-			    args : [
-				'parent'
-			    ]
+			    action : ['s', 'main_panel', 'add', 'parent']
 			}
 		    ]
 		}
@@ -134,5 +49,37 @@ exports.main = function(env){
 	}
     ]
 
-    console.log(sprout[0].next);
+    var seq = capsule.modules.sequence;
+
+    var fs = require('fs');
+    sprout = [
+	{
+	    name : 'star',
+	    action : ['c', fs.readFile, 'start'],
+
+	    next : [
+		{
+		    'action' : ['f', function(stack, sprout_pusher){
+				    console.log(stack.star[1].toString());
+				}]   
+		}
+	    ]
+	},
+	{
+	    action : ['f', function(stack, sprout_pusher){
+			  stack.first = 'last';
+			  }],
+	    next : [
+		{
+		    action : ['f', function(stack, sprout_pusher){
+				  console.log(stack.first);
+			      }]
+		}
+	    ]
+	},
+    ]
+
+    seq.run(sprout, {});
+
+//    console.log(sprout[0].next);
 }
