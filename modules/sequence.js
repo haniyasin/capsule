@@ -13,7 +13,7 @@ function do_args(args, stack){
 }
 
 //calling local function with callback
-function function_with_cb_do(name, action, stack, next){
+function function_with_cb_do(action, name, stack, next){
     var func = action.shift();
     do_args(action, stack);
 
@@ -27,12 +27,13 @@ function function_with_cb_do(name, action, stack, next){
 }
 
 //passing message to service
-function service_do(action, stack, next){
+function service_do(action, name, stack, next){
     var service = action.shift();
 
-    do_args(action, stack);
+//    do_args(action, stack);
 
     action.unshift({"stack" : stack,
+		    "name" : name,
 		 "next" : next});
     exports.mq_send(service, action);
     //further working with sprout doin inside service_loader
@@ -68,7 +69,7 @@ function element_do(element, stack){
     switch(type){
 	// function with callback on last argument
     case 'c' : 
-	function_with_cb_do(name, action, stack, next);
+	function_with_cb_do(action, name, stack, next);
 	break;
 	
 	//adapter
@@ -76,8 +77,8 @@ function element_do(element, stack){
 	break;
 
 	//message to service
-    case 's' : 
-	service_do(action, stack, next);
+    case 's' :
+	service_do(action, name, stack, next);
 	break;
 
 	//function far. function which is executed in same place as element before
@@ -88,6 +89,9 @@ function element_do(element, stack){
 }
 
 function sprout(sprout, stack){
+    if(typeof(stack) === 'undefined')
+	stack = [];
+
     for(element in sprout){
 	var ret = element_do(sprout[element], stack);
 	if(typeof(ret) == 'string')

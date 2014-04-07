@@ -33,7 +33,7 @@ exports.read = function(id, position, length, cb, capsule){
 		else
 		    fs.read(fd, content, 0, length, position, function(err, readed_bytes, content){
 				if(readed_bytes != length)
-				    err = 'cannot read as need';
+				    cb({ msg : 'readed few' });
 				else
 				    cb(err, content.toString());
 			    });

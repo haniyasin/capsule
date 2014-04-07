@@ -56,37 +56,70 @@ exports.main = function(env){
     var seq = capsule.modules.sequence;
     seq.mq_send = _mq.send;
 
+    var ui_sprout = [
+	{
+	    name : 'panel',
+	    
+	    action : ['s', panel, 'create',
+		      {
+			  "x" : '5%',
+			  "y" : '5%',
+			  "width" : "60%" ,
+			  "height" : "60%",
+			  "orientation" : "bottom"
+		      }],
+	    
+	    next : [
+		{
+		    action : ['s', button, 'create', {
+				  "label" : "go",
+				  "x" : "20%",
+				  "y" : "1%",
+				  "width" : "20%",
+				  "height" : "35%",
+				  
+				  "on_pressed" : [
+				      {
+					  action : ['f', function(stack, sprout_pusher){
+							stack.push(stack.last = 'ttt');
+						    }]
+				      },
+				      {
+					  action : ['f', function(stack, sprout_pusher){
+							console.log(stack.last);
+							console.log('eeee');
+						    }]
+				      }
+				  ]
+			      },
+			      'panel'
+		    ]		    
+		},
+		{
+		    action : ['s', button, 'create',{
+				  "label" : "nanana",
+				  "x" : "40%",
+				  "y" : "20%",
+				  "width" : "40%",
+				  "height" : "30%",
+				  
+				  "on_pressed" : [
+				      {
+					  action : ['c', console.log, 'gobutton is pressed']	  
+				      }
+				  ]
+			      }, 'panel'
+			     ]	    
+		}
+	    ]
+	}
+    ]
+
+    seq.run(ui_sprout);
+/*
     seq.sequence(['s', button, 'create',
 		  {
-		      "label" : "go",
-		      "x" : "20%",
-		      "y" : "1%",
-		      "width" : "20%",
-		      "height" : "35%",
-		      
-		      "on_pressed" : [
-			  ['fn', function(context, stack){
-			       stack.push(stack.last = 'ttt');
-			   }],
-			  ['ff', function(next, stack, sequence){
-			       console.log(stack.last);
-			       console.log('eeee');
-			   }]
-		      ]
 		  }],
-		 ['s', button, 'create',
-		   {
-		       "label" : "nanana",
-		       "x" : "40%",
-		       "y" : "20%",
-		       "width" : "40%",
-		       "height" : "30%",
-		       
-		       "on_pressed" : [
-			   ['c', console.log, 'gobutton is pressed']
-		       ]
-		   }	
-		 ],	    
 		 ['s', entry, 'create',
 		  {
 		      "x" : "3%",
@@ -100,17 +133,11 @@ exports.main = function(env){
 			   }]
 		      ] 
 		  }],
-		 ['s', panel, 'create',
-		  {
-		      "x" : '5%',
-		      "y" : '5%',
-		      "width" : "60%" ,
-		      "height" : "60%",
-		      "orientation" : "bottom"
-		  }],
+		 ,
 		 ['s', panel, 'add', 'stack[3][0]', 'stack[0][0]'],
 		 ['s', panel, 'add', 'stack[3][0]', 'stack[1][0]'],
 		 ['s', panel, 'add', 'stack[3][0]', 'stack[2][0]']);
+*/
 
 /*    var sid = sloader.load('tests/test_set/service_one', mqnode1, env);    
     _mq.send(sid, [null, "set", "gg", "ttte"]);
