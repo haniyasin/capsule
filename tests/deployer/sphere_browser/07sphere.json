@@ -5,7 +5,8 @@
 	"inline" : true,
 
 	"ui" : {
-	    "address_panel" : "sphere/ui/address_panel.js"
+	    "address_panel" : "sphere/ui/address_panel.js",
+	    "action_panel" : "sphere/ui/action_panel.js"
 	}
     }
 }
