@@ -31,6 +31,9 @@
 		    "socket_srv" : "modules/transport/http/socket_srv.js"
 		}
 	    },
+	    "storage" : {
+		"this" : "modules/storage.js"
+	    },
 	    "sequence" : "modules/sequence.js"
 	}
     }

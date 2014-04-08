@@ -48,8 +48,8 @@ function compile_update_tree(tree, cur_offset){
 		break;
 	    }
 	    data += obj;
-	    cur_offset += obj.length;
 	    head += 'o' + key + '!' + cur_offset + '!' + obj.length + '|';
+	    cur_offset += obj.length;
 	}
     }
     return {
@@ -74,7 +74,32 @@ exports.update = function(id, update_tree, callback, capsule){
     capsule.modules.storage.low_level.append(id, make_update_block(update_tree), callback);
 }
 
-function modify_tree(tree, mask_tree, content){
+//filtering of tree by path
+function filter(filter_tree){
+    var current_filter = filter_tree;
+    this.start_object = function(name){
+//		    current_mask._p = current_mask;
+//		    current_mask = current_mask[object_name];
+//		    current_mask.pass = true;		    
+    };
+
+    this.end_object = function(name){
+    };
+
+    this.filter_object_start = function(name){
+	return true;
+    };
+
+    this.filter_object_end = function(name){
+	return true;
+    };
+
+    this.filter_element = function(name){
+	return true;
+    };
+}
+
+function modify_tree(tree, _filter, content){
     var object_start_re = /^s(\w+)\|/g;
     var object_end_re = /^(e)\|/g;
     var element_re = /^o(\w+)\!(\d+)\!(\d+)\|/g; //type, name, offset, length
@@ -85,30 +110,41 @@ function modify_tree(tree, mask_tree, content){
 
     while(true){
 	if(re_result = object_start_re.exec(content)){
+	    
+	    var object_name = re_result[1];
 	    cur_item_length = object_start_re.lastIndex;
 	    object_start_re.lastIndex = 0;
-
-	    var next = {_p : current};
-//	    if(mask_tree.hasOwnProperty(re_result[1])){
-		current[re_result[1]] = next;
-		current = current[re_result[1]];		
-//	    }
-	}else if(re_result = object_end_re.exec(content)){
-	    cur_item_length = 2;
-	    object_end_re.lastIndex = 0;
 	    
-	    var next = current;
-	    current = current._p;
-	    delete next._p;
+	    _filter.start_object(object_name);
+	   
+	    //нужно сделать проверку, отличается ли объект, и только если да, то заменять
+	    if(_filter.filter_object_start(object_name)){
+		current[object_name] = {_p : current};
+		current = current[object_name];		
+	    }
+	}else if(re_result = object_end_re.exec(content)){
+
+	    if(_filter.filter_object_end()){
+		cur_item_length = 2;
+		object_end_re.lastIndex = 0;
+		
+		var next = current;
+		current = current._p;
+		delete next._p;
+	    }
 	}else if(re_result = element_re.exec(content)){
-	    cur_item_length = element_re.lastIndex;
-	    element_re.lastIndex = 0;
-	    //parent object, field, offset in data section, length
-	    map_to_read.push([current, re_result[1], parseInt(re_result[2]) + 1, parseInt(re_result[3])]);
-	    current[re_result[1]] = undefined;
+
+	    if(_filter.filter_element()){
+		cur_item_length = element_re.lastIndex;
+		element_re.lastIndex = 0;
+		//parent object, field, offset in data section, length
+		map_to_read.push([current, re_result[1], parseInt(re_result[2]), parseInt(re_result[3])]);
+		current[re_result[1]] = undefined;
+	    }
+
 	} else break;
+
 	content = content.substring(cur_item_length);
-//	console.log(content + '\n\n');
     }
     
     return map_to_read;
@@ -116,33 +152,37 @@ function modify_tree(tree, mask_tree, content){
 
 function data_reader(tree, id, callback, read){
     var blocks_counter = 0,
-    work_done = false;
-    
-    this.sealed = false;
+        sealed = false;
+
+    this.sealed = function(){
+	sealed = true;
+	if(blocks_counter == 0)
+	    callback(undefined, tree);
+    };
 
     this.block_add = function(map_to_read, offset){
 	blocks_counter += map_to_read.length;
 //	console.log(map_to_read);
 	for(key in map_to_read){
 	    (function(offset, length, parent_object, field){
-		 console.log('gaa', offset, length);
+//		 console.log('gaa', offset, length);
 		 read(id, offset, length, function(err, content){
 			  if(err)
 			      callback(err);				  
 			  else
 			      parent_object[field] = content;
 			  
-			  console.log(tree);
-			  if(this.sealed && !--blocks_counter)
+			  console.log(sealed, blocks_counter);
+			  if(!--blocks_counter && sealed)
 			      callback(undefined, tree);
 		      });
 		 
-	     })(offset + map_to_read[key][2], map_to_read[key][3], map_to_read[key][0], map_to_read[key][1]);
+	     })(offset + map_to_read[key][2] + 1, map_to_read[key][3] - 1, map_to_read[key][0], map_to_read[key][1]);
 	}
     };
 }
 
-function parse_block(id, mask_tree, callback, read){
+function parse_block(id, _filter, callback, read){
     var tree = {},
     offset = 0,
     _data_reader = new data_reader(tree, id, callback, read);  
@@ -151,7 +191,7 @@ function parse_block(id, mask_tree, callback, read){
 	read(id, offset, 20, function(err, content){
 		 if(err){
 		     if(err.msg == 'readed few'){
-			 data_reader.sealed = true;
+			 _data_reader.sealed();
 			 return; //object readed to end
 		     }
 		     else
@@ -168,7 +208,7 @@ function parse_block(id, mask_tree, callback, read){
 			  if(err)
 			      callback(err);
 			  _data_reader.block_add(
-			      modify_tree(tree, mask_tree, content), 
+			      modify_tree(tree, _filter, content), 
 			      offset + head_len);
 		      });
 		  })(offset, head_len);
@@ -185,6 +225,6 @@ function parse_block(id, mask_tree, callback, read){
  * extracting content from object by mask_tree
  */
 
-exports.extract = function(id, mask_tree, callback, capsule){
-    parse_block(id, mask_tree, callback, capsule.modules.storage.low_level.read);
+exports.extract = function(id, filter_tree, callback, capsule){
+    parse_block(id, new filter(filter_tree), callback, capsule.modules.storage.low_level.read);
 }

@@ -17,6 +17,7 @@ exports.main = function(env){
 //    ll.read(id, 0, 3, function(err,data){console.log(data);});    
     ll.delete(id, function(){console.log('object is deleted');});
 
+    console.log(JSON.stringify(stor));
     stor.update(id, {
 		    "blini" : {
 			"s_tvorogom" : {
@@ -47,6 +48,8 @@ exports.main = function(env){
 			}
 		    }
 		}, function(){
-		    stor.extract(id, null, function(){}, capsule);
+		    stor.update(id, { blini : { yagondie : "fufel" }}, 
+				stor.extract(id, { blini : {} }, function(err, object){console.log(object);}, capsule), capsule
+			       );
 		}, capsule);
 }
