@@ -1,0 +1,11 @@
+{
+    "sphere" : {
+	"type" : "module",
+        "preload" : true,
+	"inline" : true,
+
+	"ui" : {
+	    "address_panel" : "sphere/ui/address_panel.js"
+	}
+    }
+}

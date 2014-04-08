@@ -1,0 +1,21 @@
+{
+    "dsa" : {	
+	"type" : "module",
+        "preload" : true,
+	"inline" : true,
+
+	"mq" : "dsa/mq.js",
+	"service_loader" : "dsa/service_loader.js",
+	"services" : {
+	    "ui" : {
+		"button" : "dsa/services/ui/overlay/button.js",
+		"entry" : "dsa/services/ui/overlay/entry.js",
+		"panel" : "dsa/services/ui/overlay/panel.js",
+		"swiper": "dsa/services/ui/overlay/swiper.js"
+		}
+	},
+	"parts" : {
+	    "ui" : "dsa/parts/ui.js"
+	}
+    }
+}

@@ -117,9 +117,11 @@ function modify_tree(tree, _filter, content){
 	    
 	    _filter.start_object(object_name);
 	   
-	    //нужно сделать проверку, отличается ли объект, и только если да, то заменять
 	    if(_filter.filter_object_start(object_name)){
-		current[object_name] = {_p : current};
+		if(current.hasOwnProperty(object_name))
+		    current[object_name]._p = current;
+		else
+		    current[object_name] = {_p : current};
 		current = current[object_name];		
 	    }
 	}else if(re_result = object_end_re.exec(content)){
