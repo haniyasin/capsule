@@ -6,7 +6,8 @@
 
 	"ui" : {
 	    "address_panel" : "sphere/ui/address_panel.js",
-	    "action_panel" : "sphere/ui/action_panel.js"
+	    "action_panel" : "sphere/ui/action_panel.js",
+	    "area" : "sphere/ui/area.js"
 	}
     }
 }

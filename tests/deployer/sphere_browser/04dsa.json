@@ -12,6 +12,7 @@
 		"button" : "dsa/services/ui/overlay/button.js",
 		"entry" : "dsa/services/ui/overlay/entry.js",
 		"panel" : "dsa/services/ui/overlay/panel.js",
+		"container" : "dsa/services/ui/overlay/container.js",
 		"swiper": "dsa/services/ui/overlay/swiper.js"
 		}
 	},

@@ -23,14 +23,19 @@ exports.main = function(env){
     ui.button = sloader.load('dsa/services/ui/overlay/button', mqnode1, env);    
     ui.entry = sloader.load('dsa/services/ui/overlay/entry', mqnode1, env);
     ui.panel = sloader.load('dsa/services/ui/overlay/panel', mqnode1, env);
+    ui.container = sloader.load('dsa/services/ui/overlay/container', mqnode1, env);
     
     var address_panel = sloader.load('sphere/ui/address_panel', mqnode1, env);
     var action_panel = sloader.load('sphere/ui/action_panel', mqnode1, env);
+    var area = sloader.load('sphere/ui/area', mqnode1, env);
 
     var seq = capsule.modules.sequence;
     seq.mq_send = _mq.send;
 
     seq.run([
+		{
+		    action : ['s', area, 'create', ui] 
+		},
 		{
 		    action : ['s', address_panel, 'create', ui]
 		},
