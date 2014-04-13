@@ -64,8 +64,8 @@ exports.main = function(env){
 		      {
 			  "x" : '5%',
 			  "y" : '5%',
-			  "width" : "60%" ,
-			  "height" : "60%",
+			  "width" : "80%" ,
+			  "height" : "80%",
 			  "orientation" : "bottom"
 		      }],
 	    
@@ -73,10 +73,10 @@ exports.main = function(env){
 		{
 		    action : ['s', button, 'create', {
 				  "label" : "go",
-				  "x" : "20%",
-				  "y" : "1%",
+				  "x" : "79%",
+				  "y" : "2%",
 				  "width" : "20%",
-				  "height" : "35%",
+				  "height" : "20%",
 				  
 				  "on_pressed" : [
 				      {
@@ -97,66 +97,50 @@ exports.main = function(env){
 		},
 		{
 		    action : ['s', button, 'create',{
-				  "label" : "nanana",
-				  "x" : "40%",
-				  "y" : "20%",
-				  "width" : "40%",
-				  "height" : "30%",
+				  "label" : "uhlala",
+				  "x" : "79%",
+				  "y" : "78%",
+				  "width" : "20%",
+				  "height" : "20%",
 				  
 				  "on_pressed" : [
 				      {
-					  action : ['c', console.log, 'gobutton is pressed']	  
+					  action : ['f', function(stack, sprout_pusher){
+							console.log('gobutton is pressed');
+						    }]	  
 				      }
 				  ]
 			      }, 'panel'
 			     ]	    
+		},
+		{
+		    action : ['s', entry, 'create',
+			      {
+				  "x" : "1%",
+				  "y" : "2%",
+				  "width" : "77%",
+				  "height" : "20%",
+				  
+				  "on_text_change" : [
+				      {
+					  action : ['f', function(stack, sprout_pusher){
+							console.log(stack.text);
+						    }]
+				      }
+				  ]
+			      }, 'panel'
+			     ]    
 		}
 	    ]
 	}
     ]
 
     seq.run(ui_sprout);
-/*
-    seq.sequence(['s', button, 'create',
-		  {
-		  }],
-		 ['s', entry, 'create',
-		  {
-		      "x" : "3%",
-		      "y" : "1%",
-		      "width" : "75%",
-		      "height" : "30%",
-		      
-		      "on_text_changed" : [
-			  ['ff', function(next, stack, sequence){
-			       console.log(stack.last);
-			   }]
-		      ] 
-		  }],
-		 ,
-		 ['s', panel, 'add', 'stack[3][0]', 'stack[0][0]'],
-		 ['s', panel, 'add', 'stack[3][0]', 'stack[1][0]'],
-		 ['s', panel, 'add', 'stack[3][0]', 'stack[2][0]']);
-*/
 
 /*    var sid = sloader.load('tests/test_set/service_one', mqnode1, env);    
     _mq.send(sid, [null, "set", "gg", "ttte"]);
     _mq.send(sid, [null, "ping", "ttt"]);
     _mq.send(sid, [null, "pong", "tttg"]);
     _mq.send(sid, [null, "init", "ttta"]);
-
-    var seq = env.capsule.modules.sequence;
-    seq.mq_send = _mq.send;
-    
-    seq.sequence(['s', sid, 'set', 'gg', 'ttte'],
-	     ['s', sid, 'get', 'gg'],
-	     ['ff', function(next, stack, sequence){
-		  console.log(stack);
-		  stack.push('hai');
-		  stack.last = 'hai';
-	      }],
-		 ['ff', function(next ,stack, sequence){
-		      console.log(stack.last);
-		  }]);
 */
 }
