@@ -101,4 +101,39 @@ function sprout(sprout, stack){
 
 exports.mq_send = function(){};
 
+//low level api
+
 exports.run = sprout;
+
+
+//high level api
+
+function element(type){
+    return function(){
+	var args = Array.prototype.slice.call(arguments, 0);
+	args.unshift(type);
+	//    console.log(arguments.callee.name);
+	return {
+	    object : {
+		action : args
+	    },
+	    sprout : function _sprout(){
+		if(!this.object.hasOwnProperty('next'))
+		    this.object.next = [];
+		for(arg in arguments){
+		    this.object.next.push(arguments[arg].object);
+		}
+		return this;    
+	    },
+	    run : function(){		   
+		sprout([this.object]);
+	    }
+	};
+    }
+}
+
+exports.msg = element('s');
+
+exports.f = element('f');
+
+exports.c = element('c');

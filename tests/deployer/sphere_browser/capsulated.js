@@ -21,24 +21,11 @@ exports.main = function(env){
     var frontend = sloader.load('sphere/frontend', mqnode1, env);
     var backend = sloader.load('sphere/backend', mqnode1, env);
 
-    var sprout = capsule.modules.sequence;
-    sprout.mq_send = _mq.send;
+    var seq = capsule.modules.sequence;
+    seq.mq_send = _mq.send;
 
-    sprout.run([
-		   {
-		       name : 'ui',
-		       
-		       action : ['s', ui, 'init'],
-		       
-		       next : [
-			   {
-			       action : ['s', backend, 'create'],
-			   },
-			   {
-			       action : ['s', frontend, 'create', backend]   
-			   }
-		       ]
-		   }
-	       ]);
-
+    seq.msg(ui, 'init').sprout(
+	seq.msg(backend, 'create'),
+	seq.msg(frontend, 'create', ui, backend)
+    ).run();
 }
