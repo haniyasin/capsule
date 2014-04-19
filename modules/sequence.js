@@ -94,6 +94,7 @@ function sprout(sprout, stack){
 
     for(element in sprout){
 	var ret = element_do(sprout[element], stack);
+//	console.log(sprout[element]);
 	if(typeof(ret) == 'string')
 	    console.log(ret);	
     }    
@@ -114,19 +115,19 @@ function element(type){
 	args.unshift(type);
 	//    console.log(arguments.callee.name);
 	return {
-	    object : {
-		action : args
-	    },
+	    action : args,
+
 	    sprout : function _sprout(){
-		if(!this.object.hasOwnProperty('next'))
-		    this.object.next = [];
+		if(!this.hasOwnProperty('next'))
+		    this.next = [];
 		for(arg in arguments){
-		    this.object.next.push(arguments[arg].object);
+		    this.next.push(arguments[arg]);
 		}
 		return this;    
 	    },
-	    run : function(){		   
-		sprout([this.object]);
+	    run : function(stack){
+		console.log(JSON.stringify(this));
+		sprout([this], stack);
 	    }
 	};
     }
