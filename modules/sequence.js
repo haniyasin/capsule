@@ -21,7 +21,7 @@ function function_with_cb_do(action, name, stack, next){
 	if(name)
 	    stack[name] = arguments;
 	sprout(next, stack);	
-    }
+    };
 
     func.apply(null, action);
 }
@@ -44,10 +44,14 @@ function function_do(action, stack, next){
  //   console.log("far function elem is: " + elem);
     var func = action.shift();
     
-    func(stack,
-	null); // need sprout push implementation    
+    var sprout_hl = {
+	msg : exports.msg,
+	f : exports.f,
+	c : exports.c	
+    };
 
-    sprout(next, stack);
+    if(!func(sprout_hl, stack))
+       sprout(next, stack);
 }
 
 function element_do(element, stack){
@@ -94,7 +98,6 @@ function sprout(sprout, stack){
 
     for(element in sprout){
 	var ret = element_do(sprout[element], stack);
-//	console.log(sprout[element]);
 	if(typeof(ret) == 'string')
 	    console.log(ret);	
     }    
@@ -117,16 +120,18 @@ function element(type){
 	return {
 	    action : args,
 
-	    sprout : function _sprout(){
+	    sprout : function(){
 		if(!this.hasOwnProperty('next'))
 		    this.next = [];
 		for(arg in arguments){
-		    this.next.push(arguments[arg]);
+		    if(arguments[arg] instanceof Array)
+			this.next = this.next.concat(arguments[arg]); //merging with low level sprout
+		    else
+			this.next.push(arguments[arg]);
 		}
 		return this;    
 	    },
 	    run : function(stack){
-		console.log(JSON.stringify(this));
 		sprout([this], stack);
 	    }
 	};
