@@ -10,6 +10,7 @@
 	    "ui" : {
 		"label" : "dsa/services/ui/overlay/label.js",
 		"button" : "dsa/services/ui/overlay/button.js",
+		"button_native" : "dsa/services/ui/native/button.js",
 		"entry" : "dsa/services/ui/overlay/entry.js",
 		"panel" : "dsa/services/ui/overlay/panel.js",
 		"container" : "dsa/services/ui/overlay/container.js",

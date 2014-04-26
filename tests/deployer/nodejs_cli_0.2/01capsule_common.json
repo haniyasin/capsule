@@ -12,6 +12,7 @@
 	    "bb_allocator" : "parts/bb_allocator.js",
 	    "cb_synchronizer" : "parts/cb_synchronizer.js",
 	    "base32" : "dependencies/base32.js",
+	    "serializer" : "dependencies/json.js",
 	    "utils" : "parts/utils.js"
 	},
 
@@ -30,9 +31,6 @@
 		    "socket_cli" : "modules/transport/http/socket_cli.js",
 		    "socket_srv" : "modules/transport/http/socket_srv.js"
 		}
-	    },
-	    "storage" : {
-		"this" : "modules/storage.js"
 	    },
 	    "sequence" : "modules/sequence.js"
 	}

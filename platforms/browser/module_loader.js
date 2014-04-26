@@ -104,8 +104,6 @@ function module_loader(){
 	}
 
 	var module = modules.get(base_path  + path);
-
-	var _exports = {};
 	var _module;
      	
 	switch(typeof(module)){
@@ -123,18 +121,18 @@ function module_loader(){
 
 	var module_definition = {
 	    'name' : '',
-	    'exports' : _exports
-	}
+	    'exports' : {}
+	};
 
-	_module(module_definition, _exports, (function(loader){
+	_module(module_definition, module_definition.exports, (function(loader){
 			     return function(path){
 				 return loader.load(path, base_path);
-			     }
+			     };
 			 })(this));
 	
 	//replace module source or function with resultated object
-	modules.replace(base_path + path, module_definition)
+	modules.replace(base_path + path, module_definition);
 
 	return module_definition.exports;	
-    }
+    };
 }

@@ -1,3 +1,9 @@
+var serializer = require('../dependencies/json.js'),
+sconfig = {
+    realFunctions : true,
+    includeFunctions : true
+};
+
 function do_args(args, stack){
     for(ind in args){
 	if(typeof(args[ind]) == 'string'){
@@ -93,6 +99,10 @@ function element_do(element, stack){
 }
 
 function sprout(sprout, stack){
+    sprout = serializer.serialize(sprout , sconfig);
+//    console.log(sprout);
+    sprout = eval(sprout);
+
     if(typeof(stack) === 'undefined')
 	stack = [];
 
@@ -116,7 +126,6 @@ function element(type){
     return function(){
 	var args = Array.prototype.slice.call(arguments, 0);
 	args.unshift(type);
-	//    console.log(arguments.callee.name);
 	return {
 	    action : args,
 
@@ -135,7 +144,7 @@ function element(type){
 		sprout([this], stack);
 	    }
 	};
-    }
+    };
 }
 
 exports.msg = element('s');

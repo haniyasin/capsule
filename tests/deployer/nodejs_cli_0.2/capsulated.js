@@ -47,9 +47,18 @@ exports.main = function(env){
 			    }
 			}
 		    }
-		}, function(){
-		    stor.update(id, { blini : { yagondie : "fufel" }}, 
-				stor.extract(id, { blini : {} }, function(err, object){console.log(object);}, capsule), capsule
-			       );
+		}, function(object){
+		    stor.extract(id, 
+				 { blini : {} }, 
+				 function(err, object){console.log(object);}, 
+				 capsule);
+		    stor.update(id, { blini : { yagodnie : "fufel" }}, 
+				function(){
+				    stor.extract(id, 
+						 { blini : {} }, 
+						 function(err, object){console.log(object);}, 
+						 capsule);
+				    },
+				capsule);
 		}, capsule);
 }
