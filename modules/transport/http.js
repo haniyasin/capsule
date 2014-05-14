@@ -1,4 +1,5 @@
-var transport = require('../transport.js');
+var transport = require('../transport.js'),
+    error = require('../parts/error.js');
 
 function frames_sender(socket, modules){
     var frames = [];
@@ -24,7 +25,7 @@ function frames_sender(socket, modules){
 		if(!frame.p.length){
 		    frames.splice(key,1);		
 		}else {
-		    console.log('нихрена не отправляется, надо вываливаться');
+		    console.log(new error('cannot send frame', 'trouble with sockets'));
 		    //		    console.log(frames[key]);		    
 		}
 		continue;		
@@ -39,7 +40,7 @@ function frames_sender(socket, modules){
 	frames.push(frame);
 	this.activate();
 	_send(frame);
-    }
+    };
 
     this.remove_delivered = function(ids){
 	//deleting delivered frames from outgoing queue
@@ -48,19 +49,19 @@ function frames_sender(socket, modules){
 	    //loop in reverse because of conflicting splice and forward loop
 	    while(fk >= 0){
 		if(frames[fk].i == ids[ind]){
-		    frames.splice(fk, 1)		    
+		    frames.splice(fk, 1);		    
 		}
 		fk--;
 	    }
 	}
-    }
+    };
 
     this.activate = function(){
 	if(!activated){	    
 	    activated = true;
 	    resend_timer = modules.timer.js.create(_resend, 500, true);	    
 	}
-    }
+    };
 
     this.deactivate = function(){
 	if(activated)
@@ -93,8 +94,9 @@ function frames_receiver(frames_sender, msg_packer, socket, modules){
 	if(typeof(callback) == 'function')
 	    _on_packets = callback;
 	else
-	    console.log("frame_receiver.on_frame: callback isn't a function");
-    }
+	    return new error("frame_receiver.on_frame: callback isn't a function", callback);
+	return true;
+    };
 }
     
 
@@ -120,7 +122,7 @@ function msg_packer(frames_sender, capsule){
 	if(!short_frame_timer)
 	    modules.timer.js.create(function(){
 					if(cur_frame.p.length || cur_frame.r.length){
-					    frames_sender.add(cur_frame)
+					    frames_sender.add(cur_frame);
 					    cur_frame = get_blank_frame();				
 					}
 				    }, 200, true);
@@ -154,12 +156,12 @@ function msg_packer(frames_sender, capsule){
 	}
 
 	//последний фрейм, пусть и наполовину пустой, когда-нибудь то надо отправлять всё равно:)
-    }
+    };
 
     this.deactivate = function(){
 	if(short_frame_timer)
 	    short_frame_timer.destroy();
-    }
+    };
 }
 
 function msg_unpacker(_frames_receiver){
@@ -195,8 +197,9 @@ function msg_unpacker(_frames_receiver){
 	if(typeof(callback) == 'function')
 	    _on_msg = callback;
 	else
-	    console.log("msg_unpacker.on_msg: callback isn't a function");
-    }
+	    return new error("msg_unpacker.on_msg: callback isn't a function", callback);
+	return true;
+    };
 
 }
 
@@ -235,7 +238,9 @@ exports.create = function(context, features, capsule){
 		if(msg.length > 0)
 		    _msg_packer.add(msg);
 		else
-		    console.log('transport.send: you must send something');
+		    return new error('transport.send: you must send something', msg);
+
+		return true;
 	    },
 	    "destroy" : function(){
 		_frames_sender.deactivate();
@@ -269,7 +274,9 @@ exports.create = function(context, features, capsule){
 						  if(msg.length > 0){
 						      _msg_packer.add(msg);
 						  } else
-						      console.log('transport.send: you must send something');
+						      return new error('transport.send: you must send something', msg);
+
+						  return true;
 					      },
 					      "on_destroy" : function(callback){
 					      }
@@ -279,9 +286,11 @@ exports.create = function(context, features, capsule){
 	return {
 	    "on_connect" : function(callback){
 		if(typeof(callback) != 'function')
-		    console.log('set a callback please');
+		    return new error('callback is not a function', 'set a callback please');
 		_on_connect = callback;
  		socket.listen();
+
+		return true;
 	    },
 	    "destroy" : function(){
 		for(key in clients){

@@ -1,8 +1,9 @@
 var serializer = require('../dependencies/json.js'),
-sconfig = {
-    realFunctions : true,
-    includeFunctions : true
-};
+    error = require('../parts/error.js'),
+    sconfig = {
+	realFunctions : true,
+	includeFunctions : true
+    };
 
 function do_args(args, stack){
     for(ind in args){
@@ -50,29 +51,23 @@ function function_do(action, stack, next){
  //   console.log("far function elem is: " + elem);
     var func = action.shift();
     
-    var sprout_hl = {
-	msg : exports.msg,
-	f : exports.f,
-	c : exports.c	
-    };
-
-    if(!func(sprout_hl, stack))
+    if(!func(exports, stack))
        sprout(next, stack);
 }
 
 function element_do(element, stack){
     if(typeof(element) != 'object' || element == null)
-	return 'incorrect element';
+	return new error('element is incorrect', JSON.stringify(element));
 
     if(!element.hasOwnProperty('action'))
-	return 'element has no action property';
+	return new error('element has no action property', JSON.stringify(element));
 
     var action =  element.action;
     var next = element.hasOwnProperty('next') ? element.next : [];
     var name = element.hasOwnProperty('name') ? element.name : 0;
 
     if(!action.length)
-	return 'element.action is empty';	
+	return new error("element\'s action field is empty", JSON.stringify(element.action));	
 
     var type = action.shift();
 
@@ -100,7 +95,6 @@ function element_do(element, stack){
 
 function sprout(sprout, stack){
     sprout = serializer.serialize(sprout , sconfig);
-//    console.log(sprout);
     sprout = eval(sprout);
 
     if(typeof(stack) === 'undefined')
@@ -108,9 +102,12 @@ function sprout(sprout, stack){
 
     for(element in sprout){
 	var ret = element_do(sprout[element], stack);
-	if(typeof(ret) == 'string')
-	    console.log(ret);	
-    }    
+	if(ret instanceof error){
+	    error.msg = '[in ' + element + 'scope]' + error.msg;
+	}	
+    }
+
+    return true;    
 };
 
 exports.mq_send = function(){};
@@ -141,7 +138,7 @@ function element(type){
 		return this;    
 	    },
 	    run : function(stack){
-		sprout([this], stack);
+		return sprout([this], stack);
 	    }
 	};
     };

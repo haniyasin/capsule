@@ -13,7 +13,8 @@
 	    "cb_synchronizer" : "parts/cb_synchronizer.js",
 	    "base32" : "dependencies/base32.js",
 	    "serializer" : "dependencies/json.js",
-	    "utils" : "parts/utils.js"
+	    "utils" : "parts/utils.js",
+	    "error" : "parts/error.js"
 	},
 
 	"modules" : {
