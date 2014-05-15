@@ -85,7 +85,7 @@ function server_create(context, address){
 			     request.on('data', function(data){
 					    context.data_cb(data, res);
 					});
-			 })(context)
+			 })(context);
 			break;
 		    }						   
 		}

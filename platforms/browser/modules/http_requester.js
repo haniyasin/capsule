@@ -31,7 +31,8 @@ function script_request(){
 	    _on_close();
 	    //этот оверхед нужно будет пофиксить, а то как-то неверно получается:)
             recv_cb(JSON.stringify(reply));
-	}
+	};
+
 	//прилепить сюда ещё превышение времени ожидание по таймеру надобно:)
 	return {
 	    'activate' : function(data){
@@ -142,7 +143,7 @@ function xhr_request(){
     
     this.on_error =  function(callback){
 	_on_error = callback;
-    }
+    };
     
     this.destroy = function(obj){
 	obj._req.abort();

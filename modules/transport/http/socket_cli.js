@@ -2,6 +2,8 @@
  * client implementation api like socket over http_requester
  */
 
+var error = require('../../../parts/error.js');
+
 function requests_holder(type, capsule){
     var modules = capsule.modules;
     var requests = []; 
@@ -34,18 +36,18 @@ function requests_holder(type, capsule){
 	this.success_metr++;
 
 	return request;
-    }
+    };
 
     this.destroy = function(request){
 	request.close();
 	this.requests_allocated--;
-    }
+    };
 
     this.close_all_requests = function(){
 	for(ind in _requests){
 	    _requests[ind].close();
 	}
-    }
+    };
 }
 
 function incoming_processor(context){
@@ -53,7 +55,7 @@ function incoming_processor(context){
 
     this.on_recv = function(callback){
 	_on_recv = callback;
-    }
+    };
 
     this.get_process_msg = function(request, _holder){
 	return function(data){	    
@@ -69,8 +71,8 @@ function incoming_processor(context){
 		    _on_recv(null); //on_connect
 	    }
 	    _holder.destroy(request); //в будущем надо учесть переиспользование объекта, возможно:)
-	}
-    }
+	};
+    };
 }
 
 function packet_sender(context, _holder, _incoming, _lpoller, modules){
@@ -123,19 +125,20 @@ function lpoller(context, _holder, _incoming, modules){
 			else
 			    request.send(JSON.stringify({'cli_id' : context.cli_id}));
 		    }else{
-			console.log('lpoller.try_poll: cannot create request');
+			self.deactivate();
+			_holder.on_disconnect(new error('disconnected', 'lpoller.try_poll: cannot create request'));
 			//console.log("packets is: " + _packets);
 		    }
 		}, 200, true);	
 	}
-    }
+    };
 
     this.deactivate = function(){
 	if(typeof(_timer) == 'object'){
 	    poll_timer.destroy();
             poll_timer = null;	    
 	}
-    }
+    };
 }
 
 exports.create = function(context, type, modules){
@@ -168,8 +171,9 @@ exports.create = function(context, type, modules){
 	     _holder.on_disconnect = callback;
 	},
 	'disconnect' : function(){
+	    _holder.on_disconnect(true);
 	    _holder.close_all_requests();
 	    _lpoller.deactivate();
 	}
-    }
+    };
 }

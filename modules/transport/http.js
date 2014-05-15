@@ -1,5 +1,5 @@
 var transport = require('../transport.js'),
-    error = require('../parts/error.js');
+    error = require('../../parts/error.js');
 
 function frames_sender(socket, modules){
     var frames = [];
@@ -66,7 +66,7 @@ function frames_sender(socket, modules){
     this.deactivate = function(){
 	if(activated)
 	    resend_timer.destroy();
-    }
+    };
 }
 
 function frames_receiver(frames_sender, msg_packer, socket, modules){
@@ -115,7 +115,7 @@ function msg_packer(frames_sender, capsule){
 
     this.confirm_receiving = function(id){
 	cur_frame.r.push(id);
-    }
+    };
 
     this.add = function(msg){
 	//creating timer for periodically sending incompleted frame
@@ -144,7 +144,7 @@ function msg_packer(frames_sender, capsule){
 			 'n' : packet_ind,
 			 's' : msg.length + 10,
 			 'd' : msg
-		     })
+		     });
 
 	for(packet in packets){
 	    if(cur_frame.s > frames_sender.frame_max_size){
@@ -226,9 +226,16 @@ exports.create = function(context, features, capsule){
 	var _msg_packer = new msg_packer(_frames_sender, capsule);
 	var _frames_receiver = new frames_receiver(_frames_sender, _msg_packer, socket, modules);
 	var _msg_unpacker = new msg_unpacker(_frames_receiver);
-	
+	var _on_destroy_cb = function(error){
+	    console.log(error);
+	};
+
 	return {
 	    "connect" : function(callback){
+		var self = this;
+		socket.on_disconnect(function(error){
+					 self.destroy(error);
+				     });
 		socket.connect(callback);
 	    },
 	    "on_msg" : function(callback){
@@ -242,15 +249,16 @@ exports.create = function(context, features, capsule){
 
 		return true;
 	    },
-	    "destroy" : function(){
+	    "destroy" : function(error){
+		_on_destroy_cb(error);
 		_frames_sender.deactivate();
 		msg_packer.deactivate();
 		socket.close();
 	    },
 	    "on_destroy" : function(callback){
-		
+		_on_destroy_cb = callback;
 	    }
-	}
+	};
 	
     }
     else if(features & transport.features.server){
@@ -288,9 +296,7 @@ exports.create = function(context, features, capsule){
 		if(typeof(callback) != 'function')
 		    return new error('callback is not a function', 'set a callback please');
 		_on_connect = callback;
- 		socket.listen();
-
-		return true;
+ 		return socket.listen();
 	    },
 	    "destroy" : function(){
 		for(key in clients){
@@ -300,7 +306,7 @@ exports.create = function(context, features, capsule){
 		socket.close();
 		clients = null;
 	    }
-	}
+	};
     }
 }
 

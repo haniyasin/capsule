@@ -2,6 +2,8 @@
  * server implementation api like sockets over http_responder
  */
 
+var error = require('../../../parts/error.js');
+
 function get_by_cli_id(array, cli_id, push){
     for(key in array){
 	if(array[key][0] == cli_id){
@@ -20,11 +22,19 @@ function response_holder(_incoming, capsule){
 
     var _packets = this.delayed_packets;
 
+    var _on_error_cb = function(error){
+	console.log(JSON.stringify(error));
+    };
+
+    this.on_error = function(callback){
+	_on_error_cb = callback;	
+    };
+
     this.get_waited_response = function(cli_id){
 	if(responses.length)
 	    return responses[cli_id].pop();
 	return null;
-    }
+    };
 
     this.activate = function(context){
 	extra_cleaner_timer = capsule.modules.timer.js.create(
@@ -86,13 +96,13 @@ function response_holder(_incoming, capsule){
 					       responses[_content.cli_id].push(response);	     
 					   }
 				       },
-				       function(error){console.log('response_holder is failed', error)});    
-    }
+				       function(nerror){_on_error_cb(new error(nerror.name, nerror.msg));});    
+    };
 
     this.deactivate = function(context){
 	capsule.modules.http_responder.remove_callback(context);	
 	extra_cleaner_timer.destroy();
-    }
+    };
 }
 
 function packet_sender(_holder){
@@ -102,7 +112,7 @@ function packet_sender(_holder){
 	    response.end(JSON.stringify(msg));
 	else
 	    _holder.delayed_packets.push([msg.cli_id, JSON.stringify(msg)]);
-    }
+    };
 }
 
 exports.create = function(context, capsule){
@@ -110,6 +120,9 @@ exports.create = function(context, capsule){
     var _incoming = new utils.msg_queue();
     var _holder = new response_holder(_incoming, capsule);
     var _sender = new packet_sender(_holder);
+    var _on_error_cb = function(erorr){
+	console.log(JSON.stringify(error));
+    };
     
     return {
 	'listen' : function(){
@@ -121,7 +134,7 @@ exports.create = function(context, capsule){
 				 if(typeof(clients[msg.cli_id]) == 'undefined'){
 				     connect_cb({	    
 						   'send' : function(data){
-						       _sender.send({"cli_id" : msg.cli_id, "msg" : data})
+						       _sender.send({"cli_id" : msg.cli_id, "msg" : data});
 						   },
 						   'on_recv' : function(callback){
 						       clients[msg.cli_id] = callback;  
@@ -131,9 +144,13 @@ exports.create = function(context, capsule){
 				     clients[msg.cli_id](msg.msg);
 			     });
 	},
+	'on_error' : function(callback){
+	    _on_error_cb = callback;
+	    _holder.on_error(callback);
+	},
 	'close' : function(){
 	    _holder.deactivate(context);
 	}	    
 	
-    }
+    };
 }
