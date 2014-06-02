@@ -1,11 +1,6 @@
 {
-    "dependencies" : {
-	"inline" : true,
-	"module_loader" : "platforms/browser/module_loader.js"
-    },
-    
     "capsule" : {
-	"modules" : {
+	"dependencies" : {
 	    "uuid" : "dependencies/uuid.js"
 	}
     }

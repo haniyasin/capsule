@@ -73,11 +73,12 @@ function assembler_constructor(dir){
 exports.assemble = function(dir, config){
     var assembler = assembler_constructor(dir);
     var generated = dutils.assemble(dir, assembler);
-    var modules = '';
-    generated.constructor = "function constructor(module_loader){\n return " 
+    generated.constructor = fs.readFileSync('platforms/browser/module_loader.js', 'utf8')
+        + "var console = { log : function(string){} };"
+	+ "function constructor(module_loader){\n return " 
 	+ generated.constructor + '}\n';
     if(config.values.hasOwnProperty('entry'))
-	generated.constructor += '(function(env){ env.' + config.values.entry + '(env);})(constructor(new env.dependencies.module_loader()))';
+	generated.constructor += '(function(env){ env.' + config.values.entry + '(env);})(constructor(new module_loader()))';
     else
 	console.log('entry point must will be setted in config.js');
 
@@ -85,7 +86,7 @@ exports.assemble = function(dir, config){
     config.values.state = 'assembled';
     config.write();	
     console.log('jhhhheee');
-    fs.writeFileSync(dir + '/assembled/application.js', modules + generated.constructor);
+    fs.writeFileSync(dir + '/assembled/application.js', generated.constructor);
 }
 
 exports.deploy = function(dir, config){
