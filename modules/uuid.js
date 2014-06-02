@@ -1,5 +1,5 @@
 var _uuid;
-if(typeof(window) == 'object')
+if(typeof(window) == 'object' && typeof(navigator) == 'object') //trying to detect what we inside browser
     _uuid = uuid;
 else
     _uuid = require('../dependencies/uuid.js');
