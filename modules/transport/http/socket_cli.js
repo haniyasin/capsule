@@ -4,8 +4,7 @@
 
 var error = require('../../../parts/error.js');
 
-function requests_holder(type, capsule){
-    var modules = capsule.modules;
+function requests_holder(type, modules){
     var requests = []; 
     var self = this;
 

@@ -15,7 +15,7 @@ function get_by_cli_id(array, cli_id, push){
     return null;	    
 }
 function response_holder(_incoming, capsule){
-    var ids = new capsule.parts.bb_allocator.create(bb_allocator.id_allocator);
+    var ids = new capsule.dependencies.bb_allocator.create(capsule.dependencies.bb_allocator.id_allocator);
     var responses = [];
     this.delayed_packets = [];
     var extra_cleaner_timer = null; //extra connection cleaner
@@ -116,7 +116,7 @@ function packet_sender(_holder){
 }
 
 exports.create = function(context, capsule){
-    var utils = capsule.parts.utils;
+    var utils = capsule.dependencies.utils;
     var _incoming = new utils.msg_queue();
     var _holder = new response_holder(_incoming, capsule);
     var _sender = new packet_sender(_holder);

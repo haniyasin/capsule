@@ -1,5 +1,5 @@
 const Soup = imports.gi.Soup;
-const Lang = imports.gi.lang;
+//const Lang = imports.gi.Lang;
 
 var _httpSession = new Soup.SessionAsync();
 Soup.Session.prototype.add_feature.call(_httpSession, new Soup.ProxyResolverDefault());
@@ -17,6 +17,7 @@ function request(){
     this.send = function(data){
 	_httpSession.queue_message(_req, 
 				   function(_httpSession, message) {
+				       print(message['response-body'].data);
 				      _on_recv(message['response-body'].data); 
 				   });
     };
@@ -26,15 +27,15 @@ function request(){
     };
 
     this.on_recv = function(cb){
-	_on_recv = recv_cb;
+	_on_recv = cb;
     };
 
     this.on_close = function(cb){
-	_on_close = closed_cb;
+	_on_close = cb;
     };
 
     this.on_error = function(cb){
-	_on_error = error_cb;
+	_on_error = cb;
     };
 }
 

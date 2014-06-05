@@ -1,8 +1,8 @@
 var DEBUG = 1;
-exports.test = function(context, modules){
+exports.test = function(context, capsule){
     console.log("transport.server testing is started...");
 
-    var socket = modules.transport.http.socket_srv.create(context, modules);
+    var socket = capsule.modules.transport.http.socket_srv.create(context, capsule);
 
     socket.on_connect(function(csocket){
 			  csocket.on_recv(function(msg){
@@ -14,6 +14,6 @@ exports.test = function(context, modules){
 			  }	
 		      })    
     socket.listen();
-    modules.timer.js.create(function(){socket.close()},
+    capsule.modules.timer.js.create(function(){socket.close()},
 			   30000, false);
 }
