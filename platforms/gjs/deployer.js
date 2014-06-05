@@ -74,11 +74,14 @@ exports.assemble = function(dir, config){
     var assembler = assembler_constructor(dir);
     var generated = dutils.assemble(dir, assembler);
     generated.constructor = fs.readFileSync('platforms/browser/module_loader.js', 'utf8')
-        + "var console = { log : function(string){} };"
+        + "var Gtk = imports.gi.Gtk;"
+        +  "Gtk.init(null);"
+
+        + "var console = { log : function(){log(JSON.stringify(arguments));} };"
 	+ "function constructor(module_loader){\n return " 
 	+ generated.constructor + '}\n';
     if(config.values.hasOwnProperty('entry'))
-	generated.constructor += '(function(env){ env.' + config.values.entry + '(env);})(constructor(new module_loader()))';
+	generated.constructor += '(function(env){ env.' + config.values.entry + '(env);})(constructor(new module_loader())); \n Gtk.main();';
     else
 	console.log('entry point must will be setted in config.js');
 
