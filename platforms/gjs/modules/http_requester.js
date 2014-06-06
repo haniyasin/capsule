@@ -8,22 +8,31 @@ function request(){
     var _req,
         _on_recv,
         _on_close,
-        _on_error;
+        _on_error,
+        _context;
 
     this.open = function(context){
+	_context = context;
 	_req = Soup.Message.new(context.method, context.url);
+	_req.connect('finished', _on_close);
     };
 
     this.send = function(data){
+	if(_context.method == 'POST')
+	    _req.set_request('text/json', 2, data, data.length);
 	_httpSession.queue_message(_req, 
 				   function(_httpSession, message) {
-				       print(message['response-body'].data);
-				      _on_recv(message['response-body'].data); 
+				      _on_recv(message['response-body'].data);
+				       _httpSession.cancel_message(_req, 1);
+				      _req.finished();
+				      _on_close();
 				   });
     };
 
     this.close = function(){
-	_httpSession.cancel_message(_req, 404);
+	_on_close();
+	_httpSession.cancel_message(_req, 1);
+	_req.finished();
     };
 
     this.on_recv = function(cb){

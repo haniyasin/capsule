@@ -77,7 +77,7 @@ exports.assemble = function(dir, config){
         + "var Gtk = imports.gi.Gtk;"
         +  "Gtk.init(null);"
 
-        + "var console = { log : function(){log(JSON.stringify(arguments));} };"
+        + "var console = { log : function(){print(JSON.stringify(arguments));} };"
 	+ "function constructor(module_loader){\n return " 
 	+ generated.constructor + '}\n';
     if(config.values.hasOwnProperty('entry'))
