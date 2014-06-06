@@ -1,0 +1,25 @@
+{
+    "preload" : true,
+    
+    "capsule" : {
+	"tests" : {
+	    "modules" :{
+		"uuid" : "tests/modules/uuid.js",
+		"timer" : "tests/modules/timer.js",
+		"ui" : {
+		    "Compositer" : "tests/modules/ui/Compositer.js"
+		},
+		"transport" : {
+		    "direct" : "tests/modules/transport/direct.js",
+		    
+		    "http" : {
+			"socket_cli" : "tests/modules/transport/http/socket_cli.js",
+			"socket_srv" : "tests/modules/transport/http/socket_srv.js",
+			"client" : "tests/modules/transport/http/client.js",
+			"server" : "tests/modules/transport/http/server.js"
+		    }
+		}		
+	    }
+	}
+    }
+}

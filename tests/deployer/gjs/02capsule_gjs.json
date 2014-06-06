@@ -5,7 +5,10 @@
 	},
 	
 	"modules" : {
-	    "http_requester" : "platforms/gjs/modules/http_requester.js"
+	    "http_requester" : "platforms/gjs/modules/http_requester.js",
+	    "ui" : {
+		"Compositer" : "platforms/gjs/modules/ui/Compositer.js"
+	    }
 	}
     }
 }

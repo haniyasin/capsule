@@ -6,7 +6,9 @@ exports.main = function(env){
 //    console.log(JSON.stringify(capsule.modules.transport.http));
     var thsocket = capsule.tests.modules.transport.http.socket_cli;
     
-    thsocket.test({ 'url' : 'http://localhost:8810/sockethh.js', 'method' : 'POST'}, capsule.modules);
+//    thsocket.test({ 'url' : 'http://localhost:8810/sockethh.js', 'method' : 'POST'}, capsule.modules);
+
+    capsule.tests.modules.ui.Compositer.test(capsule);
     
 //    var thttp = capsule.tests.modules.transport.http.client;
     
