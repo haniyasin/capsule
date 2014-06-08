@@ -90,15 +90,49 @@ function element(){
 }
 
 function animation(){
-    var animations = new Pool();
+    var anims = new Pool(),
+        binded = new Pool,
+        started = new Pool,
+        fps = 60,
+        timeline = null,
+        current_frame = null;
     return new element_proto('anim', {
-				 create : function(animation){
+				 create : function(chain){
+				     var frames = [];
+				     for(part in chain){
+					 var frame = {
+					     actions : []
+					 };
+					 with(chain[part]){
+					     for(action in actions){
+						 
+					     }					     
+					 }
+				     }
 				 },
 				 destroy : function(anim_id){
 				 },
 				 bind : function(anim_id){
 				 },
 				 unbind : function(binded_id){
+				 },
+				 start : function(binded_id){
+
+				     if(timeline == null){
+					 timeline = new Clutter.Timeline({duration : 1000});
+
+					 timeline.connect('new-frame', function() {
+							      for(action in current_frame.actions){
+								  current_frame.actions[action].do();	  
+							      }
+							      current_frame = current_frame.next;
+//							      element.actor.set_rotation(Clutter.RotateAxis.Z_AXIS, rotation, 200,0,0);
+							  });
+					 timeline.set_loop(true);
+					 timeline.start();					 
+				     }
+				 },
+				 stop : function(binded_id){
 				 }
 			     });
 }
@@ -302,16 +336,6 @@ function comp(){
     var element = elements.take(0);
     element.props_manager.apply_all();
     this.root_actor.add_actor(element.actor);
-
-    var timeline = new Clutter.Timeline({duration : 1000});
-    var rotation = 0;
-
-    timeline.connect('new-frame', function() {
-			 rotation += 0.3;
-			 element.actor.set_rotation(Clutter.RotateAxis.Z_AXIS, rotation, 200,0,0);
-		     });
-    timeline.set_loop(true);
-    timeline.start();
 
 //    print(JSON.stringify(this));
 }

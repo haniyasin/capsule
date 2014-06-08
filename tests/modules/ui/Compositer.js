@@ -13,4 +13,18 @@ exports.test = function(capsule){
     comp.frame_add(0, image);
     image = comp.image_create({ x : 130, y : 130, width : 50, height : 50, opacity : 0.8 });
     comp.frame_add(0, image);
+    var anim = comp.anim_create([
+				    {
+					duration : 500,
+					actions : {
+					    x : +50,
+					    y : +50
+					}
+				    },
+				    {
+					duration : {
+					    width : +60
+					}
+				    }
+			    ]);
 }
