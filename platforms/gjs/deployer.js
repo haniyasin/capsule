@@ -75,7 +75,8 @@ exports.assemble = function(dir, config){
     var generated = dutils.assemble(dir, assembler);
     generated.constructor = fs.readFileSync('platforms/browser/module_loader.js', 'utf8')
         + "var Gtk = imports.gi.Gtk;"
-        +  "Gtk.init(null);"
+        + "var GtkClutter = imports.gi.GtkClutter;"
+        +  "GtkClutter.init(null);"
 
         + "var console = { log : function(){print(JSON.stringify(arguments));} };"
 	+ "function constructor(module_loader){\n return " 

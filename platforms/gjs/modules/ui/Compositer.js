@@ -5,59 +5,95 @@
 
 const Gtk = imports.gi.Gtk;
 const Clutter = imports.gi.Clutter;
-
+const GtkClutter = imports.gi.GtkClutter;
 function frame(){
     return new element_proto('frame', {
-				 'create' : function(info){
-				     var element = element_obj_proto('surface');
+				 create : function(info){
+				     var element = new element_obj_proto(new Clutter.Actor(), info);
+				     element.childs = [];
+				     element.actor.show();
 				     return elements.put(element);
 				 },
-				 'destroy' : function(id){
+				 destroy : function(id){
 				     var element = elements.free(id);
 				 },
-				 'add' : function(parent_id, child_id){
+				 add : function(parent_id, child_id){
 				     var child = elements.take(child_id);
-				     if(!parent)
-					 this.root.add(child);
+				     if(!parent_id)
+					 this.root_actor.add_actor(child.actor);
+				     else {
+					 var parent = elements.take(parent_id);
+					 parent.childs.push(child);
+					 child.parent = parent;
+				     }
 				 }
 			     });
 }
 
 function image(){
     return  new element_proto('image', {
-				  'create' : function(info){
-				      var label = new Gtk.Label({ label : 'HOHOHO'});
-				      label.show();
-				      return label;
+				  create : function(info){
+				      var element = new element_obj_proto(new Clutter.Actor(), info);
+				      element.actor.show();
+				      var color = new Clutter.Color();
+				      color.alpha = 200;
+				      color.blue = Math.random() * 255;
+				      color.red = Math.random() * 255;
+				      color.green = Math.random() * 255;
+				      element.actor.set_background_color(color);
+				      return elements.put(element);
 				  },
-				  'destroy' : function(id){
+				  destroy : function(id){
 				  }
 			      });
 }
 
 function text(){
     return new element_proto('text', {
-				 'create' : function(info){
+				 create : function(info){
 				 },
-				 'destroy' : function(id){
+				 destroy : function(id){
 				 }
 			     });
 }
 
 function button(){
     return new element_proto('button', {
-				 'create' : function(info){
+				 create : function(info){
 				 },
-				 'destroy' : function(id){
+				 destroy : function(id){
 				 }
 			     });
 }
 
 function entry(){
     return new element_proto('entry', {
-				 'create' : function(info){
+				 create : function(info){
 				 },
-				 'destroy' : function(id){
+				 destroy : function(id){
+				 }
+			     });
+}
+
+function element(){
+    return new element_proto('elemement', {
+				 change_props : function(id, info){
+				     var element = elements.take(id);
+				     element.set_all(info);
+				 }
+			     });
+}
+
+function animation(){
+    var animations = new Pool();
+    return new element_proto('anim', {
+				 create : function(animation){
+				 },
+				 destroy : function(anim_id){
+				 },
+				 bind : function(anim_id){
+				 },
+				 unbind : function(binded_id){
 				 }
 			     });
 }
@@ -67,22 +103,95 @@ function element_proto(name, props){
     this.props = props;    
 }
 
-function element_obj_proto(surface){
-    this.surface = surface; //Clutter actor
+function elem_obj_props(element){
+    var types = {
+	x : {
+	    set : function(value){
+		if(typeof value == undefined)
+		    value = 0;
+		//проверяем не в процентах ли, конвертируем
+		element.actor.set_x(value);
+	    }
+	},
+	y : {
+	    set : function(value){
+		if(typeof value == undefined)
+		    value = 0;
+		element.actor.set_y(value);
+	    }
+	},
+	width : {
+	    set : function(value){
+		if(typeof value == undefined)
+		    value = 0;
+		element.actor.set_width(value);
+	    }
+	},
+	height : {
+	    set : function(value){
+		if(typeof value == undefined)
+		    value = 0;
+		element.actor.set_height(value);
+	    }
+	},
+	opacity : {
+	    set : function(value){
+		if(typeof value == undefined)
+		    value = 1;
+		element.actor.set_opacity(value * 255);
+	    }
+	}
+    };
+
+    this.set_all = function(info, init){
+	for(type in types){
+	    if(info.hasOwnProperty(type))
+		types[type].set(info[type]);
+	    else if(typeof init != undefined)
+		types[type].set();
+	}
+    };
 }
 
-var elements = {
-    'Pool' : [],
-    'put' : function(element){
-	
-    },
+function element_obj_proto(actor, info){
+    this.actor = actor; //Clutter actor
+    this.props = new elem_obj_props(this);
+    this.props.set_all(info, true);
+}
 
-    'take' : function(id){
-    },
+var Pool = function () {
+    this.pool = []; this.available = []; this.count = 0;
+    
+    return undefined;
+};
 
-    'free' : function(id){
+Pool.prototype.put = function (data) {
+    var id = this.available.shift();
+    
+    if (id === undefined) {
+        id = this.pool.push();
     }
-}
+    
+    this.pool[id] = data;
+    this.count++;
+    
+    return id;
+};
+
+Pool.prototype.take = function (id) {
+    return this.pool[id];
+};
+
+Pool.prototype.free = function (id) {
+    delete this.pool[id];
+    
+    this.available.push(id);
+    this.count--;
+    
+    return undefined;
+};
+
+var elements = new Pool();
 
 var manager = {
     'modules' : [],
@@ -109,17 +218,22 @@ manager.add(entry);
 
 function comp(){
     manager.assemble(this);
-/*
-//    Clutter.init('ee', 'erere');
-    var stage = Clutter.Stage.get_default();
-    stage.title = 'GJS Compositer module prototype';
-    stage.set_color(new Clutter.Color( {red:150, blue:0, green:0, alpha:255} ));
-    stage.show ();
-    //Clutter.main ();
-*/
+
     this.root = new Gtk.Window({ type : Gtk.WindowType.TOPLEVEL });
     this.root.title = 'GJS compositer module prototype';
     this.root.show();
+
+    var actor = new GtkClutter.Embed();
+    actor.show();
+    actor.set_size_request(800, 400);
+    this.root.add(actor);
+    var stage = this.root_actor  = actor.get_stage();
+    var color = new Clutter.Color();
+    color.alpha = 200;
+    color.blue = 150;
+    color.red = 240;
+    color.green = 250;
+    stage.set_background_color(color);
 //    print(JSON.stringify(this));
 }
 
