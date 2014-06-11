@@ -6,6 +6,9 @@
 const Gtk = imports.gi.Gtk;
 const Clutter = imports.gi.Clutter;
 const GtkClutter = imports.gi.GtkClutter;
+
+var error = require('../../../../parts/error.js');
+
 function frame(){
     return new element_proto('frame', {
 				 create : function(info){
@@ -83,8 +86,8 @@ function element(){
     return new element_proto('elemement', {
 				 change_props : function(id, info){
 				     var element = elements.take(id);
-				     element.set_all(info);
-				     element.apply_all();
+				     element.props_manager.set_all(info);
+				     element.props_manager.apply_all();
 				 }
 			     });
 }
@@ -92,41 +95,68 @@ function element(){
 function animation(){
     var anims = new Pool(),
         binded = new Pool,
-        started = new Pool,
+        started = [],
         fps = 60,
-        timeline = null,
-        current_frame = null;
+        timeline = null;
+
     return new element_proto('anim', {
 				 create : function(chain){
 				     var frames = [];
+				     var prev_frames_num = 0;
 				     for(part in chain){
-					 var frame = {
-					     actions : []
-					 };
+					 var frames_num = chain[part].duration / 1000 * fps;
 					 with(chain[part]){
-					     for(action in actions){
-						 
-					     }					     
+					     if(typeof duration == 'undefined')
+						 return new error('Compositer animation error', 'chain block has no duration propertie');
+					     if(typeof actions != 'undefined'){
+						 for(action in actions){
+						     var step = frames_num / actions[action];
+						     for(steps = step; steps < frames_num; steps += step){
+							 var frame_ind = steps - steps %1 + prev_frames_num;
+							 if(typeof frames[frame_ind] == 'undefined')
+							     frames[frame_ind] = {};
+							 
+							 frames[frame_ind][action] = step;
+						     }
+						 }						 
+					     }
 					 }
-				     }
+					 prev_frames_num = frames_num;
+				     }				     
+				     print(JSON.stringify(frames));
+				     return anims.put(frames);
 				 },
 				 destroy : function(anim_id){
+				     anims.free(anim_id);
 				 },
-				 bind : function(anim_id){
+				 bind : function(element_id, anim_id){
+				     var anim = anims.take(anim_id);
+				     return binded.put({ element : element_id, 
+							 cur_frame : 0, 
+							 frames : anim });
 				 },
 				 unbind : function(binded_id){
+				     binded.free(binded_id);
 				 },
 				 start : function(binded_id){
-
+				     started.push(binded_id);
 				     if(timeline == null){
 					 timeline = new Clutter.Timeline({duration : 1000});
 
 					 timeline.connect('new-frame', function() {
-							      for(action in current_frame.actions){
-								  current_frame.actions[action].do();	  
+							      for(sanim_ind in started){
+								  var banim = binded.take(started[sanim_ind]);
+								  var element = elements.take(banim.element);
+								  if(banim.cur_frame < banim.frames.length){
+								      var changing_props = banim.frames[banim.cur_frame];
+								      for (prop_name in changing_props){
+									  element.props_manager.update(prop_name, changing_props[prop_name]);
+//									  print(prop_name);
+								      }
+								      banim.cur_frame++;
+								  }
 							      }
-							      current_frame = current_frame.next;
-//							      element.actor.set_rotation(Clutter.RotateAxis.Z_AXIS, rotation, 200,0,0);
+//							      element.actor.set_rotation(Clutter.RotateAxis.Z_AXIS, rotation, 200,0,0);								  
 							  });
 					 timeline.set_loop(true);
 					 timeline.start();					 
@@ -152,20 +182,23 @@ function element_proto(name, props){
 }
 
 function props_manager(element){
+    var props = {
+	
+    };
     var types = {
 	x : {
 	    set : function(value){
 		if(typeof value == undefined)
 		    value = 0;
 
-		element.props.x = value;
+		props.x = value;
 	    },
 	    apply : function(){
-		var value = element.props.x;
+		var value = props.x;
 		//проверяем не в процентах ли, конвертируем
 		var percent_result = /^(\d{0,2})%/.exec(value);
 		if(percent_result != null){
-		    value = element.parent.props.width / 100 * percent_result[1];		    
+		    value = element.parent.props_manager.get('width') / 100 * percent_result[1];	    
 		}
 		element.actor.set_x(value);
 	    }
@@ -174,14 +207,14 @@ function props_manager(element){
 	    set : function(value){
 		if(typeof value == undefined)
 		    value = 0;
-		element.props.y = value;
+		props.y = value;
 	    },
 	    apply : function(){
-		var value = element.props.y;
+		var value = props.y;
 		//проверяем не в процентах ли, конвертируем
 		var percent_result = /^(\d{0,2})%/.exec(value);
 		if(percent_result != null){
-		    value = element.parent.props.height / 100 * percent_result[1];		    
+		    value = element.parent.props_manager.get('height') / 100 * percent_result[1];	    
 		}
 		element.actor.set_y(value);
 	    }
@@ -190,14 +223,14 @@ function props_manager(element){
 	    set : function(value){
 		if(typeof value == undefined)
 		    value = 0;
-		element.props.width = value;
+		props.width = value;
 	    },
 	    apply : function(){
-		var value = element.props.width;
+		var value = props.width;
 		//проверяем не в процентах ли, конвертируем
 		var percent_result = /^(\d{0,2})%/.exec(value);
 		if(percent_result != null && percent_result.length == 2){
-		    value = element.parent.props.width / 100 * percent_result[1];		    
+		    value = element.parent.props_manager.get('width') / 100 * percent_result[1];	    
 		}
 		element.actor.set_width(value);
 	    }
@@ -206,14 +239,14 @@ function props_manager(element){
 	    set : function(value){
 		if(typeof value == undefined)
 		    value = 0;
-		element.props.height = value;
+		props.height = value;
 	    },
 	    apply : function(){
-		var value = element.props.height;
+		var value = props.height;
 		//проверяем не в процентах ли, конвертируем
 		var percent_result = /^(\d{0,2})%/.exec(value);
 		if(percent_result != null && percent_result.length == 2){
-		    value = element.parent.props.height / 100 * percent_result[1];		    
+		    value = element.parent.props_manager.get('height') / 100 * percent_result[1];		    
 		}
 		element.actor.set_height(value);
 	    }
@@ -222,12 +255,26 @@ function props_manager(element){
 	    set : function(value){
 		if(typeof value == undefined)
 		    value = 1;
-		element.props.opacity = value;
+		props.opacity = value;
 	    },
 	    apply : function(){
-		element.actor.set_opacity(element.props.opacity * 255);
+		element.actor.set_opacity(props.opacity * 255);
 	    }
 	}
+    };
+
+    this.get = function(name){
+	return props[name];	
+    };
+
+    this.set = function(name, value){
+	props[name] = value;
+    };
+
+    this.update = function(name, inc_value){
+	props[name] += inc_value;
+	types[name].apply();
+	print(name, props[name]);
     };
 
     this.set_all = function(info, init){
@@ -240,16 +287,16 @@ function props_manager(element){
     };
 
     this.apply_all = function(){
-	for(prop in element.props){
+	for(prop in props){
 	    types[prop].apply();
 	}
     };
+
 }
 
 function element_obj_proto(actor, info){
     this.actor = actor; //Clutter actor
     this.props_manager = new props_manager(this);
-    this.props = {};
     this.props_manager.set_all(info, true);
 }
 

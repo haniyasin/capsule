@@ -22,9 +22,13 @@ exports.test = function(capsule){
 					}
 				    },
 				    {
-					duration : {
+					duration : 600,
+					actions : {
 					    width : +60
 					}
 				    }
 			    ]);
+
+    var banim = comp.anim_bind(image, anim);
+    comp.anim_start(banim);
 }
