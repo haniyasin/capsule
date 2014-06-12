@@ -3,9 +3,11 @@ var DEBUG = 1;
 exports.test = function(capsule){
     var comp = capsule.modules.ui.Compositer.create();
     
-    var image = comp.image_create({ x : 10, y : 10, width : 50, height : 50, opacity : 0.8 });
+    var image = comp.image_create({ x : 10, y : 10, width : 50, height : 50, opacity : 0.8,
+				    source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY3growIAAycBLhVrvukAAAAASUVORK5CYII='});
     comp.frame_add(0, image);
-    image = comp.image_create({ x : 40, y : 40, width : 50, height : 50, opacity : 0.8 });
+    image = comp.image_create({ x : 40, y : 40, width : 50, height : 50, opacity : 0.8,
+				source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2D4zwAAAgIBANHTRkQAAAAASUVORK5CYII='});
     comp.frame_add(0, image);
     image = comp.image_create({ x : 70, y : 70, width : 50, height : 50, opacity : 0.8 });
     comp.frame_add(0, image);
@@ -55,10 +57,10 @@ exports.test = function(capsule){
 			    ]);
 
     var banim1 = comp.anim_bind(image1, anim);
-    var banim = comp.anim_bind(image, anim);
+    var banim = comp.anim_bind(0, anim);
     comp.anim_start(banim1);
     comp.anim_start(banim);
     const GLib = imports.gi.GLib;
     print(GLib.base64_encode('lalaltttt'));
-    comp.event_register(image1, 'animation_stopped', function() {print(uhaha)});
+    comp.event_register(image1, 'animation_stopped', function(event_name) {print('uhaha', event_name)});
 }

@@ -3,11 +3,23 @@
  * author Nikita Zaharov aka ix(ix@2du.ru)
  */
 
+const GLib = imports.gi.GLib;
 const Gtk = imports.gi.Gtk;
+const GdkPixbuf = imports.gi.GdkPixbuf;
+const Cogl = imports.gi.Cogl;
 const Clutter = imports.gi.Clutter;
 const GtkClutter = imports.gi.GtkClutter;
 
 var error = require('../../../../parts/error.js');
+
+function set_random_background(actor){
+    var color = new Clutter.Color();
+    color.alpha = 200;
+    color.blue = Math.random() * 255;
+    color.red = Math.random() * 255;
+    color.green = Math.random() * 255;
+    actor.set_background_color(color);    
+}
 
 function frame(){
     return new element_proto('frame', {
@@ -15,12 +27,7 @@ function frame(){
 				     var element = new element_obj_proto(new Clutter.Actor(), info);
 				     element.childs = [];
 				     element.actor.show();
-				     var color = new Clutter.Color();
-				     color.alpha = 200;
-				     color.blue = Math.random() * 255;
-				     color.red = Math.random() * 255;
-				     color.green = Math.random() * 255;
-				     element.actor.set_background_color(color);
+				     set_random_background(element.actor);    
 				     return elements.put(element);
 				 },
 				 destroy : function(id){
@@ -43,12 +50,32 @@ function image(){
 				  create : function(info){
 				      var element = new element_obj_proto(new Clutter.Actor(), info);
 				      element.actor.show();
-				      var color = new Clutter.Color();
-				      color.alpha = 200;
-				      color.blue = Math.random() * 255;
-				      color.red = Math.random() * 255;
-				      color.green = Math.random() * 255;
-				      element.actor.set_background_color(color);
+				      if(info.hasOwnProperty('source')){
+					  var re_result;
+					  if(re_result = /data:image\/(\w+);base64,/.exec(info.source)){
+					      var data = info.source.substr(re_result[0].length);
+					      if( re_result[1] == 'png'){
+						  var loader = GdkPixbuf.PixbufLoader.new_with_type('png');
+						  print(loader.write(GLib.base64_decode(data)));
+						  loader.set_size(100, 100);
+						  var pixbuf = loader.get_pixbuf();
+						  element.image = new Clutter.Image();
+						  element.image.set_data(pixbuf.get_pixels(),
+									 pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888,
+									 pixbuf.get_width(),
+									 pixbuf.get_height(),
+									 pixbuf.get_rowstride());
+						  element.actor.content = element.image;
+					      } else if( re_result[1] == 'svg'){
+					      }
+					      
+					  } else
+					      return error('comp.image', 'invalid content of source field');
+					     
+				      } else {
+					  print('comp.image', 'please set image.source');
+					  set_random_background(element.actor);    
+				      }
 				      return elements.put(element);
 				  },
 				  destroy : function(id){
@@ -143,7 +170,7 @@ function animation(){
 				     started.push(binded_id);
 				     if(timeline == null){
 					 timeline = new Clutter.Timeline({duration : 1000});
-
+					 var comp = this;
 					 timeline.connect('new-frame', function() {
 							      for(sanim_ind in started){
 								  var banim = binded.take(started[sanim_ind]);
@@ -156,7 +183,11 @@ function animation(){
 								      }
 								      banim.cur_frame++;
 								  }else{
-								      this.event__emit(banim.element, 'animation_stopped');
+								      comp.event__emit(banim.element, 'animation_stopped');
+								      for(key in started){
+									  if(started[key] == started[sanim_ind])
+									      started.splice(sanim_ind, 1);
+								      }
 								  }
 							      }
 //							      element.actor.set_rotation(Clutter.RotateAxis.Z_AXIS, rotation, 200,0,0);								  
