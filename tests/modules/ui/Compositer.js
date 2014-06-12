@@ -9,7 +9,7 @@ exports.test = function(capsule){
     image = comp.image_create({ x : 40, y : 40, width : 50, height : 50, opacity : 0.8,
 				source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2D4zwAAAgIBANHTRkQAAAAASUVORK5CYII='});
     comp.frame_add(0, image);
-    image = comp.image_create({ x : 70, y : 70, width : 50, height : 50, opacity : 0.8 });
+    image = comp.image_create({ x : '70%', y : 70, width : '50%', height : 50, opacity : 0.8 });
     comp.frame_add(0, image);
     var image1 = comp.image_create({ x : 100, y : 100, width : 50, height : 50, opacity : 0.8 });
     comp.frame_add(0, image1);

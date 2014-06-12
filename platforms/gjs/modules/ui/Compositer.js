@@ -57,7 +57,7 @@ function image(){
 					      if( re_result[1] == 'png'){
 						  var loader = GdkPixbuf.PixbufLoader.new_with_type('png');
 						  print(loader.write(GLib.base64_decode(data)));
-						  loader.set_size(100, 100);
+					//	  loader.set_size(100, 100);
 						  var pixbuf = loader.get_pixbuf();
 						  element.image = new Clutter.Image();
 						  element.image.set_data(pixbuf.get_pixels(),
@@ -178,7 +178,8 @@ function animation(){
 								  if(banim.cur_frame < banim.frames.length){
 								      var changing_props = banim.frames[banim.cur_frame];
 								      for (prop_name in changing_props){
-									  element.props_manager.update(prop_name, changing_props[prop_name]);
+									  element.props_manager[prop_name].update(changing_props[prop_name]);
+									  element.props_manager[prop_name].apply();
 //									  print(prop_name);
 								      }
 								      banim.cur_frame++;
@@ -233,113 +234,88 @@ function element_proto(name, props){
 }
 
 function props_manager(element){
-    var props = {
-	
-    };
     var types = {
-	x : {
-	    set : function(value){
-		if(typeof value == undefined)
-		    value = 0;
+	x : 'true',
+	y : 'true',
+	width : 'true',
+	height : 'true',
+	opacity : 'true'
+    };
 
-		props.x = value;
-	    },
-	    apply : function(){
-		var value = props.x;
-		//проверяем не в процентах ли, конвертируем
-		var percent_result = /^(\d{0,2})%/.exec(value);
-		if(percent_result != null){
-		    value = element.parent.props_manager.get('width') / 100 * percent_result[1];	    
-		}
-		element.actor.set_x(value);
+    function geometry_prop(prop_name){
+	this.value = 0,
+	this.type = 'p';
+
+	this.set = function(value){
+	    if(typeof value == undefined)
+		return;
+	    
+	    var re_result;
+	    if(re_result = /^(\d+)%$/.exec(value)){
+		this.value = re_result[1];
+		this.type = '%';
+	    } else {
+		this.value = value;
+	    	this.type = 'p';
 	    }
+	};
+
+	this.get = function(){
+	    if(this.type == 'p')
+		return this.value;
+	    else
+		return element.parent.props_manager[prop_name].get() / 100 * this.value;	    
+	};
+
+	this.update = function(inc_value){
+	    var re_result;
+	    if(re_result = /^(\d+)%$/.exec(inc_value)){
+		this.value += re_result[1];
+		this.type = '%';
+	    } else {
+		this.value += inc_value;
+	    	this.type = 'p';
+	    }	    
+	};
+
+	this.apply = function(){
+	    var value = this.value;
+	    if(this.type == '%')
+		this.value = element.parent.props_manager[prop_name].get() / 100 * this.value;	    
+
+	    element.actor['set_' + prop_name](value);
+	};	
+    }
+
+    this.x = new geometry_prop('x');
+    this.y = new geometry_prop('y');
+    this.width = new geometry_prop('width');
+    this.height = new geometry_prop('height');
+    this.opacity = {
+	value : 0,
+	type : '&',
+	set : function(value){
+	    if(typeof value == undefined)
+		value = 1;
+	    this.value = value;
 	},
-	y : {
-	    set : function(value){
-		if(typeof value == undefined)
-		    value = 0;
-		props.y = value;
-	    },
-	    apply : function(){
-		var value = props.y;
-		//проверяем не в процентах ли, конвертируем
-		var percent_result = /^(\d{0,2})%/.exec(value);
-		if(percent_result != null){
-		    value = element.parent.props_manager.get('height') / 100 * percent_result[1];	    
-		}
-		element.actor.set_y(value);
-	    }
-	},
-	width : {
-	    set : function(value){
-		if(typeof value == undefined)
-		    value = 0;
-		props.width = value;
-	    },
-	    apply : function(){
-		var value = props.width;
-		//проверяем не в процентах ли, конвертируем
-		var percent_result = /^(\d{0,2})%/.exec(value);
-		if(percent_result != null && percent_result.length == 2){
-		    value = element.parent.props_manager.get('width') / 100 * percent_result[1];	    
-		}
-		element.actor.set_width(value);
-	    }
-	},
-	height : {
-	    set : function(value){
-		if(typeof value == undefined)
-		    value = 0;
-		props.height = value;
-	    },
-	    apply : function(){
-		var value = props.height;
-		//проверяем не в процентах ли, конвертируем
-		var percent_result = /^(\d{0,2})%/.exec(value);
-		if(percent_result != null && percent_result.length == 2){
-		    value = element.parent.props_manager.get('height') / 100 * percent_result[1];		    
-		}
-		element.actor.set_height(value);
-	    }
-	},
-	opacity : {
-	    set : function(value){
-		if(typeof value == undefined)
-		    value = 1;
-		props.opacity = value;
-	    },
-	    apply : function(){
-		element.actor.set_opacity(props.opacity * 255);
-	    }
+	apply : function(){
+	    element.actor.set_opacity(this.value * 255);
 	}
-    };
-
-    this.get = function(name){
-	return props[name];	
-    };
-
-    this.set = function(name, value){
-	props[name] = value;
-    };
-
-    this.update = function(name, inc_value){
-	props[name] += inc_value;
-	types[name].apply();
-//	print(name, inc_value);
     };
 
     this.set_all = function(info, init){
 	for(type in types){
 	    if(info.hasOwnProperty(type))
-		types[type].set(info[type]);
+		this[type].set(info[type]);
 	    else if(typeof init != undefined)
-		types[type].set();
+		this[type].set();
 	}
     };
 
     this.apply_all = function(){
-	for(prop in props){
-	    types[prop].apply();
+	for(prop in types){
+	    this[prop].apply();
 	}
     };
 
