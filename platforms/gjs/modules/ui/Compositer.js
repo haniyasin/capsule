@@ -25,6 +25,7 @@ function frame(){
 				 },
 				 destroy : function(id){
 				     var element = elements.free(id);
+				     element.actor.unref();
 				 },
 				 add : function(parent_id, child_id){
 				     var child = elements.take(child_id);
@@ -110,9 +111,9 @@ function animation(){
 						 return new error('Compositer animation error', 'chain block has no duration propertie');
 					     if(typeof actions != 'undefined'){
 						 for(action in actions){
-						     var step = frames_num / actions[action];
-						     for(steps = step; steps < frames_num; steps += step){
-							 var frame_ind = steps - steps %1 + prev_frames_num;
+						     var step = actions[action] / frames_num;
+						     for(steps = step; Math.abs(steps) < frames_num; steps += step){
+							 var frame_ind = Math.abs(steps - steps %1 + prev_frames_num);
 							 if(typeof frames[frame_ind] == 'undefined')
 							     frames[frame_ind] = {};
 							 
@@ -121,9 +122,9 @@ function animation(){
 						 }						 
 					     }
 					 }
-					 prev_frames_num = frames_num;
+					 prev_frames_num += frames_num;
 				     }				     
-				     print(JSON.stringify(frames));
+//				     print(JSON.stringify(frames));
 				     return anims.put(frames);
 				 },
 				 destroy : function(anim_id){
@@ -154,6 +155,8 @@ function animation(){
 //									  print(prop_name);
 								      }
 								      banim.cur_frame++;
+								  }else{
+								      this.event__emit(banim.element, 'animation_stopped');
 								  }
 							      }
 //							      element.actor.set_rotation(Clutter.RotateAxis.Z_AXIS, rotation, 200,0,0);								  
@@ -168,10 +171,27 @@ function animation(){
 }
 
 function event(){
+    var listened_elems = {
+    };
+
     return new element_proto('event', {
-				 register : function(element_id, event_name){
+				 _emit : function(element_id, event_name){
+				     if(listened_elems.hasOwnProperty(element_id)){
+					 if(listened_elems[element_id].hasOwnProperty(event_name)){
+					     listened_elems[element_id][event_name](event_name);
+					 }
+				     }
+				 },
+
+				 register : function(element_id, event_name, callback){
+				     if(!listened_elems.hasOwnProperty(element_id))
+					 listened_elems[element_id] = {};
+				     listened_elems[element_id][event_name] = callback;
 				 },
 				 unregister : function(element_id, event_name){
+				     if(!listened_elems.hasOwnProperty(element_id))
+					 return new error('event unregister', 'element pointed to has no exists');
+				     delete listened_elems[element_id][event_name];
 				 }
 			     });
 }
@@ -274,7 +294,7 @@ function props_manager(element){
     this.update = function(name, inc_value){
 	props[name] += inc_value;
 	types[name].apply();
-	print(name, props[name]);
+//	print(name, inc_value);
     };
 
     this.set_all = function(info, init){
