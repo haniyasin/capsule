@@ -17,7 +17,7 @@ function slideup_cubes_test(comp){
 				    {
 					duration : 1000,
 					actions : {
-					    x : 200
+					    x : 100
 					}
 				    },
 				    {
@@ -49,7 +49,7 @@ function slideup_cubes_test(comp){
 				    {
 					duration : 1000,
 					actions : {
-					    x : -200
+					    x : -100
 					}
 				    }
 			    ]);
@@ -62,8 +62,14 @@ function slideup_cubes_test(comp){
     comp.anim_start(banim_green);
     comp.anim_start(banim1);
     comp.anim_start(banim);
-    comp.event_register(image1, 'animation_stopped', function(event_name) {print('uhaha', event_name)});    
-};
+    comp.event_register(banim_red, 'animation_stopped', function(event_name) {
+			    comp.anim_start(banim_red);
+			    comp.anim_start(banim_green);
+			    comp.anim_start(banim1);
+			    comp.anim_start(banim);
+			    print('uhaha', event_name)
+			});  
+    };
 
 function original_test2(comp){
     var root = 0,
@@ -159,7 +165,7 @@ function original_test2(comp){
 
     bind = comp.anim_bind(frame, anim);
 
-    comp.event_register(frame, 'animation_stopped', function(eventName, eventData){
+    comp.event_register(bind, 'animation_stopped', function(eventName, eventData){
 			    print('mugaga');
 				     comp.anim_start(bind);
 			});
@@ -175,6 +181,6 @@ function original_test2(comp){
 
 exports.test = function(capsule){
     var comp = capsule.modules.ui.Compositer.create();
-//    slideup_cubes_test(comp);    
+    slideup_cubes_test(comp);    
     original_test2(comp);
 };

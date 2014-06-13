@@ -124,7 +124,7 @@ function animation(){
     var anims = new Pool(),
         binded = new Pool,
         started = [],
-        fps = 60,
+        fps = 30,
         timeline = null;
 
     return new element_proto('anim', {
@@ -137,14 +137,13 @@ function animation(){
 					     if(typeof duration == 'undefined')
 						 return new error('Compositer animation error', 'chain block has no duration propertie');
 					     if(typeof actions != 'undefined'){
+						 var new_frames_num = prev_frames_num + frames_num;
 						 for(action in actions){
 						     var step = actions[action] / frames_num;
-						     for(steps = step; Math.abs(steps) < frames_num; steps += step){
-							 var frame_ind = Math.abs(steps - steps %1 + prev_frames_num);
-							 if(typeof frames[frame_ind] == 'undefined')
-							     frames[frame_ind] = {};
-							 
-							 frames[frame_ind][action] = step;
+						     for(ind = prev_frames_num;  ind < new_frames_num; ind++){
+							 if(typeof frames[ind] == 'undefined')
+							     frames[ind] = {};
+							 frames[ind][action] = step;
 						     }
 						 }						 
 					     }
@@ -159,14 +158,15 @@ function animation(){
 				 },
 				 bind : function(element_id, anim_id){
 				     var anim = anims.take(anim_id);
-				     return binded.put({ element : element_id, 
-							 cur_frame : 0, 
+				     return binded.put({ element : element_id,  
 							 frames : anim });
 				 },
 				 unbind : function(binded_id){
 				     binded.free(binded_id);
 				 },
 				 start : function(binded_id){
+				     var banim = binded.take(binded_id);
+				     banim.cur_frame = 0;
 				     started.push(binded_id);
 				     if(timeline == null){
 					 timeline = new Clutter.Timeline({duration : 1000});
@@ -184,10 +184,10 @@ function animation(){
 								      }
 								      banim.cur_frame++;
 								  }else{
-								      comp.event__emit(banim.element, 'animation_stopped');
-								      for(key in started){
-									  if(started[key] == started[sanim_ind])
-									      started.splice(sanim_ind, 1);
+								      if(typeof started[sanim_ind] != 'indefined'){
+									  var ended_anim = started[sanim_ind];
+									  started.splice(sanim_ind, 1);
+									  comp.event__emit(ended_anim, 'animation_stopped');
 								      }
 								  }
 							      }
