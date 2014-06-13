@@ -1,5 +1,5 @@
 /*
- * gjs platform Compositer module based on modern gnome technologies - mix of clutter and gtk+
+ * Compositer module based on modern gnome technologies - mix of clutter and gtk+
  * author Nikita Zaharov aka ix(ix@2du.ru)
  */
 
@@ -242,17 +242,19 @@ function props_manager(element){
 	opacity : 'true'
     };
 
-    function geometry_prop(prop_name){
+    function geometry_prop(prop_name, parent_prop_name){
+	if(typeof parent_prop_name == 'undefined')
+	    parent_prop_name = prop_name;
 	this.value = 0,
 	this.type = 'p';
 
 	this.set = function(value){
-	    if(typeof value == undefined)
+	    if(typeof value == 'undefined')
 		return;
 	    
 	    var re_result;
 	    if(re_result = /^(\d+)%$/.exec(value)){
-		this.value = re_result[1];
+		this.value = parseInt(re_result[1]);
 		this.type = '%';
 	    } else {
 		this.value = value;
@@ -263,40 +265,33 @@ function props_manager(element){
 	this.get = function(){
 	    if(this.type == 'p')
 		return this.value;
-	    else
-		return element.parent.props_manager[prop_name].get() / 100 * this.value;	    
+	    else if (element.hasOwnProperty('parent'))
+		return element.parent.props_manager[parent_prop_name].get() / 100 * this.value;	    
 	};
 
 	this.update = function(inc_value){
-	    var re_result;
-	    if(re_result = /^(\d+)%$/.exec(inc_value)){
-		this.value += re_result[1];
-		this.type = '%';
-	    } else {
-		this.value += inc_value;
-	    	this.type = 'p';
-	    }	    
+	    this.value += inc_value;
 	};
 
 	this.apply = function(){
 	    var value = this.value;
-	    if(this.type == '%')
-		this.value = element.parent.props_manager[prop_name].get() / 100 * this.value;	    
+	    if(this.type == '%' && element.hasOwnProperty('parent')){
+		value = element.parent.props_manager[parent_prop_name].get() / 100 * this.value;
+	    }
 
 	    element.actor['set_' + prop_name](value);
 	};	
     }
 
-    this.x = new geometry_prop('x');
-    this.y = new geometry_prop('y');
+    this.x = new geometry_prop('x', 'width');
+    this.y = new geometry_prop('y', 'height');
     this.width = new geometry_prop('width');
     this.height = new geometry_prop('height');
     this.opacity = {
-	value : 0,
-	type : '&',
+	value : 1,
 	set : function(value){
-	    if(typeof value == undefined)
-		value = 1;
+	    if(typeof value == 'undefined')
+		return;
 	    this.value = value;
 	},
 	apply : function(){
@@ -316,6 +311,15 @@ function props_manager(element){
     this.apply_all = function(){
 	for(prop in types){
 	    this[prop].apply();
+	}
+	if(typeof element.childs != 'undefined'){
+	    //this is frame
+		print('eeerrr');
+	    for(child in element.childs){
+		for(prop in types){
+		    element.childs[child].props_manager[prop].apply();
+		}
+	    }
 	}
     };
 
