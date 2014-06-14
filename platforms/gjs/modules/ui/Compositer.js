@@ -31,8 +31,10 @@ function frame(){
 				     return elements.put(element);
 				 },
 				 destroy : function(id){
-				     var element = elements.free(id);
+				     var element = elements.take(id);
+				     elements.free(id);
 				     element.actor.unref();
+				     element = undefined;
 				 },
 				 add : function(parent_id, child_id){
 				     var child = elements.take(child_id);
@@ -41,6 +43,12 @@ function frame(){
 				     child.parent = parent;
 				     parent.actor.add_actor(child.actor);
 				     child.props_manager.apply_all();
+				 },
+				 remove : function(parent_id, child_id){
+				     var parent = elements.take(parent_id);
+				     var child = elements.take(child_id);
+				     parent.actor.remove_child(child.actor);
+				     child.parent = undefined;
 				 }
 			     });
 }
@@ -79,6 +87,10 @@ function image(){
 				      return elements.put(element);
 				  },
 				  destroy : function(id){
+				      var element = elements.take(id);
+				      element.actor.unref();
+				      element.image.unref();
+				      elements.free(id);
 				  }
 			      });
 }
@@ -86,8 +98,16 @@ function image(){
 function text(){
     return new element_proto('text', {
 				 create : function(info){
+				     var element = new element_obj_proto(new Clutter.Text(), info);
+				     if(!info.hasOwnProperty('text'))
+					 info.text = 'text';
+				     element.actor.set_text(info.text);
+				     element.actor.show();
+				     return elements.put(element);
 				 },
 				 destroy : function(id){
+				     elements.take(id).actor.unref();
+				     elements.free(id);
 				 }
 			     });
 }
@@ -124,7 +144,7 @@ function animation(){
     var anims = new Pool(),
         binded = new Pool,
         started = [],
-        fps = 30,
+        fps = 60,
         timeline = null;
 
     return new element_proto('anim', {
@@ -228,11 +248,34 @@ function event(){
 					 listened_elems[element_id] = {};
 				     listened_elems[element_id][event_name] = callback;
 				     var element = elements.take(element_id);
+				     element.actor.reactive = true;
 				     switch(event_name){
 					 case 'pointer_down' :
-					 print('bgo');
-					 element.actor.reactive = true;
 					 element.actor.connect('button-press-event', callback);
+					 break;
+
+					 case 'pointer_up' : 
+					 element.actor.connect('button-release-event', callback);
+					 break;
+
+					 case 'pointer_in' :
+					 element.actor.connect('enter-event', callback);
+					 break;
+
+					 case 'pointer_out' :
+					 element.actor.connect('leave-event', callback);
+					 break;
+
+					 case 'pointer_motion' : 
+					 element.actor.connect('motion-event', callback);
+					 break;
+
+					 case 'key_down' :
+					 element.actor.connect('key-press-event', callback);
+					 break;
+
+					 case 'key_up' : 
+					 element.actor.connect('key-release-event', callback);
 					 break;
 				     }
 				 },
