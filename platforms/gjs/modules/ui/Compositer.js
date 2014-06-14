@@ -115,8 +115,27 @@ function text(){
 function button(){
     return new element_proto('button', {
 				 create : function(info){
+				     if(!info.hasOwnProperty('label'))
+					 info.label = 'button';
+				     var widget = new Gtk.Button.new_with_label(info.label);
+				     var element = new element_obj_proto(new GtkClutter.Actor.new_with_contents(widget), info);
+				     element.widget = widget;
+				     element.actor.show();
+				     element.control = {
+					 on_press : function(callback){
+					     element.widget.connect('pressed', callback);
+					 }
+				     };
+				     return elements.put(element);
+				 },
+				 get_control : function(id){
+				     return elements.take(id).control;
 				 },
 				 destroy : function(id){
+				     var element = elements.take(id);
+				     element.actor.unref();
+				     element.widget.unref();
+				     elements.free(id);
 				 }
 			     });
 }
@@ -124,8 +143,28 @@ function button(){
 function entry(){
     return new element_proto('entry', {
 				 create : function(info){
+				     if(!info.hasOwnProperty('placeholder'))
+					 info.placeholder = 'enter text';
+				     var widget = new Gtk.Entry();
+				     widget.set_placeholder_text(info.placeholder);
+				     var element = new element_obj_proto(new GtkClutter.Actor.new_with_contents(widget), info);
+				     element.widget = widget;
+				     element.actor.show();
+				     element.control = {
+					 'on_text_change' : function(callback){
+					     element.widget.connect('activate', callback);
+					 }
+				     };
+				     return elements.put(element);
+				 },
+				 get_control : function(id){
+				     return elements.take(id).control;				     
 				 },
 				 destroy : function(id){
+				     var element = elements.take(id);
+				     element.actor.unref();
+				     element.widget.unref();
+				     elements.free(id);
 				 }
 			     });
 }
@@ -471,7 +510,7 @@ function comp(){
     color.red = 240;
     color.green = 250;
     stage.set_background_color(color);
-    this.frame_create({ x : 50, y : 50, width : 400, height : 300, opacity : 0.9 });
+    this.frame_create({ x : 50, y : 50, width : 700, height : 300, opacity : 0.9 });
     var element = elements.take(0);
     element.props_manager.apply_all();
     this.root_actor.add_actor(element.actor);

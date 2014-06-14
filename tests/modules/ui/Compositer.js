@@ -328,10 +328,18 @@ function create_move_remove_test(comp){
     text = comp.text_create({ x : '10%', y : '5%', width : '80%', height : '90%', opacity : 0.9, text : 'haha'}),
     frame = comp.frame_create( { x : '5%', y : '5%', width : '50%', height : '50%', opacity : 0.5 }),
     frame_t = comp.frame_create( { x : 40, y : 40, width : 50, height : 50, opacity : 0.8 });
-    comp.frame_add(frame, rand);
     comp.frame_add(frame_t, green);
     comp.frame_add(frame_t, text);
-    comp.frame_add(frame, frame_t);
+
+    var button = comp.button_create( { x : 70, y : 60, width : 100, height : 50, opacity : 0.8, label : 'click' });
+    comp.button_get_control(button).on_press(function(){print('button is pressed')});
+    var entry = comp.entry_create( { x : 40, y : 100, width : 150, height : 30, opacity : 0.8, placeholder : 'печатайте что-нибудь' });
+    comp.entry_get_control(entry).on_text_change(function(){print('text is changed')});
+
+    comp.frame_add(frame, rand);
+    comp.frame_add(frame, frame_t); 
+    comp.frame_add(frame, button);
+    comp.frame_add(frame, entry);
     comp.frame_add(0, frame);
 
     var anim = comp.anim_create([
