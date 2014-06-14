@@ -133,6 +133,15 @@ function animation(){
 				     var prev_frames_num = 0;
 				     for(part in chain){
 					 var frames_num = chain[part].duration / 1000 * fps;
+					 if(chain[part].duration == 0){
+					     with(chain[part]){
+						 frames[prev_frames_num] = {};
+						 for(action in actions){
+						     frames[prev_frames_num][action] = actions[action];
+						 }						 
+					     }
+					     prev_frames_num++;
+					 }
 					 with(chain[part]){
 					     if(typeof duration == 'undefined')
 						 return new error('Compositer animation error', 'chain block has no duration propertie');
@@ -150,7 +159,6 @@ function animation(){
 					 }
 					 prev_frames_num += frames_num;
 				     }				     
-//				     print(JSON.stringify(frames));
 				     return anims.put(frames);
 				 },
 				 destroy : function(anim_id){
@@ -219,6 +227,14 @@ function event(){
 				     if(!listened_elems.hasOwnProperty(element_id))
 					 listened_elems[element_id] = {};
 				     listened_elems[element_id][event_name] = callback;
+				     var element = elements.take(element_id);
+				     switch(event_name){
+					 case 'pointer_down' :
+					 print('bgo');
+					 element.actor.reactive = true;
+					 element.actor.connect('button-press-event', callback);
+					 break;
+				     }
 				 },
 				 unregister : function(element_id, event_name){
 				     if(!listened_elems.hasOwnProperty(element_id))
@@ -395,6 +411,8 @@ manager.add(event);
 function comp(){
     manager.assemble(this);
 
+    Gtk.init(null);
+    Clutter.init(null);
     this.root = new Gtk.Window({ type : Gtk.WindowType.TOPLEVEL });
     this.root.title = 'GJS compositer prototype';
     this.root.show();
@@ -414,6 +432,8 @@ function comp(){
     var element = elements.take(0);
     element.props_manager.apply_all();
     this.root_actor.add_actor(element.actor);
+    this.root_actor.reactive = true;
+    this.root_actor.connect('button-press-event', function(){print('yayaya')})
 
 //    print(JSON.stringify(this));
 }

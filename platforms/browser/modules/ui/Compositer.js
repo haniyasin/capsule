@@ -205,6 +205,7 @@ var comp = (function () {
         if (typeof object.color === 'string') {
             this.html.style.backgroundColor = object.color;
         }
+	this.html.ondragstart = function(){ return false; };
     };
 
 
@@ -226,6 +227,7 @@ var comp = (function () {
         }
 
         this.html.alt = '';
+	this.html.ondragstart = function(){ return false; };
     };
 
 
@@ -308,6 +310,63 @@ var comp = (function () {
         target.html.style.lineHeight = height   + 'px';
     };
 
+    /*Entry unit*/
+
+    Unit.prototype.types['entry'] = function (object) {
+        this.html = document.createElement('input');
+	this.html.type = 'text';
+	var unit = this;
+	this.control = {
+	    on_text_change : function(callback){
+		unit.html.onchange = function(){
+		    callback(unit.html.value);
+		}
+	    }
+	}
+
+        this.init(object);
+
+        this.prepare(object);
+    };
+
+    Unit.prototype.types['entry'].prototype = new Unit(undefined, undefined);
+
+    Unit.prototype.types['entry'].prototype.init = function (object) {
+        if (typeof object.placeholder === 'string') {
+            this.html.placeholder = object.placeholder;
+        }
+
+        if (typeof object.size === 'string') {
+            this.html.size = object.size;
+        }
+    };
+
+    /*Button unit*/
+
+    Unit.prototype.types['button'] = function (object) {
+        this.html = document.createElement('input');
+	this.html.type = 'button';
+	var unit = this;
+	this.control = {
+	    on_pressed : function(callback){
+		unit.html.onclick = function(){
+		    callback();
+		};
+	    }
+	}
+
+        this.init(object);
+
+        this.prepare(object);
+    };
+
+    Unit.prototype.types['button'].prototype = new Unit(undefined, undefined);
+
+    Unit.prototype.types['button'].prototype.init = function (object) {
+        if (typeof object.label === 'string') {
+            this.html.value = object.label;
+        }
+    };
 
     /* Root unit */
 
@@ -430,9 +489,10 @@ var comp = (function () {
         var group = this.group(),
 
             unit = ((this.unit === null) ? '%' : this.unit),
-            type = ((unit === 'px') ? this : this.px(target, true)),
+            type = this.px(target, true),
 
             assembledValue = Math.round(type.value);
+
 
         if (group === 'size') {
             assembledValue = Math.abs(assembledValue);
@@ -459,10 +519,6 @@ var comp = (function () {
     };
 
     Unit.Value.prototype.px = function (context, recalc) {
-        if (this.unit === 'px') {
-            return this;
-        }
-
         if (recalc !== true && typeof this.cache === 'object') {
             return this.cache;
         }
@@ -473,19 +529,34 @@ var comp = (function () {
             return undefined;
         }
 
-        var parent = context.parent,
+        var parent = context.parent;
 
-        value =
-            (typeof parent === 'object') ?
-                (group === 'size') ?
-                    parent[this.type].px(parent).value / 100 * this.value :
+	var value;
+
+	if(this.unit === 'px'){
+	    value = (typeof parent === 'object') ?
+	        group == 'size' ? 
+	            this.value :
+	            parent[this.type].px(parent).value + this.value 
+	    :
+	        this.value;
+	    
+	} else {
+            value =
+                (typeof parent === 'object') ?
+                    (group === 'size') ?
+                        parent[this.type].px(parent).value / 100 * this.value 
+		    :
                         parent[this.type].px(parent).value +
                         parent[
                             (this.type === 'x') ? 'width' : 'height'
-                        ].px(parent).value / 100 * this.value :
+                        ].px(parent).value / 100 * this.value 
+                :
                     (this.type === 'x' || this.type === 'y') ? 0 :
                         (this.type === 'width') ?
-                            wsSize.take().width : wsSize.take().height;
+                            wsSize.take().width : wsSize.take().height;	    
+	}
+
 
         this.cache = new Unit.Value({
             type  : this.type,
@@ -819,18 +890,19 @@ var comp = (function () {
 
                 element = Unit.pool.take(elementId);
 
+//	        console.log('pointer x is', JSON.stringify(event.clientX));
                 eventData = {
                     'group_id'    : 0,
                     'pointer_obj' : [{
                         'pointer_id' : 0,
 
                         'x' : (element.width.unit  === '%') ?
-                            (100 / element.width.px().value  * event.layerX) :
-                            event.layerX,
+                            (100 / element.width.px().value  * event.clientX) :
+                            event.clientX,
 
                         'y' : (element.height.unit === '%') ?
-                            (100 / element.height.px().value * event.layerY) :
-                            event.layerY
+                            (100 / element.height.px().value * event.clientY) :
+                            event.clientY
                     }]
                 };
             break;
@@ -906,6 +978,21 @@ var comp = (function () {
                 'You can create Compositer object only after load DOM'
             );
         }
+    };
+
+    Compositer.prototype['elem_get_geometry'] = function(elemId, px){
+        if (typeof elemId !== 'number') {
+            return undefined;
+        }
+
+        var elem = Unit.pool.take(elemId);
+
+        return {
+	    x : px ? elem.x.px().value : elem.x.value,
+	    y : px ? elem.y.px().value : elem.y.value,
+	    width : px ?  elem.width.px().value : elem.width.value,
+	    height : px ? elem.width.px().value : elem.height.value
+	};	
     };
 
     Compositer.prototype['frame_create'] = function (object) {
@@ -1001,27 +1088,30 @@ var comp = (function () {
     };
 
     Compositer.prototype['frame_info'] = function () {
-        var unitTypeName, valueTypeName, info = {}, work,
+        var unitTypeName, valueTypeName, elems = {}, work,
             unitTypes  = Unit.prototype.types,
             valueTypes = Unit.Value.types;
 
         for (unitTypeName in unitTypes) {
             if (unitTypes.hasOwnProperty(unitTypeName)) {
-                info[unitTypeName] = {};
+                elems[unitTypeName] = {};
 
                 for (valueTypeName in valueTypes) {
                     if (valueTypes.hasOwnProperty(valueTypeName)) {
                         work = valueTypes[valueTypeName].prototype.work;
 
                         if (work === true) {
-                            info[unitTypeName][valueTypeName] = true;
+                            elems[unitTypeName][valueTypeName] = true;
                         }
                     }
                 }
             }
         }
 
-        return info;
+        return {
+	    perfomance : 'normal',
+	    elements : elems
+	};
     }
 
     Compositer.prototype['image_create'] = function (object) {
@@ -1064,6 +1154,58 @@ var comp = (function () {
         }
 
         Unit.pool.free(textId);
+
+        return undefined;
+    };
+
+    Compositer.prototype['entry_create'] = function (object) {
+        var entry = new Unit('entry', object);
+
+        entry.id(Unit.pool.put(entry));
+
+        return entry.id(undefined);
+    };
+
+    Compositer.prototype['entry_get_control'] = function(entryId){
+	return Unit.pool.take(entryId).control;
+    };
+
+    Compositer.prototype['entry_destroy'] = function (entryId) {
+        if (typeof entryId !== 'number') {
+            return undefined;
+        }
+
+        if (entryId === 0) {
+            return undefined;
+        }
+
+        Unit.pool.free(entryId);
+
+        return undefined;
+    };
+
+    Compositer.prototype['button_create'] = function (object) {
+        var button = new Unit('button', object);
+
+        button.id(Unit.pool.put(button));
+
+        return button.id(undefined);
+    };
+
+    Compositer.prototype['button_get_control'] = function(buttonId){
+	return Unit.pool.take(buttonId).control;
+    };
+
+    Compositer.prototype['button_destroy'] = function (buttonId) {
+        if (typeof buttonId !== 'number') {
+            return undefined;
+        }
+
+        if (buttonId === 0) {
+            return undefined;
+        }
+
+        Unit.pool.free(buttonId);
 
         return undefined;
     };
