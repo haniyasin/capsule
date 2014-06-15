@@ -337,7 +337,8 @@ function props_manager(element){
 	y : 'true',
 	width : 'true',
 	height : 'true',
-	opacity : 'true'
+	opacity : 'true',
+	z_index : 'true'
     };
 
     function geometry_prop(prop_name, parent_prop_name){
@@ -393,7 +394,19 @@ function props_manager(element){
 	    this.value = value;
 	},
 	apply : function(){
-	    element.actor.set_opacity(this.value * 255);
+	    element.actor.opacity = this.value * 255;
+	}
+    };
+
+    this.z_index = {
+	value : 1,
+	set : function(value){
+	    if(typeof value == 'undefined')
+		return;
+	    this.value = value * -1;
+	},
+	apply : function(){
+	    element.actor.z_position = this.value;
 	}
     };
 

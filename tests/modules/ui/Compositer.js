@@ -322,18 +322,18 @@ function original_test1(comp){
 }
 
 function create_move_remove_test(comp){    
-    var rand = comp.image_create({ x : 70, y : 10, width : 50, height : 50, opacity : 0.8}),
-    green = comp.image_create({ width : '100%', height : '100%', opacity : 1,
+    var rand = comp.image_create({ x : 70, y : 10, width : 50, height : 50, opacity : 0.8, z_index : 1}),
+    green = comp.image_create({ width : '100%', height : '100%', opacity : 1, z_index : 1,
 				source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2D4zwAAAgIBANHTRkQAAAAASUVORK5CYII='}),
     text = comp.text_create({ x : '10%', y : '5%', width : '80%', height : '90%', opacity : 0.9, text : 'haha'}),
     frame = comp.frame_create( { x : '5%', y : '5%', width : '50%', height : '50%', opacity : 0.5 }),
-    frame_t = comp.frame_create( { x : 40, y : 40, width : 50, height : 50, opacity : 0.8 });
+    frame_t = comp.frame_create( { x : 40, y : 40, width : 50, height : 50, opacity : 0.8, z_index : 2 });
     comp.frame_add(frame_t, green);
     comp.frame_add(frame_t, text);
 
-    var button = comp.button_create( { x : 70, y : 60, width : 100, height : 50, opacity : 0.8, label : 'click' });
+    var button = comp.button_create( { x : 70, y : 60, width : 100, height : 50, z_index : 1, label : 'click' });
     comp.button_get_control(button).on_press(function(){print('button is pressed')});
-    var entry = comp.entry_create( { x : 40, y : 100, width : 150, height : 30, opacity : 0.8, placeholder : 'печатайте что-нибудь' });
+    var entry = comp.entry_create( { x : 40, y : 100, width : 150, height : 30, placeholder : 'печатайте что-нибудь' });
     comp.entry_get_control(entry).on_text_change(function(){print('text is changed')});
 
     comp.frame_add(frame, rand);
@@ -373,7 +373,7 @@ function create_move_remove_test(comp){
 exports.test = function(capsule){
     var comp = capsule.modules.ui.Compositer.create();
 //    slideup_cubes_test(comp);   
-//    original_test2(comp);
+    original_test2(comp);
 //    original_test1(comp);
     create_move_remove_test(comp);
 };
