@@ -344,7 +344,7 @@ function create_move_remove_test(comp){
 
     var anim = comp.anim_create([
 				    {
-					duration : 500,
+					duration : 10000,
 					actions : {
 					    y : 30,
 					    x : 30,
@@ -361,9 +361,8 @@ function create_move_remove_test(comp){
 					    height : -30
 					}
 				    }
-				]),
-    bind = comp.anim_bind(frame, anim);
-    comp.anim_start(bind);
+				]);
+
     comp.event_register(frame_t, 'pointer_in', function(event_data){
 			   print('in', JSON.stringify(event_data)); 
 			});
@@ -376,10 +375,17 @@ function create_move_remove_test(comp){
     comp.event_register(frame_t, 'pointer_up', function(event_data){
 			   print('in', JSON.stringify(event_data)); 
 			});
-    comp.event_register(bind, 'animation_stopped', function(){
+
+    var video = comp.video_create({ x : 50, y : 50, width : 400, height : 200}),
+    control = comp.video_get_control(video);
+    comp.frame_add(0, video);
+    var bind = comp.anim_bind(video, anim);
+    comp.anim_start(bind);
+
+//    comp.event_register(bind, 'animation_stopped', function(){
 //			    comp.frame_remove(0, frame);
 //			    comp.frame_destroy(frame);
-			});
+//			});
 }
 
 exports.test = function(capsule){

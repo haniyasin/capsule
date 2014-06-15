@@ -10,6 +10,7 @@ const Cogl = imports.gi.Cogl;
 const Clutter = imports.gi.Clutter;
 const GtkClutter = imports.gi.GtkClutter;
 const ClutterGst = imports.gi.ClutterGst;
+const Gst = imports.gi.Gst;
 
 var error = require('../../../../parts/error.js');
 
@@ -170,6 +171,40 @@ function entry(){
 			     });
 }
 
+function video(){
+    return new element_proto('video', {
+				 create : function(info){
+				     var element = new element_obj_proto(new Clutter.Texture( {disable_slicing : true }), info);
+				     element.childs = [];
+				     element.pipeline = Gst.parse_launch("playbin uri=http://docs.gstreamer.com/media/sintel_trailer-480p.webm");
+				     element.sink = new ClutterGst.VideoSink();
+				     element.sink.texture = element.actor;
+				     element.pipeline.video_sink = element.sink;
+				     element.pipeline.set_state(Gst.State.PLAYING);
+				     element.actor.add_child(element.actor);
+				     element.actor.show();
+
+				     element.control = {
+					 start : function(){
+					     element.pipeline.state = Gst.State.PLAYING;
+					 },
+					 pause : function(){
+					     element.pipeline.state = Gst.State.PAUSED;
+					 }
+				     };
+				     return elements.put(element);
+				 },
+				 get_control : function(id){
+				     return elements.take(id).control;
+				 },
+				 destroy : function(id){
+				     var element = elements.take(id);
+				     element.actor.unref();
+				     elements.free(id);
+				 }
+			     });
+}
+
 function element(){
     return new element_proto('elemement', {
 				 change_props : function(id, info){
@@ -226,6 +261,7 @@ function animation(){
 				 },
 				 bind : function(element_id, anim_id){
 				     var anim = anims.take(anim_id);
+				     //if(anim) проверять и ошибку бросать
 				     return binded.put({ element : element_id,  
 							 frames : anim });
 				 },
@@ -548,6 +584,7 @@ manager.add(image);
 manager.add(text);
 manager.add(button);
 manager.add(entry);
+manager.add(video);
 manager.add(element);
 manager.add(animation);
 manager.add(event);
@@ -555,8 +592,10 @@ manager.add(event);
 function comp(){
     manager.assemble(this);
 
+//    ClutterGst.init(null);
     Gtk.init(null);
     Clutter.init(null);
+    Gst.init(null, null);
     this.root = new Gtk.Window({ type : Gtk.WindowType.TOPLEVEL });
     this.root.title = 'GJS compositer prototype';
     this.root.show();
