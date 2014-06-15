@@ -364,6 +364,18 @@ function create_move_remove_test(comp){
 				]),
     bind = comp.anim_bind(frame, anim);
     comp.anim_start(bind);
+    comp.event_register(frame_t, 'pointer_in', function(event_data){
+			   print('in', JSON.stringify(event_data)); 
+			});
+    comp.event_register(frame_t, 'pointer_out', function(event_data){
+			   print('in', JSON.stringify(event_data)); 
+			});
+    comp.event_register(frame_t, 'pointer_down', function(event_data){
+			   print('in', JSON.stringify(event_data)); 
+			});
+    comp.event_register(frame_t, 'pointer_up', function(event_data){
+			   print('in', JSON.stringify(event_data)); 
+			});
     comp.event_register(bind, 'animation_stopped', function(){
 //			    comp.frame_remove(0, frame);
 //			    comp.frame_destroy(frame);
@@ -373,7 +385,7 @@ function create_move_remove_test(comp){
 exports.test = function(capsule){
     var comp = capsule.modules.ui.Compositer.create();
 //    slideup_cubes_test(comp);   
-    original_test2(comp);
+//    original_test2(comp);
 //    original_test1(comp);
     create_move_remove_test(comp);
 };

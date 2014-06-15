@@ -9,6 +9,7 @@ const GdkPixbuf = imports.gi.GdkPixbuf;
 const Cogl = imports.gi.Cogl;
 const Clutter = imports.gi.Clutter;
 const GtkClutter = imports.gi.GtkClutter;
+const ClutterGst = imports.gi.ClutterGst;
 
 var error = require('../../../../parts/error.js');
 
@@ -269,15 +270,40 @@ function animation(){
 			     });
 }
 
+function _event_mouse_handler(listened_elems, element_id, event_name){
+    var element = elements.take(element_id);
+    this.handle = function(actor, event){
+	var coords = event.get_coords();
+	coords[0] = coords[0] - element.props_manager.x.get_pos_absolute();
+	coords[1] = coords[1] - element.props_manager.y.get_pos_absolute();
+	var event_data = {
+	    'group_id'    : 0,
+	    'pointer_obj' : [{
+				 'pointer_id' : 0,
+				 
+				 'x' : (element.props_manager.x.type  === '%') ?
+				     (100 / element.props_manager.x.get()  * coords[0]) :
+				     coords[0],
+				 
+				 'y' : (element.props_manager.height.type === '%') ?
+				     (100 / element.props_manager.height.get() * coords[1]) :
+				     coords[1]
+			     }]
+	};
+
+	listened_elems[element_id][event_name](event_data);
+    };	
+}
+
 function event(){
     var listened_elems = {
     };
 
     return new element_proto('event', {
-				 _emit : function(element_id, event_name){
+				 _emit : function(element_id, event_name, event_data){
 				     if(listened_elems.hasOwnProperty(element_id)){
 					 if(listened_elems[element_id].hasOwnProperty(event_name)){
-					     listened_elems[element_id][event_name](event_name);
+					     listened_elems[element_id][event_name](event_data);
 					 }
 				     }
 				 },
@@ -288,25 +314,26 @@ function event(){
 				     listened_elems[element_id][event_name] = callback;
 				     var element = elements.take(element_id);
 				     element.actor.reactive = true;
+				     var mouse_handler = new _event_mouse_handler(listened_elems, element_id, event_name);
 				     switch(event_name){
 					 case 'pointer_down' :
-					 element.actor.connect('button-press-event', callback);
+					 element.actor.connect('button-press-event', mouse_handler.handle);
 					 break;
 
 					 case 'pointer_up' : 
-					 element.actor.connect('button-release-event', callback);
+					 element.actor.connect('button-release-event', mouse_handler.handle);
 					 break;
 
 					 case 'pointer_in' :
-					 element.actor.connect('enter-event', callback);
+					 element.actor.connect('enter-event', mouse_handler.handle);
 					 break;
 
 					 case 'pointer_out' :
-					 element.actor.connect('leave-event', callback);
+					 element.actor.connect('leave-event', mouse_handler.handle);
 					 break;
 
 					 case 'pointer_motion' : 
-					 element.actor.connect('motion-event', callback);
+					 element.actor.connect('motion-event', mouse_handler.handle);
 					 break;
 
 					 case 'key_down' :
@@ -361,11 +388,21 @@ function props_manager(element){
 	    }
 	};
 
+	this.get_pos_absolute = function(){
+	    var cur_elem = element;
+	    var pos = 0;
+	    while(typeof cur_elem != 'undefined'){
+		pos += cur_elem.props_manager[prop_name].get();
+		cur_elem = cur_elem.parent;
+	    } 
+	    return pos;
+	},
+
 	this.get = function(){
 	    if(this.type == 'p')
-		return this.value;
+		    return this.value;
 	    else if (element.hasOwnProperty('parent'))
-		return element.parent.props_manager[parent_prop_name].get() / 100 * this.value;	    
+	    return element.parent.props_manager[parent_prop_name].get() / 100 * this.value;	    
 	};
 
 	this.update = function(inc_value){
@@ -388,10 +425,16 @@ function props_manager(element){
     this.height = new geometry_prop('height');
     this.opacity = {
 	value : 1,
+	get : function() {
+	  return this.value;  
+	},
 	set : function(value){
 	    if(typeof value == 'undefined')
 		return;
 	    this.value = value;
+	},
+	update : function(inc_value){
+	    this.value += inc_value;
 	},
 	apply : function(){
 	    element.actor.opacity = this.value * 255;
@@ -400,10 +443,16 @@ function props_manager(element){
 
     this.z_index = {
 	value : 1,
+	get : function(){
+	    return value * -1;
+	},
 	set : function(value){
 	    if(typeof value == 'undefined')
 		return;
 	    this.value = value * -1;
+	},
+	update : function(inc_value){
+	    this.value += inc_value; 
 	},
 	apply : function(){
 	    element.actor.z_position = this.value;
@@ -523,7 +572,7 @@ function comp(){
     color.red = 240;
     color.green = 250;
     stage.set_background_color(color);
-    this.frame_create({ x : 50, y : 50, width : 700, height : 300, opacity : 0.9 });
+    this.frame_create({ x : 0, y : 0, width : 700, height : 300, opacity : 0.9 });
     var element = elements.take(0);
     element.props_manager.apply_all();
     this.root_actor.add_actor(element.actor);
