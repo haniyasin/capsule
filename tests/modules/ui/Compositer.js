@@ -67,7 +67,6 @@ function slideup_cubes_test(comp){
 			    comp.anim_start(banim_green);
 			    comp.anim_start(banim1);
 			    comp.anim_start(banim);
-			    print('uhaha', event_name)
 			});  
     };
 
@@ -326,7 +325,7 @@ function create_move_remove_test(comp){
     green = comp.image_create({ width : '100%', height : '100%', opacity : 1, z_index : 1,
 				source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2D4zwAAAgIBANHTRkQAAAAASUVORK5CYII='}),
     text = comp.text_create({ x : '10%', y : '5%', width : '80%', height : '90%', opacity : 0.9, text : 'haha'}),
-    frame = comp.frame_create( { x : '5%', y : '5%', width : '50%', height : '50%', opacity : 0.5 }),
+    frame = comp.frame_create( { x : '5%', y : '5%', width : '50%', height : '50%', opacity : 0.5, z_index : 2 }),
     frame_t = comp.frame_create( { x : 40, y : 40, width : 50, height : 50, opacity : 0.8, z_index : 2 });
     comp.frame_add(frame_t, green);
     comp.frame_add(frame_t, text);
@@ -344,7 +343,7 @@ function create_move_remove_test(comp){
 
     var anim = comp.anim_create([
 				    {
-					duration : 10000,
+					duration : 500,
 					actions : {
 					    y : 30,
 					    x : 30,
@@ -355,10 +354,10 @@ function create_move_remove_test(comp){
 				    {
 					duration : 1000,
 					actions : {
-					    y : -30,
+					    y : 20,
 					    x : -30,
-					    width : -30,
-					    height : -30
+					    width : 100,
+					    height : 50
 					}
 				    }
 				]);
@@ -376,16 +375,100 @@ function create_move_remove_test(comp){
 			   print('in', JSON.stringify(event_data)); 
 			});
 
-    var video = comp.video_create({ x : 50, y : 50, width : 400, height : 200}),
-    control = comp.video_get_control(video);
-    comp.frame_add(0, video);
     var bind = comp.anim_bind(video, anim);
     comp.anim_start(bind);
 
-//    comp.event_register(bind, 'animation_stopped', function(){
-//			    comp.frame_remove(0, frame);
-//			    comp.frame_destroy(frame);
-//			});
+    comp.event_register(bind, 'animation_stopped', function(){
+			    comp.frame_remove(0, frame);
+			    comp.frame_destroy(frame);
+			});
+}
+
+function video_player(comp){
+    var player_frame = comp.frame_create({ x : '10%', y : '10%', width : '80%', height : '80%'}),
+    video = comp.video_create({ x : 0, y : 0, width : '100%', height : '100%', z_index : 1, opacity : 1}),
+    vcontrol = comp.video_get_control(video),
+    playb = comp.button_create({
+				       x : '30%',
+				       y : '95%',
+				       width : '10%',
+				       height : '5%',
+				       z_index : 2,
+				       opacity : 0.7,
+				       label : 'начать'
+				   }),
+    backwardb = comp.button_create({
+				      x : '40%',
+				      y : '95%',
+				      width : '10%',
+				      height : '5%',
+				      z_index : 2,
+				      opacity : 0.7,
+				      label : 'назад'
+				  }),
+    forwardb = comp.button_create({
+				       x : '50%',
+				       y : '95%',
+				       width : '10%',
+				       height : '5%',
+				       z_index : 2,
+				       opacity : 0.7,
+				       label : 'вперёд'
+				   }),
+    pauseb = comp.button_create({
+				       x : '60%',
+				       y : '95%',
+				       width : '10%',
+				       height : '5%',
+				       z_index : 2,
+				       opacity : 0.7,
+				       label : 'пауза'
+				   });
+    
+    comp.frame_add(player_frame, video);
+    comp.frame_add(player_frame, playb);
+    comp.frame_add(player_frame, pauseb);
+    comp.frame_add(player_frame, forwardb);
+    comp.frame_add(player_frame, backwardb);
+    comp.frame_add(0, player_frame);
+
+    var anim_size_up = comp.anim_create([
+					    {
+						duration : 700,
+						actions : {
+						    x : -10,
+						    y : -10,
+						    width : 20,
+						    height : 20
+						}
+					    }
+					]),
+    anim_size_down = comp.anim_create([
+					    {
+						duration : 700,
+						actions : {
+						    x : 10,
+						    y : 10,
+						    width : -20,
+						    height : -20
+						}
+					    }
+					]),
+    banimsu = comp.anim_bind(player_frame, anim_size_up),
+    banimsd = comp.anim_bind(player_frame, anim_size_down);
+
+    comp.button_get_control(playb).on_press(function(){
+						comp.anim_start(banimsu);
+						vcontrol.play();
+					    });
+    comp.button_get_control(pauseb).on_press(function(){
+						 comp.anim_start(banimsd);
+						 vcontrol.pause();
+					     });
+    comp.button_get_control(forwardb).on_press(function(){vcontrol.set_position(vcontrol.get_position() + 5000);});
+    comp.button_get_control(backwardb).on_press(function(){vcontrol.set_position(vcontrol.get_position() - 5000);});
+//    var bind = comp.anim_bind(video, anim);
+//    comp.anim_start(bind);    
 }
 
 exports.test = function(capsule){
@@ -393,5 +476,6 @@ exports.test = function(capsule){
 //    slideup_cubes_test(comp);   
 //    original_test2(comp);
 //    original_test1(comp);
-    create_move_remove_test(comp);
+//    create_move_remove_test(comp);
+    video_player(comp);
 };

@@ -175,21 +175,28 @@ function video(){
     return new element_proto('video', {
 				 create : function(info){
 				     var element = new element_obj_proto(new Clutter.Texture( {disable_slicing : true }), info);
-				     element.childs = [];
 				     element.pipeline = Gst.parse_launch("playbin uri=http://docs.gstreamer.com/media/sintel_trailer-480p.webm");
 				     element.sink = new ClutterGst.VideoSink();
 				     element.sink.texture = element.actor;
 				     element.pipeline.video_sink = element.sink;
-				     element.pipeline.set_state(Gst.State.PLAYING);
 				     element.actor.add_child(element.actor);
 				     element.actor.show();
 
 				     element.control = {
-					 start : function(){
-					     element.pipeline.state = Gst.State.PLAYING;
+					 play : function(){
+					     element.pipeline.set_state(Gst.State.PLAYING);
 					 },
 					 pause : function(){
-					     element.pipeline.state = Gst.State.PAUSED;
+					     element.pipeline.set_state(Gst.State.PAUSED);
+					 },
+					 set_position : function(msecond){	
+					     element.pipeline.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH, msecond * Gst.MSECOND);				     
+					 },
+					 get_position : function(){
+					     return element.pipeline.query_position(Gst.Format.TIME)[1] / Gst.MSECOND;
+					 },
+					 get_duration : function(){
+					     return element.pipeline.query_diration(Gst.Format.TIME)[1] / Gst.MSECOND;
 					 }
 				     };
 				     return elements.put(element);
@@ -200,6 +207,8 @@ function video(){
 				 destroy : function(id){
 				     var element = elements.take(id);
 				     element.actor.unref();
+				     element.pipeline.unref();
+				     element.sink.unref();
 				     elements.free(id);
 				 }
 			     });
@@ -452,6 +461,13 @@ function props_manager(element){
 	    }
 
 	    element.actor['set_' + prop_name](value);
+
+	    //for frame recalculating all childs for properly % geometry
+	    if(element.hasOwnProperty('childs')){
+		for(child in element.childs){
+		    element.childs[child].props_manager[prop_name].apply();
+		}
+	    }
 	};	
     }
 
@@ -592,7 +608,6 @@ manager.add(event);
 function comp(){
     manager.assemble(this);
 
-//    ClutterGst.init(null);
     Gtk.init(null);
     Clutter.init(null);
     Gst.init(null, null);
@@ -611,14 +626,10 @@ function comp(){
     color.red = 240;
     color.green = 250;
     stage.set_background_color(color);
-    this.frame_create({ x : 0, y : 0, width : 700, height : 300, opacity : 0.9 });
+    this.frame_create({ x : 0, y : 0, width : 800, height : 400, opacity : 0.9 });
     var element = elements.take(0);
     element.props_manager.apply_all();
     this.root_actor.add_actor(element.actor);
-    this.root_actor.reactive = true;
-    this.root_actor.connect('button-press-event', function(){print('yayaya')})
-
-//    print(JSON.stringify(this));
 }
 
 exports.elements = elements;
