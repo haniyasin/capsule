@@ -29,7 +29,8 @@ function frame(){
 				     var element = new element_obj_proto(new Clutter.Actor(), info);
 				     element.childs = [];
 				     element.actor.show();
-				     set_random_background(element.actor);    
+				     if(info.hasOwnProperty('background_random'))
+					 set_random_background(element.actor);    
 				     return elements.put(element);
 				 },
 				 destroy : function(id){
@@ -175,7 +176,9 @@ function video(){
     return new element_proto('video', {
 				 create : function(info){
 				     var element = new element_obj_proto(new Clutter.Texture( {disable_slicing : true }), info);
-				     element.pipeline = Gst.parse_launch("playbin uri=http://docs.gstreamer.com/media/sintel_trailer-480p.webm");
+				     if(!info.hasOwnProperty('source'))
+					 info.source = "uri=http://docs.gstreamer.com/media/sintel_trailer-480p.webm";
+				     element.pipeline = Gst.parse_launch("playbin " + info.source);
 				     element.sink = new ClutterGst.VideoSink();
 				     element.sink.texture = element.actor;
 				     element.pipeline.video_sink = element.sink;
@@ -196,7 +199,7 @@ function video(){
 					     return element.pipeline.query_position(Gst.Format.TIME)[1] / Gst.MSECOND;
 					 },
 					 get_duration : function(){
-					     return element.pipeline.query_diration(Gst.Format.TIME)[1] / Gst.MSECOND;
+					     return element.pipeline.query_duration(Gst.Format.TIME)[1] / Gst.MSECOND;
 					 }
 				     };
 				     return elements.put(element);
@@ -321,22 +324,19 @@ function _event_mouse_handler(listened_elems, element_id, event_name){
 	var coords = event.get_coords();
 	coords[0] = coords[0] - element.props_manager.x.get_pos_absolute();
 	coords[1] = coords[1] - element.props_manager.y.get_pos_absolute();
-	var event_data = {
-	    'group_id'    : 0,
-	    'pointer_obj' : [{
-				 'pointer_id' : 0,
-				 
-				 'x' : (element.props_manager.x.type  === '%') ?
-				     (100 / element.props_manager.x.get()  * coords[0]) :
-				     coords[0],
-				 
-				 'y' : (element.props_manager.height.type === '%') ?
-				     (100 / element.props_manager.height.get() * coords[1]) :
-				     coords[1]
-			     }]
-	};
-
-	listened_elems[element_id][event_name](event_data);
+	var pointer_obj = [{
+			       'pointer_id' : 0,
+			       
+			       'x' : (element.props_manager.x.type  === '%') ?
+				   Math.round((100 / element.props_manager.width.get()  * coords[0])) :
+				   coords[0],
+			       
+			       'y' : (element.props_manager.height.type === '%') ?
+				   Math.round((100 / element.props_manager.height.get() * coords[1])) :
+				   coords[1]
+			   }];
+	
+	listened_elems[element_id][event_name](pointer_obj);
     };	
 }
 

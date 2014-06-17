@@ -10,8 +10,9 @@ exports.main = function(env){
     
     var thttp = capsule.tests.modules.transport.http.client;
     
-    thttp.test({ 'url' : 'http://localhost:8810/krevetk/o', 'method' : 'POST'}, capsule);
+//    thttp.test({ 'url' : 'http://localhost:8810/krevetk/o', 'method' : 'POST'}, capsule);
 
+    capsule.tests.modules.ui.Compositer.test(capsule);
 }
 
 

@@ -6,7 +6,9 @@
 	    "modules" :{
 		"uuid" : "tests/modules/uuid.js",
 		"timer" : "tests/modules/timer.js",
-		
+		"ui" : {
+		    "Compositer" : "tests/modules/ui/Compositer.js"
+		},
 		"transport" : {
 		    "direct" : "tests/modules/transport/direct.js",
 		    
