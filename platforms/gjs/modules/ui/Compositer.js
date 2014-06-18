@@ -175,13 +175,15 @@ function entry(){
 function video(){
     return new element_proto('video', {
 				 create : function(info){
-				     var element = new element_obj_proto(new Clutter.Texture( {disable_slicing : true }), info);
+				     var element = new element_obj_proto(new Clutter.Texture( {}), info);
 				     if(!info.hasOwnProperty('source'))
 					 info.source = "uri=http://docs.gstreamer.com/media/sintel_trailer-480p.webm";
 				     element.pipeline = Gst.parse_launch("playbin " + info.source);
 				     element.sink = new ClutterGst.VideoSink();
+//				     element.sink = Gst.ElementFactory.make('cluttersink', 'bat');
 				     element.sink.texture = element.actor;
 				     element.pipeline.video_sink = element.sink;
+				     
 				     element.actor.add_child(element.actor);
 				     element.actor.show();
 
@@ -200,8 +202,26 @@ function video(){
 					 },
 					 get_duration : function(){
 					     return element.pipeline.query_duration(Gst.Format.TIME)[1] / Gst.MSECOND;
+					 },
+					 get_volume : function(){
+					     return 100;
+					 },
+					 set_volume : function(volume){
+					     
+					 },
+					 on_timeupdate : function(callback){
+					     var curtime = 0;
+					     let self = this;
+					     GLib.timeout_add(GLib.PRIORITY_HIGH, 200, function(){
+								  if(curtime < self.get_position()){
+								      print('hoho');
+								      callback();
+								      curtime = self.get_position();
+								  }
+								  return true;
+							      });   
 					 }
-				     };
+ 				     };
 				     return elements.put(element);
 				 },
 				 get_control : function(id){
@@ -281,12 +301,13 @@ function animation(){
 				     binded.free(binded_id);
 				 },
 				 start : function(binded_id){
+				     comp = this;
 				     var banim = binded.take(binded_id);
 				     banim.cur_frame = 0;
 				     started.push(binded_id);
 				     if(timeline == null){
 					 timeline = new Clutter.Timeline({duration : 1000});
-					 var comp = this;
+
 					 timeline.connect('new-frame', function() {
 							      for(sanim_ind in started){
 								  var banim = binded.take(started[sanim_ind]);

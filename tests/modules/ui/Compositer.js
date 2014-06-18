@@ -500,8 +500,24 @@ function video_player(comp){
 						 comp.anim_start(banimsd);
 						 vcontrol.pause();
 					     });
+    vcontrol.set_volume(0.2);
     var timepoint = 0;
-//    comp.events_callback_set(function(){});// for compatibility with old api only
+    vcontrol.on_timeupdate(function(){
+			       var point_to_slide = Math.round(vcontrol.get_position() / (vcontrol.get_duration() / 100));
+			       if(point_to_slide > timepoint){
+				   var position_change_anim = comp.anim_create([
+										   {
+										       duration : 0,
+										       actions : {
+											   x : point_to_slide
+										       }
+										   }
+									       ]);
+//				   alert(point_to_slide);
+				   comp.anim_start(comp.anim_bind(image_timepoint, position_change_anim));
+				   timepoint += point_to_slide;				   
+			       }
+			   });
     comp.event_register(frame_timeline, 'pointer_down', function(pointer_obj){
 			    var new_timepoint = pointer_obj.shift().x;
 			    vcontrol.set_position(vcontrol.get_duration() / 100 * new_timepoint);
