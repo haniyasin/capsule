@@ -8,8 +8,11 @@ exports.main = function(env){
     
 //    thsocket.test({ 'url' : 'http://localhost:8810/sockethh.js', 'method' : 'POST'}, capsule.modules);
 
-    capsule.tests.modules.ui.Compositer.test(capsule);
-    
+//    capsule.tests.modules.ui.Compositer.test(capsule);
+
+    var mplayer = capsule.parts.connectors.pipe.create(['/usr/bin/mplayer', 'http://docs.gstreamer.com/media/sintel_trailer-480p.webm'], null);
+
+    mplayer.spawn();
 //    var thttp = capsule.tests.modules.transport.http.client;
     
 //    thttp.test({ 'url' : 'http://localhost:8810/krevetk/o', 'method' : 'POST'}, capsule);

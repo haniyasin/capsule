@@ -3,7 +3,11 @@
 	"dependencies" : {
 	    "uuid" : "dependencies/uuid.js"
 	},
-	
+	"parts" : {
+	    "connectors" : {
+		"pipe" : "platforms/gjs/parts/connectors/pipe.js"
+	    }
+	},
 	"modules" : {
 	    "http_requester" : "platforms/gjs/modules/http_requester.js",
 	    "ui" : {
