@@ -11,7 +11,10 @@
 	"modules" : {
 	    "http_requester" : "platforms/gjs/modules/http_requester.js",
 	    "ui" : {
-		"Compositer" : "platforms/gjs/modules/ui/Compositer.js"
+		"Compositer" : "platforms/gjs/modules/ui/Compositer.js",
+		"video" : {
+		    "mplayer" : "platforms/gjs/modules/ui/video/mplayer.js"
+		}
 	    }
 	}
     }

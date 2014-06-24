@@ -9,20 +9,10 @@ exports.main = function(env){
 //    thsocket.test({ 'url' : 'http://localhost:8810/sockethh.js', 'method' : 'POST'}, capsule.modules);
 
 //    capsule.tests.modules.ui.Compositer.test(capsule);
-
-    var mplayer = capsule.parts.connectors.pipe.create(['mplayer', '-slave', 'http://docs.gstreamer.com/media/sintel_trailer-480p.webm'], null);
     
-    mplayer.on_out(function(content){print(content)});
-    mplayer.spawn();
-    let GLib = imports.gi.GLib;
-    mplayer.in('pause\n');
-    mplayer.in('pausing\n');
-    mplayer.in('pausing\n');
-    GLib.timeout_add(1, 8000,function(){
-			 mplayer.in('pause\n');
-			 print('haha');
-		     });
-//    mplayer.destroy();
+    var video = capsule.modules.ui.video.mplayer.create({
+							});	
+    video.control.play();
 //    var thttp = capsule.tests.modules.transport.http.client;
     
 //    thttp.test({ 'url' : 'http://localhost:8810/krevetk/o', 'method' : 'POST'}, capsule);
