@@ -657,6 +657,8 @@ exports.elements = elements;
 
 exports.manager = manager;
 
+exports.element_proto = element_obj_proto;
+
 exports.create = function(){
     return new comp();
 }
