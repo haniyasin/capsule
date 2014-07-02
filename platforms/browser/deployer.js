@@ -55,7 +55,7 @@ function assembler_constructor(dir){
 	var generated = {
 	    constructor : '',
 	    script_inline : ''
-	}
+	};
 	
 	generated.constructor += "(function(current){" + this.block;
 
@@ -82,7 +82,7 @@ function assembler_constructor(dir){
 	generated.constructor += 'return current;})({});\n'; //тут надо вписать имя родителя	
 
 	return generated;
-    }
+    };
 
     assembler.do_file = function(name, file_path){
 	var flags = this.s.flags;
@@ -103,7 +103,7 @@ function assembler_constructor(dir){
 	} else {
 	    if(this.s.type == dutils.types.module){
 		var content = fs.readFileSync(file_path,"utf8");
-		var module_load = new module_load_emitter(file_path, content, name, flags.inline);
+		var module_load = new module_load_emitter(this.get_path(name), content, name, flags.inline);
 		this.block +=  module_load.emit_declare();
 		var _block_load = module_load.emit_load();
 		
@@ -113,7 +113,7 @@ function assembler_constructor(dir){
 		    this.block += _block_load;
 	    }
 	}
-    }
+    };
 
     return assembler;
 }
@@ -126,7 +126,7 @@ function deploy_on_files(dir, config, capsule_files){
     for(file in capsule_files.files_to_copy){
 	var _file = capsule_files.files_to_copy[file];
 	mkpath.sync(path.dirname(_file.new_path));
-	console.log(_file.new_path)
+//	console.log(_file.new_path)
 	fs.writeFileSync(_file.new_path,_file.data);
     }    
 }
@@ -137,12 +137,12 @@ function deploy_on_http(dir, config, capsule_files, capsule){
 			   function (context, response){
 					       response.end(capsule_files.capsule);
 			   },
-			   function(error){console.log('failed', error)})  
+			   function(error){console.log('failed', error);});  
     http_responder.on_recv({ 'url' : config.values.deploy_url + '/constructor.js'}, 
 			   function (context, response){				
 			       response.end(capsule_files.constructor);
 			   },
-			   function(error){console.log('failed export _construct_func', error)})
+			   function(error){console.log('failed export _construct_func', error);});
 
     for(var i = 0;i < capsule_files.files_to_copy.length; i++){
 	(function(file){
@@ -150,7 +150,7 @@ function deploy_on_http(dir, config, capsule_files, capsule){
 				    function (context, response){
 					response.end(file.data);
 				    },
-				    function(error){console.log('failed export object', error)});
+				    function(error){console.log('failed export object', error);});
 	 })(capsule_files.files_to_copy[i]);
     }	    			
 }
@@ -172,16 +172,16 @@ exports.assemble = function(dir, config){
     var cb_sync = cb_synchronizer.create();
     cb_sync.after_all = function(){
 	fs.writeFileSync(dir + '/assembled/files_to_copy.json', JSON.stringify(files_to_copy));	
-    }
+    };
     for(file in files_to_copy){
 	(function(file){
 	     fs.readFile(files_to_copy[file].path, cb_sync.add(function(err, content){
 			     if(!err){
 				 files_to_copy[file].data = content.toString();
 			     }else
-				 console.log('something is going wrong in file reading')
+				 console.log('something is going wrong in file reading');
 			 }));	    
-	 })(file)
+	 })(file);
     }
     config.values.state = 'assembled';
     config.write();
@@ -224,8 +224,8 @@ exports.deploy = function(dir, config){
 	    console.log('ERROR: unknown deploy_type in config');
 	    break;
 	}
-    }
-    //запуска в браузере или запуске в браузере с любого http сервера, способного раздавать файлы
+    };
+    //раздача чере nodej и запуск в браузере  или в браузере с любого http сервера, способного раздавать файлы
 }
 
 exports.run = function(){

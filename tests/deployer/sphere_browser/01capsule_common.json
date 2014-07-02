@@ -9,10 +9,13 @@
 	"dependencies" : {
 	    "preload" : true,
 
-	    "bb_allocator" : "parts/bb_allocator.js",
-	    "cb_synchronizer" : "parts/cb_synchronizer.js",
 	    "base32" : "dependencies/base32.js",
-	    "serializer" : "dependencies/json.js",
+	    "serializer" : "dependencies/json.js"
+	},
+	
+	"parts" : {
+	    "bb_allocator" : "parts/bb_allocator.js",
+	    "cb_synhronizer" : "parts/cb_synchronizer.js",
 	    "utils" : "parts/utils.js",
 	    "error" : "parts/error.js"
 	},

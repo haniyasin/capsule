@@ -35,41 +35,62 @@ function tree_walker(tree, assembler){
 }
 
 function assembler_constructor(dir){
+    this.name = null;
+
     this.dir = dir;
     this.s = {
 	flags : { 'preload' : false
 		},
 	type : types.envelope,
 	depend : null
-    }
+    };
 
     this.childs = [];
+    this.parent = null;
     
+    this.get_path = function(name){
+	var path = this.name;
+	var parent = this.parent;
+	while(parent != null && parent.name != null && parent.name != 'capsule'){
+	    path = parent.name + '/' + path;	    
+	    parent = parent.parent;
+	}
+
+	var _name = name == 'this' ? '.js' : name + '.js';
+	if(path == null)
+	    path = _name;
+	else
+	    path += _name == '.js' ? _name : '/' + _name;
+	
+	return path;
+    };
 
     this.set_flag = function(name, value){
 	this.s.flags[name] = value;
-    }
+    };
     
     this.set_type = function(name){
 	if(types.hasOwnProperty(name)){
 	    this.s.type = types[name];
 	}else
-	    console.log('unexpectial type')
-    }
+	    console.log('unexpectial type');
+    };
     
     this.push_state = function(state){
-	this.s = JSON.parse(JSON.stringify(state))
-    }
+	this.s = JSON.parse(JSON.stringify(state));
+    };
 
     this.pop_state = function(){
 	return this.s;
-    }
+    };
 
     this.create_child = function(name){
 	var assembler = this.constructor(dir);
 	this.childs.push([name, assembler]);
+	assembler.parent = this;
+	assembler.name = name;
 	return assembler;
-    }
+    };
 
     this.find_child = function(name){
 	for(child in this.childs){
@@ -77,7 +98,7 @@ function assembler_constructor(dir){
 		return this.childs[child][1];
 	}
 	return null;
-    }
+    };
 }
 
 exports.tree_walker = tree_walker;
@@ -91,7 +112,7 @@ exports.config = function(dir){
 	this.values = JSON.parse(fs.readFileSync(dir + '/config.json').toString());		
         this.write = function(){
 	    fs.writeFileSync(dir + '/config.json', JSON.stringify(this.values));
-	}	
+	};	
     } catch (x) {
 	console.log('config.json не существует, а надо бы');
 	console.log(x.message);

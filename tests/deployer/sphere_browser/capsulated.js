@@ -17,15 +17,12 @@ exports.main = function(env){
 //    mqnode2.deactivate();
     var _mq = mqnode1;
 
-    var ui = sloader.load('sphere/ui_elements', mqnode1, env);
-    var frontend = sloader.load('sphere/frontend', mqnode1, env);
-    var backend = sloader.load('sphere/backend', mqnode1, env);
+//    var frontend = sloader.load('sphere/frontend', mqnode1, env);
+//    var backend = sloader.load('sphere/backend', mqnode1, env);
 
-    var seq = capsule.modules.sequence;
-    seq.mq_send = _mq.send;
+//    var seq = capsule.modules.sequence;
+//    seq.mq_send = _mq.send;
 
-    seq.msg(ui, 'init').sprout(
-	seq.msg(backend, 'create'),
-	seq.msg(frontend, 'create', ui, backend)
-    ).run();
+//    seq.msg(backend, 'create').run(),
+//    seq.msg(frontend, 'create', backend).run();
 }

@@ -36,18 +36,19 @@ function assembler_constructor(dir){
 	generated.constructor += 'return current;})({});\n'; //тут надо вписать имя родителя	
 	
 	return generated;
-    }
+    };
 
     assembler.do_file = function(module_name, file_path){
 	this.block_load += 'current';
 	if(module_name != 'this')
 	    this.block_load += '.' + module_name;
 	
-	this.block_load += ' = ' + "require('./" + file_path + "');\n";	    
+	var _new_path = this.get_path(module_name);
+	this.block_load += ' = ' + "require('./" + _new_path + "');\n";	    
 
 	this.files_to_copy.push({"path" : file_path, 
-				 "new_path" : this.dir + '/assembled/' + file_path});
-    }
+				 "new_path" : this.dir + '/assembled/' + _new_path});
+    };
 
     return assembler;
 }
@@ -70,7 +71,7 @@ exports.assemble = function(dir, config){
 				 console.log('something is going wrong in file reading');
 			     }
 			 });	    
-	 })(file)	
+	 })(file);	
     }
 
     config.values.state = 'assembled';

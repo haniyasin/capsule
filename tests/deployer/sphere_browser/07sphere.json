@@ -5,21 +5,9 @@
 	"inline" : true,
 
 	"parts" : {
-	    "ui" : {
-		"card" : "sphere/parts/ui/card.js",
-		"menu" : "sphere/parts/ui/menu.js",
-		"part" : "sphere/parts/ui/part.js"
-	    }
 	},
 
 	"objects_loader" : "sphere/objects_loader.js",
-	"ui_elements"  : "sphere/ui_elements.js",
-	"ui" : {
-	    "address_panel" : "sphere/ui/address_panel.js",
-	    "action_panel" : "sphere/ui/action_panel.js",
-	    "area" : "sphere/ui/area.js"
-	},
-
 	"frontend" : "sphere/frontend.js",
 	"backend" : "sphere/backend.js"
     }

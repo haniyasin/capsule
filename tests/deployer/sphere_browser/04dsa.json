@@ -6,16 +6,28 @@
 
 	"mq" : "dsa/mq.js",
 	"service_loader" : "dsa/service_loader.js",
-	"services" : {
+	"objects" : {
 	    "ui" : {
-		"label" : "dsa/services/ui/overlay/label.js",
-		"button" : "dsa/services/ui/overlay/button.js",
-		"button_native" : "dsa/services/ui/native/button.js",
-		"entry" : "dsa/services/ui/overlay/entry.js",
-		"panel" : "dsa/services/ui/overlay/panel.js",
-		"container" : "dsa/services/ui/overlay/container.js",
-		"swiper": "dsa/services/ui/overlay/swiper.js"
-		}
+		"ll" : {
+		    "preload" : false,
+		    "label" : "dsa/objects/ui/ll/native/label.js",
+		    "button" : "dsa/objects/ui/ll/overlay/button.js",
+		    "button_native" : "dsa/objects/ui/ll/native/button.js",
+		    "entry" : "dsa/objects/ui/ll/native/entry.js",
+		    "panel" : "dsa/objects/ui/ll/overlay/panel.js",
+		    "container" : "dsa/objects/ui/ll/overlay/container.js",
+		    "swiper": "dsa/objects/ui/ll/overlay/swiper.js"				    
+		},
+
+		"this" : "dsa/objects/ui/ui.js",
+
+		"card" : "dsa/objects/ui/card.js",
+		"menu" : "dsa/objects/ui/menu.js",
+		"click_item" : "dsa/objects/ui/click_item.js"
+	    }
+	},
+
+	"services" : {
 	},
 	"parts" : {
 	    "ui" : "dsa/parts/ui.js"

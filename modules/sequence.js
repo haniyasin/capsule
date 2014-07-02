@@ -1,4 +1,4 @@
-var serializer = require('../dependencies/json.js'),
+var serializer = require('../dependencies/serializer.js'),
     error = require('../parts/error.js'),
     sconfig = {
 	realFunctions : true,
