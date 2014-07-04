@@ -4,11 +4,21 @@
         "preload" : true,
 	"inline" : true,
 
-	"parts" : {
-	},
-
 	"objects_loader" : "sphere/objects_loader.js",
 	"frontend" : "sphere/frontend.js",
-	"backend" : "sphere/backend.js"
+	"backend" : "sphere/backend.js",
+	
+	"objects" : {
+	    "preload" : false,
+	    "taxi" : {
+		"this" : "sphere/objects/taxi.js",
+		"orders" : "sphere/objects/taxi/orders.js"
+	    },
+	    "portal"  : "sphere/objects/portal.js",
+	    "welcome" : "sphere/objects/welcome.js"
+	},
+	
+	"parts" : {
+	}
     }
 }

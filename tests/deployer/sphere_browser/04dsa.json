@@ -10,20 +10,26 @@
 	    "ui" : {
 		"ll" : {
 		    "preload" : false,
-		    "label" : "dsa/objects/ui/ll/native/label.js",
-		    "button" : "dsa/objects/ui/ll/overlay/button.js",
-		    "button_native" : "dsa/objects/ui/ll/native/button.js",
-		    "entry" : "dsa/objects/ui/ll/native/entry.js",
-		    "panel" : "dsa/objects/ui/ll/overlay/panel.js",
-		    "container" : "dsa/objects/ui/ll/overlay/container.js",
-		    "swiper": "dsa/objects/ui/ll/overlay/swiper.js"				    
+
+		    "native" : {
+			"label" : "dsa/objects/ui/ll/native/label.js",
+			"button" : "dsa/objects/ui/ll/native/button.js",
+			"entry" : "dsa/objects/ui/ll/native/entry.js"
+		    },
+		    "overlay" : {
+			"button" : "dsa/objects/ui/ll/overlay/button.js",
+			"panel" : "dsa/objects/ui/ll/overlay/panel.js",
+			"container" : "dsa/objects/ui/ll/overlay/container.js",
+			"swiper": "dsa/objects/ui/ll/overlay/swiper.js"			
+		    }
 		},
 
-		"this" : "dsa/objects/ui/ui.js",
+		"this" : "dsa/objects/ui.js",
 
 		"card" : "dsa/objects/ui/card.js",
 		"menu" : "dsa/objects/ui/menu.js",
-		"click_item" : "dsa/objects/ui/click_item.js"
+		"click" : "dsa/objects/ui/click.js",
+		"entry" : "dsa/objects/ui/entry.js"
 	    }
 	},
 

@@ -8,7 +8,7 @@ function module_loader(){
 				   return i;
 			   }
 			   return null;			   
-		       }
+		       };
 
 		       this.add = function(path, module){
 			   _modules.push([path, module]);
@@ -43,17 +43,17 @@ function module_loader(){
 			   _modules.splice(pos,1);
 
 			   return true;
-		       }
+		       };
 		       return this;
 		   })();
     
     this.add = function(path, module) {
 	modules.add(path, module);
-    }
+    };
 
     this.add_array = function(array){
         modules.add_array(array);	
-    }
+    };
 
     this.load = function (path, base_path){
 	//calculating base_path, path of directory, which is consisting this module
@@ -103,9 +103,12 @@ function module_loader(){
 
 	}
 
-	var module = modules.get(base_path  + path);
-	var _module;
-     	
+	var module = modules.get(base_path  + path),
+	_module;
+	
+	if(module == null)
+	    throw {code : "MODULE_NOT_FOUND"};
+	
 	switch(typeof(module)){
 	    case 'function' : //inline true
 	    _module = module;
@@ -116,6 +119,7 @@ function module_loader(){
 	    break;
 
 	    case 'object' : //already loaded module
+//		alert(base_path + path);
 	    return module.exports;
 	}
 
@@ -132,7 +136,7 @@ function module_loader(){
 	
 	//replace module source or function with resultated object
 	modules.replace(base_path + path, module_definition);
-
+	
 	return module_definition.exports;	
     };
 }
