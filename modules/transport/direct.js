@@ -1,4 +1,5 @@
-var transport = require('../transport.js');
+var transport = require('../transport.js'),
+uuid = require('../uuid.js');
 var callbacks = new Array();
 
 exports.create = function(context, features, capsule){
@@ -28,7 +29,7 @@ exports.create = function(context, features, capsule){
 					     callbacks[context.url]['ds'][uuid]();
 				     }
 				 });
-		    }
+		    };
 	    },
 	    "destroy" : function(){
 		var destroy_cbs = callbacks[context.url]['d'];
@@ -40,7 +41,7 @@ exports.create = function(context, features, capsule){
 	    }
 	}		    
     }else if (features & transport.features.client){
-	var uuid = capsule.modules.uuid.generate_str();
+	var uuid = uuid.generate_str();
 	return {
 	    "connect" : function(){
 		if(typeof(callbacks[context.url][0]) == 'function')
@@ -65,6 +66,6 @@ exports.create = function(context, features, capsule){
 		if(callbacks[context.url]['dc' + uuid])
 		    callbacks[context.url]['dc' + uuid]();
 	    }
-	}
+	};
     }
 }

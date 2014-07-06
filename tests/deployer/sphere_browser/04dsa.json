@@ -6,6 +6,7 @@
 
 	"mq" : "dsa/mq.js",
 	"service_loader" : "dsa/service_loader.js",
+	"init" : "dsa/init.js",
 	"objects" : {
 	    "ui" : {
 		"ll" : {
@@ -28,8 +29,10 @@
 
 		"card" : "dsa/objects/ui/card.js",
 		"menu" : "dsa/objects/ui/menu.js",
+		"part" : "dsa/objects/ui/part.js",
 		"click" : "dsa/objects/ui/click.js",
-		"entry" : "dsa/objects/ui/entry.js"
+		"entry" : "dsa/objects/ui/entry.js",
+		"text" : "dsa/objects/ui/text.js"
 	    }
 	},
 
