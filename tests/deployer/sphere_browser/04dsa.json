@@ -22,7 +22,8 @@
 			"panel" : "dsa/objects/ui/ll/overlay/panel.js",
 			"container" : "dsa/objects/ui/ll/overlay/container.js",
 			"swiper": "dsa/objects/ui/ll/overlay/swiper.js"			
-		    }
+		    },
+		    "animation" : "dsa/objects/ui/ll/animation.js"
 		},
 
 		"this" : "dsa/objects/ui.js",

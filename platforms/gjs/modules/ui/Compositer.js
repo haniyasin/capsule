@@ -184,7 +184,7 @@ function video(){
 				     element.sink.texture = element.actor;
 				     element.pipeline.video_sink = element.sink;
 				     
-				     element.actor.add_child(element.actor);
+//				     element.actor.add_child(element.actor);
 				     element.actor.show();
 
 				     element.control = {

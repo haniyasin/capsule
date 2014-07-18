@@ -12,5 +12,5 @@ exports.create = function(comp){
 	    "create" : comp.text_create,
 	    "destroy" : comp.text_destroy
 	}
-    }
+    };
 }

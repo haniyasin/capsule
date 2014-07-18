@@ -5,6 +5,6 @@ exports.main = function(env){
     var frontend = dsa.get('sphere/frontend'),
     backend = dsa.get('sphere/backend');
     
-    dsa.mq.send(backend, [null,'create']).run();
-    dsa.mq.send(frontend, [null,'create', backend]).run();
+    backend.create().run();
+    frontend.create(backend.id).run([]);
 };

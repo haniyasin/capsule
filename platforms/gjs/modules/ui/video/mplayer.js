@@ -22,8 +22,8 @@ exports.create = function(info, capsule){
     surface.realize();
 
     var element = new comp.element_proto(new ClutterX11.TexturePixmap.new_with_window(surface.get_id()), info);
-
-    element.actor.window_redirect_automatic = true;
+    print('window redirect', element.actor.window_redirect_automatic);
+    element.actor.set_automatic(true);
     element.actor.show();
 
     return {
@@ -46,6 +46,7 @@ exports.create = function(info, capsule){
 				 });
 	    },
 	    pause : function(){
+		mplayer.in('pause\n');
 	    },
 	    set_position : function(msecond){
 	    },

@@ -8,17 +8,14 @@ exports.main = function(env){
     
 //    thsocket.test({ 'url' : 'http://localhost:8810/sockethh.js', 'method' : 'POST'}, capsule.modules);
 
-//    capsule.tests.modules.ui.Compositer.test(capsule);
-    
+//    capsule.tests.modules.ui.Compositer.test(capsule); 
 
     var comp = capsule.modules.ui.Compositer.create();
 //    var comp1 = capsule.modules.ui.Compositer.create();
 
     var video = capsule.modules.ui.video.mplayer.create({
-							    width : '50%',
-							    height : '50%',
-							    x : '25%',
-							    y : '25%'
+							    width : '100%',
+							    height : '100%'
 							}, capsule);	
     video.control.play();
 

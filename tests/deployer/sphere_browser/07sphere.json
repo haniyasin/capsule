@@ -10,6 +10,7 @@
 	
 	"objects" : {
 	    "preload" : false,
+	    "list" : "sphere/objects/list.js",
 	    "taxi" : {
 		"this" : "sphere/objects/taxi.js",
 		"orders" : "sphere/objects/taxi/orders.js"
