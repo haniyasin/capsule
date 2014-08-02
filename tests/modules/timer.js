@@ -10,7 +10,7 @@ exports.test = function(capsule){
     var seconds_left = 0;
     var interval = 50; //milisec
     var timeout = 4; //seconds
-    var _timer  = capsule.modules.timer.js.create(function(){
+    var _timer  = capsule.modules.timer.create(function(){
 //				     console.log(print++);
 				     var cur_seconds =  (new Date()).getSeconds();
 				     start_seconds <= cur_seconds ? seconds_left = cur_seconds - start_seconds : seconds_left = 60 - start_seconds + cur_seconds;
@@ -30,12 +30,12 @@ exports.test = function(capsule){
 
     var timeout_counter = 0;    
     for(var ind = 0; ind < 200; ind++){
-	capsule.modules.timer.js.create(function(timeout){
+	capsule.modules.timer.create(function(timeout){
 			    //				      timeout.destroy();
 			    timeout_counter++;
 			}, interval + ind, false);	
 	if(ind == 199)
-	    capsule.modules.timer.js.create(function(){
+	    capsule.modules.timer.create(function(){
 				if(DEBUG)
 				    console.log("DEBUG: timeout_counter[",timeout_counter,']');
 				if(timeout_counter == 200)

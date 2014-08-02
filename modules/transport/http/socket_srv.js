@@ -37,7 +37,7 @@ function response_holder(_incoming, capsule){
     };
 
     this.activate = function(context){
-	extra_cleaner_timer = capsule.modules.timer.js.create(
+	extra_cleaner_timer = capsule.modules.timer.create(
 	    function(){
 		//если много ждёт, то завершаем и оставляем не более 3
 		for(cli_id in responses){				 

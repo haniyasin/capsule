@@ -99,7 +99,7 @@ function lpoller(context, _holder, _incoming, modules){
 
     this.try_poll = function(){	
 	if(!poll_timer){
-	    poll_timer = modules.timer.js.create(
+	    poll_timer = modules.timer.create(
 		function(){
 		    if(request)
 		    {

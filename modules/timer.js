@@ -5,10 +5,10 @@ exports.create = function(callback, milisec, cyclic){
        &&typeof(setTimeout) == 'undefined')
 	return new error('not supported', 'this platform is not supported timer functionality');
  
+    var id = cyclic ? setInterval(callback, milisec) : setTimeout(callback, milisec);
     return {
-	id : cyclic ? setInterval(callback, milisec) : setTimeout(callback, milisec),
 	destroy : function(){
-	    cyclic ? clearInterval(this.id) : clearTimeout(this.id);
+	    cyclic ? clearInterval(id) : clearTimeout(id);
 	}
     };
 }

@@ -59,7 +59,7 @@ function frames_sender(socket, modules){
     this.activate = function(){
 	if(!activated){	    
 	    activated = true;
-	    resend_timer = modules.timer.js.create(_resend, 500, true);	    
+	    resend_timer = modules.timer.create(_resend, 500, true);	    
 	}
     };
 
@@ -120,7 +120,7 @@ function msg_packer(frames_sender, capsule){
     this.add = function(msg){
 	//creating timer for periodically sending incompleted frame
 	if(!short_frame_timer)
-	    modules.timer.js.create(function(){
+	    modules.timer.create(function(){
 					if(cur_frame.p.length || cur_frame.r.length){
 					    frames_sender.add(cur_frame);
 					    cur_frame = get_blank_frame();				
@@ -220,7 +220,7 @@ exports.create = function(context, features, capsule){
     if(features & transport.features.client){
 	    //здесь необходимо как-то сделать выбор то ли script, то ли xhr бекэнда, а пока xhr и post по дефолту
 	var socket_cli = modules.transport.http.socket_cli;
-	var socket = socket_cli.create(context, 'xhr', capsule);
+	var socket = socket_cli.create(context, 'xhr', modules);
 
 	var _frames_sender = new frames_sender(socket, modules);
 	var _msg_packer = new msg_packer(_frames_sender, capsule);

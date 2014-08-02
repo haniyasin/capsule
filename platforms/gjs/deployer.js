@@ -56,7 +56,7 @@ function assembler_constructor(dir){
 	var flags = this.s.flags;
 	if(this.s.type == dutils.types.module){
 	    var content = fs.readFileSync(file_path,"utf8");
-	    var module_load = new module_load_emitter(file_path, content, name);
+	    var module_load = new module_load_emitter(this.get_path(name), content, name);
 	    this.block +=  module_load.emit_declare();
 	    var _block_load = module_load.emit_load();
 	    

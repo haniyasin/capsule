@@ -3,13 +3,15 @@ exports.main = function(env){
 //    capsule.tests.modules.transport.direct.test(capsule);
 //    capsule.tests.modules.timer.test(capsule);
     
-//    console.log(JSON.stringify(capsule.modules.transport.http));
-    var thsocket = capsule.tests.modules.transport.http.socket_cli;
+//    var thsocket = capsule.tests.modules.transport.http.socket_cli;
     
 //    thsocket.test({ 'url' : 'http://localhost:8810/sockethh.js', 'method' : 'POST'}, capsule.modules);
-
+    var thttp = capsule.tests.modules.transport.http.client;
+    
+    thttp.test({ 'url' : 'http://localhost:8810/krevetk/o', 'method' : 'POST'}, capsule);
+    return;
 //    capsule.tests.modules.ui.Compositer.test(capsule); 
-
+/*
     var comp = capsule.modules.ui.Compositer.create();
 //    var comp1 = capsule.modules.ui.Compositer.create();
 
@@ -27,10 +29,7 @@ exports.main = function(env){
 				  });
     comp.frame_add(0, frame);
     comp.frame_add(frame, video.handle);
-//    var thttp = capsule.tests.modules.transport.http.client;
-    
-//    thttp.test({ 'url' : 'http://localhost:8810/krevetk/o', 'method' : 'POST'}, capsule);
-
-}
+*/
+};
 
 

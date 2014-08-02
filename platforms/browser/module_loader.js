@@ -103,11 +103,11 @@ function module_loader(){
 
 	}
 
-	var module = modules.get(base_path  + path),
+	var module = modules.get(base_path + path),
 	_module;
 	
 	if(module == null)
-	    throw {code : "MODULE_NOT_FOUND"};
+	    throw {code : "MODULE_NOT_FOUND", module_path : base_path + path};
 	
 	switch(typeof(module)){
 	    case 'function' : //inline true
