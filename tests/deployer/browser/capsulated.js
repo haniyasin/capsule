@@ -12,7 +12,18 @@ exports.main = function(env){
     
 //    thttp.test({ 'url' : 'http://localhost:8810/krevetk/o', 'method' : 'POST'}, capsule);
 
-    capsule.tests.modules.ui.Compositer.test(capsule);
-}
+//    with(capsule.modules.ui){
+//	var comp = new Compositer.Compositer();
+//	var map = new map({
+//			      width : '80%',
+//			      height : '80%',
+//			      x : '10%',
+//			      y : '10%'
+//			  });
+//	comp.frame_add(0, map.id());
+//  }
+
+    capsule.tests.modules.ui.Compositer.test();
+};
 
 

@@ -1,4 +1,4 @@
-* v0.1 experimental - is current version 
+* v0.1 final - is current version 
   first ready to use version of capsule. Many bugs is still here:)
 
 * how versions is marked
@@ -12,7 +12,7 @@
 * plans
 
 ** v0.1
-   all plans is done, only code cleaning and bug fixes is needed
+   job is done
 
 ** v0.2
 + sequence module integrating and using within capsule modules

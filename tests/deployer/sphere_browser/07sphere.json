@@ -13,8 +13,11 @@
 	    "list" : "sphere/objects/list.js",
 	    "taxi" : {
 		"this" : "sphere/objects/taxi.js",
-		"orders" : "sphere/objects/taxi/orders.js"
+		"orders" : "sphere/objects/taxi/orders.js",
+		"taxi" : "sphere/objects/taxi/taxi.js",
+		"passenger" : "sphere/objects/taxi/passenger.js"
 	    },
+	    "remont" : "sphere/objects/remont.js",
 	    "portal"  : "sphere/objects/portal.js",
 	    "welcome" : "sphere/objects/welcome.js"
 	},
