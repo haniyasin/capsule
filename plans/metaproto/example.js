@@ -1,4 +1,4 @@
 ololo;
 bugaga; euhaha
-lolo
-op op op
+var l1olo
+op op2 op3
