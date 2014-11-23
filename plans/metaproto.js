@@ -53,6 +53,7 @@ function parser(){
 		if(!context.hasOwnProperty('vars'))
 		    context.vars = {};
 		context.vars[name] = {};
+		context.cur_var = name;
 	    }
 	}
     };
