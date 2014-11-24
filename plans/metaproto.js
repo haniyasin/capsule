@@ -33,15 +33,20 @@ function lex(text, delimeters){
 
 function parser(){
     var chunk, status, context = {
+	parent : null,
+	children : [],
 	next : null,
 	word : 0
     },
     word_types = {
 	label : {
 	    regexp : /^\D\w*/
+	},
+	value : {
+	    event : 'endblock'
 	}	
     },
-    words = {
+    ops = {
 	var : {
 	    next : [
 		{
@@ -49,65 +54,95 @@ function parser(){
 		    type : 'label'
 		}
 	    ],
-	    handler : function(context, name){
+	    post_handler : function(context, name){
 		if(!context.hasOwnProperty('vars'))
 		    context.vars = {};
 		context.vars[name] = {};
 		context.cur_var = name;
 	    }
+	},
+	'=': {
+	    event : 'endblock',
+
+	    pre_handler : function(context, new_context){
+		if(context.hasOwnProperty('cur_var'))
+		    new_context.place = context.vars[context.cur_var];
+	    },
+
+	    post_handler : function(context, name){
+	    }
 	}
     };
 
-    function do_word(_word){
-	if(words.hasOwnProperty(_word)){
-	    var cur_word = words[_word];
-	    if(cur_word.next.length){
-		context = context.next = { prev : context,
-					   args : [],
-					   args_cur_num : 0,
-					   args_num : cur_word.next.length,
-					   word : cur_word
-					 };
-	    }
-	}else{
-	    if(context.word){
-		with(context){
-//		    print(JSON.stringify(context));
-			  if(args_cur_num != args_num){
-			      var type = word_types[word.next[args_cur_num].type];
-			      if(type.hasOwnProperty('regexp'))
-				  if(type.regexp.exec(_word) != null){
-				      args[args_cur_num++] = _word;
-				  }else{
-				      print('label is incorrect', _word);
-				  };
-			  }else{
-			      args.unshift(context);
-			      word.handler.apply(null, args);
-			      args = [];
-			      args_cur_num = 0;
-			  }		    
-		}		
-	    }
+    /*
+     * отвечает за обработку ключевых слов, операторов. Нет никакой разницы состоят ли эти операторы
+     * из букв или спецсимволов 
+     */
+    function do_op(_op){
+	var cur_op = ops[_op],
+   	    new_context = { 
+		op : cur_op
+	    };
+	print(_op);
+
+	if(cur_op.hasOwnProperty('next') && cur_op.next.length){
+	    new_context.args = [];
+	    new_context.args_cur_num = 0;
+	    new_context.args_num = cur_op.next.length;
+	    
+	    if(cur_op.hasOwnProperty('pre_handler'))
+		cur_op.pre_handler(context, new_context);
+	    context = context.next = new_context;
 	}
-	print('It is word:' + _word);			
+	if(cur_op.hasOwnProperty('event')){
+	    if(cur_op.event == 'endblock')
+		context = context.next = new_context;
+	}
     }
+    
     this.do = function(){
 	while((chunk =_lex.next()) != null){
-	    if(!chunk[0]){
-		do_word(chunk[1]);
+	    if(ops.hasOwnProperty(chunk[1]))
+		do_op(chunk[1]);
+	    else if(!chunk[0]){
+		if(context.op){
+		    with(context){
+			//operators with explicit arguments
+			if(context.hasOwnProperty('args')){
+			    if(args_cur_num == args_num){
+				args.unshift(context);
+				op.post_handler.apply(null, args);
+				args = [];
+				args_cur_num = 0;
+			    }			    
+			    var type = word_types[op.next[args_cur_num].type];
+			    
+			    if(type.hasOwnProperty('regexp'))
+				if(type.regexp.exec(chunk[1]) != null){
+				    args[args_cur_num++] = chunk[1];
+				}else{
+				    print('label is incorrect', chunk[1]);
+				};
+			}
+			
+			//найти переменную
+			print(chunk[1]);
+			if(op.hasOwnProperty('event')){
+			    switch(op.event){
+			    case 'endblock':
+//				print('гграааапа');
+			    }
+			}
+		    }		
+		}
 	    }
-	    else
-		print('It is delimeter:' + chunk[1]);
 	}
 	return status;
-    };
-    this.next = function(chunk){
     };
 }
 
 var content = g.file_get_contents('metaproto/example.js');
 
-var _lex = new lex(content[1].toString(), '\n; ,\t:+-)(*&^%$#@!~`\'\"<>./');
+var _lex = new lex(content[1].toString(), '\n; ,\t:+-)(*&^%$#@!~`\'\"<>./=');
 var _parser = new parser();
 _parser.do();
