@@ -1,22 +1,25 @@
+meta.activate.simpleflex();
+meta activate sphere;
 config languages {
        russian {
            english : 'английский'
 	   russian : 'русский'
            ok : 'принять'
 	   cancel : 'отказаться'
-	   
+	   'choose language' : 'выбрать язык'
+	   'main' : 'основное окно'
        }
 }
 
-config.lang.english _e
+config.languages lang
 
-card create chooser {
+card create 'choose language' {
      click {
-         label : _e 'english'
+         label : lang english
          config.lang = english
      }
      click russian {
-         label : _e 'russian'
+         label : lang russian
          config.lang = russian
      }        
 }
@@ -28,14 +31,14 @@ card create main {
          source : "img/main.svg"
      }
      click ok {
-         label : _e 'ok'
+         label : lang ok
          width : 2
 	 do {
 	    card focus chooser 
 	 }	 
      }
      click cancel {
-         label : _e 'cancel'
+         label : lang cancel
          width : 2
 	 do{
 	    card create failed {
