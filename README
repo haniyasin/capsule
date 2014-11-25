@@ -1,7 +1,26 @@
-This project is complex tools, module's launchers and modules for creating a abstraction which called the capsule.
-For each supported platform was itself own set tools and neccesary parts for creating a abstraction.
-Now, we support two platforms - browser, nodejs, but in far future was planned support for android, GNU/Linux, Windows and javame. Abstraction is created with keeping all these plantforms on mind.
+Это набор инструментов, модулей и низкоуровневых компонентов, которые формируют единый API для всех поддерживаемых
+платформ. Для каждой платформы поддерживается необходимое количество низкоуровневых и иных компонентов. 
+На данный момент поддерживается: nodejs, browser. Поддержка gnome gjs в разработке. Планируется прямая поддержка android,
+windows.
+Архитектура capsule разработана с учётом возможности поддержки почти любой платформы.
 
-What is capsule abstraction? It is not so ease to answer. 
-One side is envelopement with api, for execution code. One envelopement and one api for the any supported platforms. You can write application, which, for example, is retriving list all you loved songs in your favorite cloud, if that cloud is having http api. Then, application is extracting some song by your entered criteria and return new playlist for using your favorite player. Of couse, this is example and application may be more complex. It is may to include player, song library, support for many cloud api and many more. What is important? That is this application may be deploed in browser or nodejs OR browser and nodejs divert some modules(gui, user logic, audio etc) to browser and some modules(strorring data, retriving data from clouds etc) to nodejs. Finally, we trying create support for each platform to bring maximum its capabilities. If platform support all capabilities what application need then application may be runned for this platform without back hellping(for example - execution an application in the browser without helping from web server).
-Other side is part of dsa and base for new type application. It is applications which is consisted from many services distributed on many devices and platforms. Its is not applications, it is united services which is doing some work together bringing to user experience which one was needed. Above example may be divided into parts: in browser(ui, little logic), in browsers other people(distributed storring songs, playlist etc), in nodejs other people(distributed search songs, storring songs texts). All parts is connected between itself and united in something like application.
+Что есть capsule с точки зрения разработчика? 
+Это единое api и языка(javascript) для написания приложения, которое будет
+работать в разных окружениях без изменения. То есть не нужно писать отдельный ui для браузера, windows и тд. В этом смысле
+можно провести аналогию с qml из Qt. Но разница в том, что capsule изначально разрабатывалась как платформа для javascript,
+а значит поддержка браузера и подобных платформ делается без особых сложностей. Qt же наоборот лучше поддерживает те
+платформы, где C++ является одним из основных языков разработки.
+С другой стороны capsule это основа для dsa, а значит в ней изначально заложены некоторые собственные концепты для написания
+полностью асинхронного кода, все компоненты выполнены с учётом этого требования. 
+Для capsule справедливо и общее правило проектов sphere, dsa, capsule - быть простым, понятным, но в то же время гибким 
+инструментом. В этом смысле api для многих разработчиков может показаться немного странноватым и не подходящим для
+серьёзной разработки.
+
+Что есть capsule с точки зрения пользователя?
+Если некоторое приложение или сервис создан на базе capsule или платформ, которые используют её для своей основы(dsa), то
+пользователь получает продукт, который одинаково хорошо будет работать и как браузерное приложение и как обычное
+приложение. Скорее всего этот продукт будет требовать минимум зависимостей и при его загрузке не нужно будет ждать минуту,
+пока браузер что-нибудь покажет(как бывает почти всегда, когда вы загружаете хоть сколько-нибудь серьёзное приложение в 
+браузере, использующее canvas+тонны фреймворков или canvas+emscripten(C и С++ приложения)).
+С другой стороны capsule сама по себе пользователю ни о чём не говорит, потому как без связки с dsa все её преимущества
+могут быть и не использованны.
