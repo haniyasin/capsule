@@ -8,7 +8,7 @@
 
 meta activate commonjs
 
-module example //Можно здесь сразу и начать фигурную скобку, чтобы избежать дальше писать example something
+module example //Можно здесь сразу и открыть фигурную скобку, чтобы избежать дальше писать example something
 
 example hello(string){
     print('hello' + string);

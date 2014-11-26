@@ -18,7 +18,10 @@
 			"client" : "tests/modules/transport/http/client.js",
 			"server" : "tests/modules/transport/http/server.js"
 		    }
-		}		
+		},
+		"storage" : {
+		    "low_level" : "tests/modules/storage/low_level.js"
+		}
 	    }
 	}
     }

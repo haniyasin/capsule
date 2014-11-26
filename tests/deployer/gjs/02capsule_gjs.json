@@ -11,6 +11,9 @@
 	"modules" : {
 	    "timer" : "platforms/gjs/modules/timer.js",
 	    "http_requester" : "platforms/gjs/modules/http_requester.js",
+	    "storage" : {
+		"low_level" : "platforms/gjs/modules/storage/low_level.js"
+	    },
 	    "ui" : {
 		"Compositer" : "platforms/gjs/modules/ui/Compositer.js",
 		"video" : {

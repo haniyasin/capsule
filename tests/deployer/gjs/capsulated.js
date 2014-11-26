@@ -6,10 +6,11 @@ exports.main = function(env){
 //    var thsocket = capsule.tests.modules.transport.http.socket_cli;
     
 //    thsocket.test({ 'url' : 'http://localhost:8810/sockethh.js', 'method' : 'POST'}, capsule.modules);
-    var thttp = capsule.tests.modules.transport.http.client;
+//    var thttp = capsule.tests.modules.transport.http.client;
     
-    thttp.test({ 'url' : 'http://localhost:8810/krevetk/o', 'method' : 'POST'}, capsule);
-    return;
+//    thttp.test({ 'url' : 'http://localhost:8810/krevetk/o', 'method' : 'POST'}, capsule);
+    capsule.tests.modules.storage.low_level.test();
+
 //    capsule.tests.modules.ui.Compositer.test(capsule); 
 /*
     var comp = capsule.modules.ui.Compositer.create();
