@@ -78,7 +78,7 @@ exports.assemble = function(dir, config){
         + "var GtkClutter = imports.gi.GtkClutter;"
         +  "GtkClutter.init(null);"
 
-        + "var console = { log : function(){print(JSON.stringify(arguments));} };"
+        + "var console = { log : function(){print.apply(null, arguments);} };"
 	+ "function constructor(module_loader){\n return " 
 	+ generated.constructor + '}\n';
     if(config.values.hasOwnProperty('entry'))

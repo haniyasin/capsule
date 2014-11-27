@@ -3,14 +3,15 @@
  * API is async
  */
 
-var g = imports.gi.GLib;
-var gio = imports.gi.Gio;
+var g = imports.gi.GLib,
+    gio = imports.gi.Gio,
+    byte_array = imports.byteArray;
 
 /*
  * deleting object by id
  */
 exports.delete = function(id, cb){
-//    g.unlink(id);
+    g.unlink(id);
     cb();
 }
 
@@ -50,18 +51,9 @@ exports.read = function(id, position, length, cb){
     file.open_readwrite_async(1, null, function(source,res){
 				  var iostream = file.open_readwrite_finish(res);
 				  var istream = iostream.input_stream;
+				  istream.seek(position, g.SeekType.SET, null);
+				  var data = istream.read_bytes(length, null);
+//				  print(data.get_data());
+				  cb(null, data.get_data().toString());
 			      });
-    return 0;
-    var content = new Buffer(length);
-    fs.open(id, 'r', function(err, fd){
-		if(err)
-		    cb(err, null);
-		else
-		    fs.read(fd, content, 0, length, position, function(err, readed_bytes, content){
-				if(readed_bytes != length)
-				    cb({ msg : 'readed few' });
-				else
-				    cb(err, content.toString());
-			    });
-	    });
-}
+};
