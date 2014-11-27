@@ -1,7 +1,7 @@
 var sll = require('../../../modules/storage/low_level.js');
 
 exports.test = function(){
-    var id = './test.data';
+    var id = 'test.data';
     console.log(id);
     sll.append(id, 'vataing', function(){console.log('written');});
 //    sll.read(id, 0, 3, function(err,data){console.log(data);});    

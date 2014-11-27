@@ -2,20 +2,22 @@
  * low level storage module for nodejs 
  * API is async
  */
+
 var fs = require('fs');
 
 /*
  * deleting object by id
  */
 
-exports.delete = function(id, cb, capsule){
-    fs.unlink(id, cb);   
+exports.delete = function(id, cb){
+    fs.unlink(id, cb);
+    cb();
 }
 
 /*
  * writing to object by id. Writing only as appending
  */
-exports.append = function(id, data, cb, capsule){
+exports.append = function(id, data, cb){
     fs.appendFile(id, data, cb);
 }
 
@@ -25,7 +27,7 @@ exports.append = function(id, data, cb, capsule){
  * cb(err, content); err may be - cannot read as need, nonexistent, underlay_err
  */
 
-exports.read = function(id, position, length, cb, capsule){
+exports.read = function(id, position, length, cb){
     var content = new Buffer(length);
     fs.open(id, 'r', function(err, fd){
 		if(err)
