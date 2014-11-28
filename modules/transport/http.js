@@ -308,5 +308,7 @@ exports.create = function(context, features, capsule){
 	    }
 	};
     }
-}
+
+    return null;
+};
 

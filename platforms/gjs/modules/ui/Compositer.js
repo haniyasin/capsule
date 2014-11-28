@@ -415,6 +415,7 @@ function event(){
 				     if(!listened_elems.hasOwnProperty(element_id))
 					 return new error('event unregister', 'element pointed to has no exists');
 				     delete listened_elems[element_id][event_name];
+				     return null;
 				 }
 			     });
 }
@@ -467,8 +468,11 @@ function props_manager(element){
 	this.get = function(){
 	    if(this.type == 'p')
 		    return this.value;
-	    else if (element.hasOwnProperty('parent'))
-	    return element.parent.props_manager[parent_prop_name].get() / 100 * this.value;	    
+	    else 
+		if (element.hasOwnProperty('parent'))
+		    return element.parent.props_manager[parent_prop_name].get() / 100 * this.value;
+
+	    return null;	    
 	};
 
 	this.update = function(inc_value){

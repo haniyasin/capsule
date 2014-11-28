@@ -3,7 +3,7 @@ function module_loader(){
 		       var _modules = [];
 		       
 		       function _find(path){
-			   for(i = 0; i < _modules.length; i++){
+			   for(var i = 0; i < _modules.length; i++){
 			       if(_modules[i][0] == path)
 				   return i;
 			   }

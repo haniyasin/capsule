@@ -536,11 +536,12 @@ function video_player(comp){
 //    comp.button_get_control(backwardb).on_press(function(){vcontrol.set_position(vcontrol.get_position() - 5000);});
 }
 
-exports.test = function(capsule){
-    var comp = capsule.modules.ui.Compositer.create();
+exports.test = function(){
+    var comp = new (require('../../../modules/ui/Compositer.js')).Compositer();
+
 //    slideup_cubes_test(comp);   
-//    original_test2(comp);
+    original_test2(comp);
 //    original_test1(comp);
 //    create_move_remove_test(comp);
-    video_player(comp);
+//    video_player(comp);
 };

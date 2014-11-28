@@ -13,7 +13,7 @@ exports.id_allocator = function(){
 exports.create = function(allocator){
     var busy = [];
     var free = [];
-    var allocator =  new allocator();
+    var _allocator =  new allocator();
     this.alloc = function(){
 //	console.log(free.length);
 //	console.log(busy.length);
@@ -22,12 +22,12 @@ exports.create = function(allocator){
             busy.push(obj);
             return obj;
         } else {
-            var obj = allocator.create(arguments);
+            var obj = _allocator.create(arguments);
             busy.push(obj);
 
             return obj;
         }   
-    }
+    };
     this.free = function(obj){
         for (ind in busy){
             if(busy[ind] == obj){
@@ -36,7 +36,7 @@ exports.create = function(allocator){
                 free.push(obj);
             }
         }
-    }
-}
+    };
+};
 
 //конец универсального выделятора

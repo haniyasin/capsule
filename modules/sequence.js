@@ -89,8 +89,10 @@ function element_do(element, stack){
 	//function far. function which is executed in same place as element before
     case 'f' : 
 	function_do(action, stack, next);
-    break;
-   }    
+	break;
+    }    
+    
+    return true;
 }
 
 function sprout(sprout, stack){

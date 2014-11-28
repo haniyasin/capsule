@@ -39,7 +39,7 @@ exports.create = function(context, features, capsule){
 		}
 		callbacks[context.url] = [];
 	    }
-	}		    
+	};   
     }else if (features & transport.features.client){
 	var uuid = uuid.generate_str();
 	return {
@@ -68,4 +68,5 @@ exports.create = function(context, features, capsule){
 	    }
 	};
     }
-}
+    return null;
+};

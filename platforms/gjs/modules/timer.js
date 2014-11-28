@@ -1,12 +1,7 @@
 var GLib = imports.gi.GLib;
 
 exports.create = function(callback, milisec, cyclic){
-    if(!cyclic)
-	GLib.timeout_add(GLib.PRIORITY_DEFAULT, milisec, function(){
-			     callback(); 
-			     return GLib.SOURCE_REMOVE;
-			 });
-    else {
+    if(cyclic){	
 	var id = GLib.SOURCE_CONTINUE;
 	id = GLib.timeout_add(GLib.PRIORITY_DEFAULT, milisec, function(){
 				  callback();
@@ -17,5 +12,10 @@ exports.create = function(callback, milisec, cyclic){
 		id = GLib.SOURCE_REMOVE;
 	    }
 	};
-    }
+    }else
+	GLib.timeout_add(GLib.PRIORITY_DEFAULT, milisec, function(){
+			     callback(); 
+			     return GLib.SOURCE_REMOVE;
+			 });	
+    return null;  
 };

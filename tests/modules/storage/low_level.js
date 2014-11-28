@@ -15,7 +15,7 @@ exports.test = function(){
 				});   
 		   });	
     }
-    for(i = 0; i != 8; i += 4){
+    for(var i = 0; i != 8; i += 4){
 	(function(i){
 	     sll.append(id, 'vata', function(){
 //			    console.log(i);
