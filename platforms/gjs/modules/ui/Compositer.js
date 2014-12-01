@@ -63,7 +63,7 @@ function image(){
 				      element.actor.show();
 				      if(info.hasOwnProperty('source')){
 					  var re_result;
-					  if(re_result = /data:image\/(\w+);base64,/.exec(info.source)){
+					  if((re_result = /data:image\/(\w+);base64,/.exec(info.source))){
 					      var data = info.source.substr(re_result[0].length);
 					      if( re_result[1] == 'png'){
 						  var loader = GdkPixbuf.PixbufLoader.new_with_type('png');
@@ -446,7 +446,7 @@ function props_manager(element){
 		return;
 	    
 	    var re_result;
-	    if(re_result = /^(\d+)%$/.exec(value)){
+	    if((re_result = /^(\d+)%$/.exec(value))){
 		this.value = parseInt(re_result[1]);
 		this.type = '%';
 	    } else {

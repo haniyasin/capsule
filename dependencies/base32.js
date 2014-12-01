@@ -209,7 +209,7 @@ function sha1(input, cb) {
         if (!typeof input.on == 'function') return cb({ message: "Not a stream!" })
         input.on('data', function(chunk) { hash.update(chunk) })
         input.on('end', function() { cb(null, hash.digest()) })
-        return
+        return undefined;
     }
 
     // non-streaming

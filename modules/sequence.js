@@ -9,7 +9,7 @@ function do_args(args, stack){
     for(ind in args){
 	if(typeof(args[ind]) == 'string'){
 	    var result;
-	    if(result = /stack[.]*\[*(\w+)\]*\[*(\d*)\]*/.exec(args[ind])){
+	    if((result = /stack[.]*\[*(\w+)\]*\[*(\d*)\]*/.exec(args[ind]))){
 		if(result.length == 2)
 		    args[ind] = stack[result[1]];
 		else if(result.length == 3)

@@ -74,7 +74,7 @@ function module_loader(){
 	    var part;
 	    var lastIndex = 0;
 	    
-	    while(part = path_parts_pattern.exec(path)){
+	    while((part = path_parts_pattern.exec(path))){
 		lastIndex = path_parts_pattern.lastIndex;
 
 		switch(part[1]){
