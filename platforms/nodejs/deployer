@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+
+cd ../..
+NODE_PATH="./" node deployer.js nodejs $1 $2

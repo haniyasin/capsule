@@ -2,9 +2,7 @@ var http = require('http');
 var url = require('url');
 var dns = require('dns');
 
-//litle hack for detecting where we are - capsule or deployer
-var base32 = typeof(module_loader) != 'undefined' ? require('../dependencies/base32.js') 
-    : require('../../../dependencies/base32.js');
+var base32 = require('dependencies/base32.js'); 
 
 // for storing active and unactive server contexts
 var servers = [];

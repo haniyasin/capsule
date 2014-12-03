@@ -9,24 +9,24 @@ exports.create = function(context, features, capsule){
         return {
 	    "on_connect" : function(callback){
 		if(callback != null)
-		    callbacks[context.url][0] = function(uuid){
+		    callbacks[context.url][0] = function(uuid_str){
 			callback({
 				     "on_msg" : function (callback){
-					 callbacks[context.url]['s' + uuid] = callback;
+					 callbacks[context.url]['s' + uuid_str] = callback;
 				     },
 				     "send" : function(msg){
-					 if(typeof(callbacks[context.url]["c" + uuid]) == 'function')
-					     callbacks[context.url]["c" + uuid](msg);
-					 else console.log("server: Callback on msg from", uuid, "client is not setted");
+					 if(typeof(callbacks[context.url]["c" + uuid_str]) == 'function')
+					     callbacks[context.url]["c" + uuid_str](msg);
+					 else console.log("server: Callback on msg from", uuid_str, "client is not setted");
 				     },
 				     "on_destroy" : function(callback){
-					 callbacks[context.url]['ds'][uuid] = callback;
+					 callbacks[context.url]['ds'][uuid_str] = callback;
 				     },
 				     "destroy" : function(){
-					 callbacks[context.url]['s' + uuid] = null;
+					 callbacks[context.url]['s' + uuid_str] = null;
 
-					 if(callbacks[context.url]['ds'][uuid])
-					     callbacks[context.url]['ds'][uuid]();
+					 if(callbacks[context.url]['ds'][uuid_str])
+					     callbacks[context.url]['ds'][uuid_str]();
 				     }
 				 });
 		    };
@@ -41,30 +41,30 @@ exports.create = function(context, features, capsule){
 	    }
 	};   
     }else if (features & transport.features.client){
-	var uuid = uuid.generate_str();
+	var uuid_str = uuid.generate_str();
 	return {
 	    "connect" : function(){
 		if(typeof(callbacks[context.url][0]) == 'function')
-		    callbacks[context.url][0](uuid);
+		    callbacks[context.url][0](uuid_str);
 		else console.log("client: Callback on connect is not setted");
 	    },
 	    "on_msg" : function (callback){
-		callbacks[context.url]["c" + uuid] = callback;
+		callbacks[context.url]["c" + uuid_str] = callback;
 	    },
 	    "send" : function(msg){
-		if(typeof(callbacks[context.url]['s' + uuid]) == 'function')
-		    callbacks[context.url]['s' + uuid](msg);
+		if(typeof(callbacks[context.url]['s' + uuid_str]) == 'function')
+		    callbacks[context.url]['s' + uuid_str](msg);
 		else console.log("client: Callback on msg is not setted");
 	    },
 	    
 	    "on_destroy" : function(callback){
-		callbacks[context.url]['dc' + uuid] = callback;
+		callbacks[context.url]['dc' + uuid_str] = callback;
 	    },
 	    "destroy" : function(){
-		callbacks[context.url]['c' + uuid] = null;
+		callbacks[context.url]['c' + uuid_str] = null;
 		
-		if(callbacks[context.url]['dc' + uuid])
-		    callbacks[context.url]['dc' + uuid]();
+		if(callbacks[context.url]['dc' + uuid_str])
+		    callbacks[context.url]['dc' + uuid_str]();
 	    }
 	};
     }

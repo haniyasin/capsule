@@ -1,12 +1,1 @@
-{
-    "capsule" : {
-	"dependencies" : {
-	    "uuid" : "dependencies/uuid.js"
-	},
-	"modules" : {
-	    "timer" : "modules/timer.js",
-	    "http_requester" : "platforms/nodejs/modules/http_requester.js",
-            "http_responder" : "platforms/nodejs/modules/http_responder.js"
-	}
-    }
-}
+/home/ix/dev/capsule/tests/deployer/nodejs_cli/02capsule_nodejs.json

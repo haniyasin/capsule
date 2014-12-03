@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+
+cd ../..
+gjs deployer.js gjs $1 $2

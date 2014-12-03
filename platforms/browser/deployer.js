@@ -17,7 +17,7 @@ function depend_resolver(depend){
 	}
 
 	//
-    }
+    };
 
     this.generate();
 }

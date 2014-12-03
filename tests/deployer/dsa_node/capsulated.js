@@ -48,7 +48,7 @@ exports.main = function(env){
    
 //    _mq.activate();
     var _mq = mqnode1;
-    var sid = sloader.load('tests/test_set/service_one', mqnode1, env);    
+    var sid = sloader.load('dsa/tests/test_set/service_one', mqnode1, env);    
     _mq.send(sid, [null, "set", "gg", "ttte"]);
     _mq.send(sid, [null, "ping", "ttt"]);
     _mq.send(sid, [null, "pong", "tttg"]);
