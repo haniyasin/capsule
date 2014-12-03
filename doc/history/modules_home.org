@@ -1,0 +1,26 @@
+* текущая версия capsule api - v0.6
+  Это значит, что под эту версию ведётся разработка всех, основанных на capsule разработок:
+  + модулей capsule
+  + dsa.mq
+  + dsa.manager
+
+  Только изменение текущей версии api, а не реализация новых версий api, какими бы стабильными они не были, приводит к изменению ориентира для основанных на capsule
+  разработок.
+** Список типов модулей, возможных в capsule v0.6
++ [[modules.uuid][uuid]] - генерация, валидация uuid
++ [[modules.timer][timer]] - таймер, включающий в себя interval                                                                                                         
++ [[modules.transport][transport]] - полностью асинхронный, неблокирующий транспорт
++ [[modules.storage][storage]] - неблокирующий, асинхронный доступ к объектам(плоское объектное хранилище), с возможностью, аналогичной inotify(или watch)
++ [[https://github.com/ixdu/capsule/wiki/Methods][compositer]] - высокоуровневый 2d canvas, scene-graph.                                                                                                                                                       
+** модули, которые будут доступны в capsule v0.7             
++ [[modules/bin_containter][bin_container]] - хранение бинарных данных, автоконвертация их из одного формата в другой, api для доступа к различным форматам для модулей capsule 
++ [[modules/http_requester][http_requester]] - клиент http, вдохновлён HttpRequest, но проще и более async, callback ориентирован.
++ [[modules/http_respondent][http_respondent]] - cервер htpp,  api которого вдохновлён http_requester
++ [[modules/http_object_dispenser][http_object_dispenser]] - простой сервер для раздачи загруженных в него файлов по http, с плоским адресным пространством. Работает поверх http_replier
++ [[modules/cloud_object][cloud_object]] - механизм доступа к объекту c единым api, который хранится на различных ресурсах(youtube, facebook, vkontakte и тд)
+** модули, которые будут доступны в capsule v0.8
++ [[modules.capsule][capsule]] - создание капсулы внутри капсулы( по сути возможность создавать либо изолированные окружения, либо капсулы выполняющиеся в отдельном потоке, этакая серебрянная пуля, объединяющая все возможные api в одно - nested mainloop, threads, process, sandbox)
++ [[modules.crypto][crypto]] - реализация крипто алгоритмов, прежде всего rsa, sha, aes                                                                       |
+** модули capsule v0.9
++ [[modules.space][space]] - Взаимодействие с простанством и датчиками(акселерометры, гирокомпасы, gps, nfc и тд)
+                                                           

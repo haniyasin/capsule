@@ -1,0 +1,27 @@
+*  function send(msg_id, msg_body, callback)`
+
+** description
+  Посылает сообщение. Количество сообщений с одиним и тем же msg_id не ограничено.
+
+** synopsis
+```javascript
+trans_obj.send(12, { hail : 'bobre'}, function(msg_id, msg_body){ 
+  trans_obj.send(msg_id, { hail_tobi : 'i tobi bobre dinozavreg' });
+  });
+```
+
+  Отправляет сообщение 'bobre' с идентификатором 12.
+  Когда приходит сообщение с таким же идентификатором(сообщение ответ), то в ответ посылается ещё одно сообщение с содержимым 'i tobi bobre dinozavreg'
+
+** parameters
+   + msg_id
+     Идентификатор сообщения, может использоваться для ответа на это сообщение с той стороны, тогда callback будет вызван, когда придёт ответ. 
+     Также может использоваться для посыла ответа.
+
+   + msg_body
+     содержимое сообщения, в json
+       
+   + callback
+     функция вида:
+     `func(msg_id, msg_body)`
+     
