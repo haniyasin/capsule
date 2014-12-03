@@ -1,7 +1,8 @@
-var fs = require('fs');
 var dutils = require('./parts/deployer_utils.js');
 
-function find_deployers(){
+var deployers;
+
+function find_deployers(fs){
     var platforms_names = fs.readdirSync('platforms');
     var deployers = {};
     for(platform in platforms_names){
@@ -10,7 +11,7 @@ function find_deployers(){
     return deployers;
 }
 
-function parse_args(argv, deployers){
+function parse_args(argv){
     var config = {
 	'platform' : 'nodejs',
 	'action' : 'assemble',
@@ -21,12 +22,16 @@ function parse_args(argv, deployers){
     if(argv.length < 4)
 	return null;
     
-    if(deployers.hasOwnProperty(argv[2]))
-	config.platform = argv[2];
-    else {
+    try{
+	//loading filesystem module by platform
+	var fs = require('platforms/' + config.platform + '/modules/fs.js');
+	config.platform = argv[2];	
+    } catch (x) {
 	console.log("ERROR: [[", argv[2], "]] is not a platform name. ");
 	return null;
     }
+
+    deployers = find_deployers(fs);
 
     if(deployers.hasOwnProperty(config.platform)){
 	if(argv[3] == 'list'){
@@ -59,8 +64,8 @@ function parse_args(argv, deployers){
     return config;
 }
 
-var deployers = find_deployers();
 var config = parse_args(process.argv, deployers);
+
 if(config){
     var selected_deployer = deployers[config.platform];
     var deployer_config = new dutils.config(config.dir);
