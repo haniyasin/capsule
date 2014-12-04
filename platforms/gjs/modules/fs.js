@@ -6,12 +6,23 @@
  * поддержки capsule в gjs, включая развёртывание из исходных текстов   
  */
 
+let g = imports.gi.GLib;
+let gio = imports.gi.Gio;
+
 exports.existsSync = function(path){
     return true;
 };
 
 exports.readdirSync = function(path){
-    return [];  
+    let dir = gio.file_new_for_path(path);
+    let children = dir.enumerate_children('standard::name,standard::type',
+                                          gio.FileQueryInfoFlags.NONE, null);
+    var files = [];
+    let info, child;
+    while ((info = children.next_file(null)) != null) {
+	files.unshift(info.get_name());
+    }
+    return files;  
 };
 
 exports.mkdir = function(path){

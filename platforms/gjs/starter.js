@@ -6,7 +6,11 @@
  * пока будем эмулировать nodejs process, но как и в случае с fs, кто его знает. Кроме того, поддерживать всё
  * нет смысла наверное.
  */
-var process;
+ARGV.unshift('gjs');
+var proc = {
+    argv : ARGV,
+    platform : "gjs"
+};
 
 /*
  * пока не забыл. Необходимо сделать такую фичу, как пометка под какой платформой мы реально работаем
@@ -18,10 +22,13 @@ var process;
 */
 
 /*
+ * console.log wrapper around gjs print
+ */
+var console = { log : function(){print.apply(null, arguments);} };
+
+/*
  * commonjs require emulation over gjs imports
  */
-
-
 var exports = {}, //a litle hack, exports must be in global visibility
     module = {
 	exports : exports
@@ -35,13 +42,16 @@ function require(path){
 
     if(cache.hasOwnProperty(path))
 	return cache[path];
-    print(path);
+    var prev_exports = exports;
+    exports = {};
+//    print(path);
     imports[path]; //importing module
     var module = exports;
     cache[path] = module;
-    exports = {};
-
+    exports = prev_exports;
+    //stacKKKKK
     return module;
 }
 
-imports.deployer
+//print(ARGV, ARGV.length);
+imports.deployer;

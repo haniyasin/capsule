@@ -1,4 +1,4 @@
-var fs = require('fs');
+var fs = require('platforms/' + proc.platform + '/modules/fs');
 
 var types = {"envelop" : 1,
 		 "module" : 2,
