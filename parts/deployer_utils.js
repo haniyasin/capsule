@@ -24,7 +24,7 @@ function tree_walker(tree, assembler){
 		var child_assembler = assembler.find_child(key);
 		if(!child_assembler){
 		    var state = assembler.pop_state();
-		    var child_assembler = assembler.create_child(key);
+		    child_assembler = assembler.create_child(key);
 		    child_assembler.push_state(state);		
 		}
 		tree_walker(tree[key], child_assembler);
@@ -93,7 +93,7 @@ function assembler_constructor(dir){
     };
 
     this.find_child = function(name){
-	for(child in this.childs){
+	for(var child in this.childs){
 	    if(this.childs[child][0] == name)
 		return this.childs[child][1];
 	}
@@ -121,7 +121,7 @@ exports.config = function(dir){
 
 exports.assemble = function(dir, assembler){    
     var filenames = fs.readdirSync(dir);
-    for(ind in filenames){
+    for(var ind in filenames){
 	if(filenames[ind].substr(filenames[ind].length - 4,4) == 'json' &&
 	   filenames[ind] != 'config.json'){
 	    tree_walker(JSON.parse(fs.readFileSync(dir + '/' + filenames[ind]).toString()), assembler);

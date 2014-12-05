@@ -1,9 +1,9 @@
-var fs = require('fs');
-var mkpath = require('../../dependencies/mkpath.js');
-var path = require('path');
+var fs = require('/platforms/' + proc.platform + '/modules/fs');
+//var mkpath = require('../../dependencies/mkpath.js');
+//var path = require('path');
 
-var dutils = require('../../parts/deployer_utils.js');
-var cb_synchronizer = require('../../parts/cb_synchronizer.js');
+var dutils = require('parts/deployer_utils');
+var cb_synchronizer = require('parts/cb_synchronizer');
 
 function module_load_emitter(path, code, module_name){
     this.emit_declare = function(){
@@ -40,7 +40,7 @@ function assembler_constructor(dir){
 	}else
 	    generated.constructor += this.block_load;
 	
-	for(child_ind in this.childs){
+	for(var child_ind in this.childs){
 	    var child = this.childs[child_ind];
 	    var child_generated = child[1].generate();
 	    
@@ -54,6 +54,7 @@ function assembler_constructor(dir){
 
     assembler.do_file = function(name, file_path){
 	var flags = this.s.flags;
+//	print(file_path);
 	if(this.s.type == dutils.types.module){
 	    var content = fs.readFileSync(file_path,"utf8");
 	    var module_load = new module_load_emitter(this.get_path(name), content, name);

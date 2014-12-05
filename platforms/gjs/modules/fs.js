@@ -10,7 +10,8 @@ let g = imports.gi.GLib;
 let gio = imports.gi.Gio;
 
 exports.existsSync = function(path){
-    return true;
+    var file = gio.file_new_for_path(path);
+    return file.query_exists(null);
 };
 
 exports.readdirSync = function(path){
@@ -22,19 +23,52 @@ exports.readdirSync = function(path){
     while ((info = children.next_file(null)) != null) {
 	files.unshift(info.get_name());
     }
-    return files;  
+    return files.sort();  
 };
 
 exports.mkdir = function(path){
-    
+    g.mkdir_with_parents(path, 777);    
+};
+
+exports.readFile = function(path, cb){
+//    var data = g.file_get_contents(path);
+//    return data[1];
 };
 
 exports.readFileSync = function(path){
-    return "";
+    var data = g.file_get_contents(path);
+//    print(data[1]);
+    return data[1];
 };
 
 exports.writeFileSync = function(path, data){
-   
+    var file = gio.file_new_for_path(path);
+    var ostream;
+
+    if(file.query_exists(null)){
+	var iostream = file.open_readwrite(null);
+	ostream = iostream.output_stream;
+    }else
+	ostream = file.create(gio.FileCreateFlags.NONE,null) ;
+
+    ostream.seek(0, g.SeekType.SET, null);
+    ostream.write(data, null);
+    ostream.unref();
+};
+
+exports.writeFile = function(path, data, cb){
+    /*var file = gio.file_new_for_path(path);
+    var ostream;
+
+    if(file.query_exists(null)){
+	var iostream = file.open_readwrite(null);
+	var ostream = iostream.output_stream;
+    }else
+	ostream = file.create_async(gio.FileCreateFlags.NONE,null) ;
+
+    ostream.seek(0, g.SeekType.SET, null);
+    ostream.write(data, null);
+    ostream.unref(); */
 };
 
 //отдельно стоит сказать про использование в nodejs deployer рекурсивного проверяльщика и создателя
