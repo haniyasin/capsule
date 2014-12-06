@@ -1,9 +1,9 @@
-var fs = require('fs');
-var mkpath = require('../../dependencies/mkpath.js');
+var fs = require('platforms/' + proc.platform + '/modules/fs');
+var mkpath = require('dependencies/mkpath.js');
 var path = require('path');
 
-var dutils = require('../../parts/deployer_utils.js');
-var cb_synchronizer = require('../../parts/cb_synchronizer.js');
+var dutils = require('parts/deployer_utils.js');
+var cb_synchronizer = require('parts/cb_synchronizer.js');
 
 function depend_resolver(depend){
     var depends = depend.split(',');
@@ -132,7 +132,7 @@ function deploy_on_files(dir, config, capsule_files){
 }
 
 function deploy_on_http(dir, config, capsule_files, capsule){
-    var http_responder = require('../nodejs/modules/http_responder.js');
+    var http_responder = require('platforms/' + proc.platform + '/modules/http_responder.js');
     http_responder.on_recv({ 'url' : config.values.deploy_url + "/capsule.htm"}, 
 			   function (context, response){
 					       response.end(capsule_files.capsule);

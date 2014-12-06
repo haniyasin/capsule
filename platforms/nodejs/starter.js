@@ -6,7 +6,7 @@ global.proc = {
 
 proc.argv.shift();
 proc.argv.shift();
-proc.argv.unshift(proc.platform);
+//proc.argv.unshift(proc.platform);
 proc.argv.unshift('deployer.js');
 proc.argv.unshift('node');
 //console.log(proc.argv);

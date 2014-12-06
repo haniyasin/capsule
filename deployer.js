@@ -23,9 +23,9 @@ function parse_args(argv){
 	return null;
     
     try{
-	config.platform = argv[2];	
+	proc.target_platform = config.platform = argv[2];
 	//loading filesystem module by platform
-	var fs = require('platforms/' + config.platform + '/modules/fs.js');
+	var fs = require('platforms/' + proc.platform + '/modules/fs.js');
     } catch (x) {
 	console.log("ERROR: [[", argv[2], "]] is not a platform name. ");
 	return null;
@@ -56,8 +56,7 @@ function parse_args(argv){
 	    config.dir = argv[4];
 	else 	
 	    return null;	
-    }
-    else{
+    }else{
 	console.log("ERROR: configs_directory is missed");
 	return null;	
     }

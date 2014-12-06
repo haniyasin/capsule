@@ -1,5 +1,5 @@
-var fs = require('fs');
-var mkpath = require('../../dependencies/mkpath.js');
+var fs = require('platforms/' + proc.platform + '/modules/fs');
+var mkpath = require('dependencies/mkpath.js');
 var path = require('path');
 
 var dutils = require('../../parts/deployer_utils.js');
