@@ -19,7 +19,6 @@ function parse_args(argv){
 	'dir' : null
     };
 
-
     if(argv.length < 4)
 	return null;
     
@@ -55,7 +54,7 @@ function parse_args(argv){
 	//проверяем существование директории
 	if(fs.existsSync(argv[4]))
 	    config.dir = argv[4];
-	else 
+	else 	
 	    return null;	
     }
     else{

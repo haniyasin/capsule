@@ -82,8 +82,7 @@ exports.deploy = function(dir, config){
     //копируем все файлы в папку для развёртывания, указанную в конфиге развёртывателя
 },
 
-exports.run = function(dir, config){
-    
+exports.run = function(dir, config){    
     var env = require('../../' + dir + '/assembled/constructor.js').environment;
 //    console.log(__dirname);
     if(config.values.hasOwnProperty('entry')){

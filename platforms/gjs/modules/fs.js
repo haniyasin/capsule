@@ -27,7 +27,7 @@ exports.readdirSync = function(path){
 };
 
 exports.mkdir = function(path){
-    g.mkdir_with_parents(path, 777);    
+    g.mkdir_with_parents(path, parseInt('0766', 8));    
 };
 
 exports.readFile = function(path, cb){
