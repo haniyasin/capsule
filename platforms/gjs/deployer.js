@@ -66,7 +66,7 @@ function assembler_constructor(dir){
 	    else 
 		this.block += _block_load;
 	}
-    }
+    };
 
     return assembler;
 }
@@ -92,11 +92,12 @@ exports.assemble = function(dir, config){
     config.write();	
     console.log('jhhhheee');
     fs.writeFileSync(dir + '/assembled/application.js', generated.constructor);
-}
+};
 
 exports.deploy = function(dir, config){
-}
+};
 
-exports.run = function(){
-}    
+exports.run = function(dir, config){
+    require(dir + '/assembled/application');
+};    
 
