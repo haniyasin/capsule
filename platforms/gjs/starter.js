@@ -44,13 +44,14 @@ function require(path){
 	return cache[path];
     var prev_exports = exports;
     exports = {};
+    module.exports = exports;
 //    print(path);
     imports[path]; //importing module
-    var module = exports;
-    cache[path] = module;
-    exports = prev_exports;
+    var _module = module.exports;
+    cache[path] = _module;
+    module.exports = exports = prev_exports;
     //stacKKKKK
-    return module;
+    return _module;
 }
 
 //print(ARGV, ARGV.length);

@@ -31,13 +31,34 @@ exports.mkdir = function(path){
 };
 
 exports.readFile = function(path, cb){
-//    var data = g.file_get_contents(path);
-//    return data[1];
+    var data = g.file_get_contents(path);
+
+    cb(false, data[1]);
+    print(data[1]);
+    return;
+
+    //temporary not worked
+    var file = gio.file_new_for_path(path);
+
+    function _finisher(source, res){
+	var iostream, istream;
+	iostream = file.open_read_write_finish(res);
+	istream = iostream.input_stream;
+	istream.seek(0, g.SeekType.SET, null);
+	istream.read_async(data, 1, null, function(source, res){
+			       istream.read_finish();
+			       ostream.unref(); 
+			       iostream.unref();
+			       cb(data);
+			   });
+    }    
+
+    file.open_readwrite_asymc(1,null, _finisher);
 };
 
 exports.readFileSync = function(path){
     var data = g.file_get_contents(path);
-//    print(data[1]);
+
     return data[1];
 };
 
@@ -57,18 +78,25 @@ exports.writeFileSync = function(path, data){
 };
 
 exports.writeFile = function(path, data, cb){
-    /*var file = gio.file_new_for_path(path);
-    var ostream;
+    var file = gio.file_new_for_path(path);
 
-    if(file.query_exists(null)){
-	var iostream = file.open_readwrite(null);
-	var ostream = iostream.output_stream;
-    }else
-	ostream = file.create_async(gio.FileCreateFlags.NONE,null) ;
+    function _finisher(source, res){
+	var iostream, ostream;
+	iostream = file.open_read_write_finish(res);
+	ostream = iostream.output_stream;
+	ostream.seek(0, g.SeekType.SET, null);
+	ostream.write_async(data, 1, null, function(source, res){
+				ostream.write_finish();
+				ostream.unref(); 
+				iostream.unref();
+				cb();
+			    });
+    }    
 
-    ostream.seek(0, g.SeekType.SET, null);
-    ostream.write(data, null);
-    ostream.unref(); */
+    if(file.query_exists(null))
+	file.open_readwrite_async(1,null, _finisher);
+    else
+	file.create_async(gio.FileCreateFlags.NONE, 1, null, _finisher) ;
 };
 
 //отдельно стоит сказать про использование в nodejs deployer рекурсивного проверяльщика и создателя

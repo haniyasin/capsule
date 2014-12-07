@@ -1,8 +1,8 @@
 var fs = require('platforms/' + proc.platform + '/modules/fs');
-var mkpath = require('dependencies/mkpath.js');
-var path = require('path');
+var mkpath = require('platforms/' + proc.platform + '/modules/mkpath');
+var path = require('platforms/' + proc.platform + '/modules/path');
 
-var dutils = require('../../parts/deployer_utils.js');
+var dutils = require('parts/deployer_utils.js');
 
 function assembler_constructor(dir){
     var assembler = new dutils.assembler_constructor(dir);
@@ -56,8 +56,8 @@ function assembler_constructor(dir){
 exports.assemble = function(dir, config){
     var assembler = assembler_constructor(dir);
     var generated = dutils.assemble(dir, assembler);
-    fs.writeFile(dir + '/assembled/constructor.js', "exports.environment =" + generated.constructor);
-    fs.writeFile(dir + '/assembled/files_to_copy.json', JSON.stringify(assembler.files_to_copy));
+    fs.writeFileSync(dir + '/assembled/constructor.js', "exports.environment =" + generated.constructor);
+    fs.writeFileSync(dir + '/assembled/files_to_copy.json', JSON.stringify(assembler.files_to_copy));
     
     var files_to_copy = assembler.files_to_copy;
     for(file in files_to_copy){

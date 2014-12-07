@@ -9,6 +9,8 @@
 	    }
 	},
 	"modules" : {
+	    "path" : "platforms/gjs/modules/path.js",
+	    "mkpath" : "platforms/gjs/modules/mkpath.js",
 	    "timer" : "platforms/gjs/modules/timer.js",
 	    "http_requester" : "platforms/gjs/modules/http_requester.js",
 	    "storage" : {
