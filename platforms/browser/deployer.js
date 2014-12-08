@@ -32,14 +32,14 @@ function module_load_emitter(path, code, module_name, inline){
 		"module_loader.add(\"" + path + "\",_" + func_name + ");";
 	} else 
 	    return  "module_loader.add(\"" + path + "\"," + JSON.stringify(code) + ");";
-    }
+    };
     
     this.emit_load = function(){
 	if(module_name == 'this')
 	    return "current = module_loader.load(\'" + path + "\');";
 	
 	return 'current.'+ module_name  + ' = ' + "module_loader.load(\'" + path + "\');";
-    }    
+    };   
 }
 
 function assembler_constructor(dir){
@@ -184,7 +184,7 @@ exports.assemble = function(dir, config){
     }
     config.values.state = 'assembled';
     config.write();
-}
+};
 
 exports.deploy = function(dir, config){
     if(config.values.state != 'assembled'){
@@ -225,11 +225,11 @@ exports.deploy = function(dir, config){
 	}
     };
     //раздача чере nodej и запуск в браузере  или в браузере с любого http сервера, способного раздавать файлы
-}
+};
 
 exports.run = function(){
     //запускаем, в качестве параметра запуска используем id, выданный при развёртывании
     //запуск фактически означает открытие в браузере адреса, по которому расположен набор
     //что-то иначе надо делать, если набор сделан для раздачи произвольным http сервером
-}    
+};    
 

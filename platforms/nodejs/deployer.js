@@ -66,7 +66,7 @@ exports.assemble = function(dir, config){
 			     if(!err){
 //				 console.log(path.dirname(files_to_copy[file].new_path));
 				 mkpath.sync(path.dirname(files_to_copy[file].new_path));
-				 fs.writeFile(files_to_copy[file].new_path, content);
+				 fs.writeFileSync(files_to_copy[file].new_path, content);
 			     }else {
 				 console.log('something is going wrong in file reading');
 			     }
@@ -76,7 +76,7 @@ exports.assemble = function(dir, config){
 
     config.values.state = 'assembled';
     config.write();
-}
+};
 
 exports.deploy = function(dir, config){
     //копируем все файлы в папку для развёртывания, указанную в конфиге развёртывателя

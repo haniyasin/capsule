@@ -1,4 +1,4 @@
-var fs = require('/platforms/' + proc.platform + '/modules/fs');
+var fs = require('platforms/' + proc.platform + '/modules/fs');
 
 var dutils = require('parts/deployer_utils');
 var cb_synchronizer = require('parts/cb_synchronizer');

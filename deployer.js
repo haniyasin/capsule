@@ -66,13 +66,21 @@ function parse_args(argv){
 
 var config = parse_args(proc.argv);
 
-if(config != null){
-    var deployer_config = new dutils.config(config.dir);
-    deployer[config.action](config.dir, deployer_config);
-}else
-    console.log("\ndeployer.js [platform] [action] [configs_directory]\n"
-		+ "platform - platform from platforms directory if exist\n"
-		+ "action - supported action this platform. May to know is using list action\n"
-		+ "configs_directory - is directory where configs and further produced temporary files is stored\n");
+function main(){
+    if(config != null){
+	var deployer_config = new dutils.config(config.dir);
+	if(config.action == 'run' && config.platform != proc.platform){
+	    console.log('Error: host and target platforms is not equal. Please run application on same host and target platform.');
+	    return;
+	}
+	deployer[config.action](config.dir, deployer_config);
+    }else
+	console.log("\ndeployer.js [platform] [action] [configs_directory]\n"
+		    + "platform - platform from platforms directory if exist\n"
+		    + "action - supported action this platform. May to know is using list action\n"
+		    + "configs_directory - is directory where configs and further produced temporary files is stored\n");    
+}
+
+main();
 
 

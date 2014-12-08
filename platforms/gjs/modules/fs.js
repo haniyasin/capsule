@@ -34,7 +34,6 @@ exports.readFile = function(path, cb){
     var data = g.file_get_contents(path);
 
     cb(false, data[1]);
-    print(data[1]);
     return;
 
     //temporary not worked
@@ -42,7 +41,7 @@ exports.readFile = function(path, cb){
 
     function _finisher(source, res){
 	var iostream, istream;
-	iostream = file.open_read_write_finish(res);
+	iostream = file.open_readwrite_finish(res);
 	istream = iostream.input_stream;
 	istream.seek(0, g.SeekType.SET, null);
 	istream.read_async(data, 1, null, function(source, res){
@@ -78,25 +77,25 @@ exports.writeFileSync = function(path, data){
 };
 
 exports.writeFile = function(path, data, cb){
+    main_loop.ref();
     var file = gio.file_new_for_path(path);
 
-    function _finisher(source, res){
-	var iostream, ostream;
-	iostream = file.open_read_write_finish(res);
-	ostream = iostream.output_stream;
+    function _finisher(ostream){
 	ostream.seek(0, g.SeekType.SET, null);
-	ostream.write_async(data, 1, null, function(source, res){
-				ostream.write_finish();
-				ostream.unref(); 
-				iostream.unref();
-				cb();
-			    });
+	ostream.write(data, null);
+	main_loop.unref();
+	cb();
     }    
 
     if(file.query_exists(null))
-	file.open_readwrite_async(1,null, _finisher);
+	file.open_readwrite_async(1,null, function(source, res){
+				      var iostream = file.open_readwrite_finish(res);
+				      _finisher(iostream.output_stream);
+				  });
     else
-	file.create_async(gio.FileCreateFlags.NONE, 1, null, _finisher) ;
+	file.create_async(gio.FileCreateFlags.NONE, 1, null, function(source, res){
+			      _finisher(file.create_readwrite_finish(res));
+			  });
 };
 
 //отдельно стоит сказать про использование в nodejs deployer рекурсивного проверяльщика и создателя

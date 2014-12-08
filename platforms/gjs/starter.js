@@ -2,6 +2,7 @@
  * эмуляция окружения капсулы, ну или пока скорее окружения nodejs для запуска deployer в неродной среде
  */
 
+var g = imports.gi.GLib;
 /*
  * пока будем эмулировать nodejs process, но как и в случае с fs, кто его знает. Кроме того, поддерживать всё
  * нет смысла наверное.
@@ -55,4 +56,8 @@ function require(path){
 }
 
 //print(ARGV, ARGV.length);
+var main_loop = new g.MainLoop(null, false);
 imports.deployer;
+main_loop.unref();
+main_loop.run();
+
