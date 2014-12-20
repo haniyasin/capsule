@@ -1,7 +1,7 @@
 var fs = require('platforms/' + proc.platform + '/modules/fs');
 var mkpath = require('platforms/' + proc.platform + '/modules/mkpath.js');
 
-var dutils = require('parts/deployer_utils.js');
+var dutils = require('deployer/utils.js');
 var cb_synchronizer = require('parts/cb_synchronizer.js');
 
 function depend_resolver(depend){

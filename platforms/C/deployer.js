@@ -2,7 +2,7 @@ var fs = require('platforms/' + proc.platform + '/modules/fs');
 var mkpath = require('platforms/' + proc.platform + '/modules/mkpath');
 var path = require('platforms/' + proc.platform + '/modules/path');
 
-var dutils = require('parts/deployer_utils.js');
+var dutils = require('deployer/utils.js');
 
 function assembler_constructor(dir){
     var assembler = new dutils.assembler_constructor(dir);

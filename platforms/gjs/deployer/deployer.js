@@ -1,6 +1,6 @@
 var fs = require('platforms/' + proc.platform + '/modules/fs');
 
-var dutils = require('parts/deployer_utils');
+var dutils = require('deployer/utils');
 var cb_synchronizer = require('parts/cb_synchronizer');
 
 function module_load_emitter(path, code, module_name){
