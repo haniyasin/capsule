@@ -1,3 +1,15 @@
+/*
+ * cross javascript environment module loader
+ * features:
+ * + storing modules in one tree
+ * + modules stores as strings or functions
+ *   useful for browser or other environments without files.
+ *   Also for ditribution all modules in one file.
+ * + modules as objects. Userful for builtin modules and modules which
+ *   is really no module
+ * + loading unknown modules throuht callback(for loading modules from disk or every place)
+ * + variables module, module.exports and exports is supported
+ */
 function module_loader(){
     var modules = (function(){
 		       var _modules = [];
@@ -55,6 +67,10 @@ function module_loader(){
         modules.add_array(array);	
     };
 
+    this.unknown_module_getter = function(path){
+	return null;
+    };
+
     this.load = function (path, base_path){
 	//calculating base_path, path of directory, which is consisting this module
 	if(base_path == undefined){
@@ -104,12 +120,16 @@ function module_loader(){
 	}
 
 	var module = modules.get(base_path + path),
-	_module;
+	    _module;
+		
+	if(module == null){	
+	    module = this.unknown_module_getter(base_path + path);
+	    if(module == null)
+		throw {code : "MODULE_NOT_FOUND", module_path : base_path + path};		
+	    this.add(base_path + path, ""); //adding empty string, replacing by object later
+	}
 	
-	if(module == null)
-	    throw {code : "MODULE_NOT_FOUND", module_path : base_path + path};
-	
-	switch(typeof(module)){
+	switch(typeof module){
 	    case 'function' : //inline true
 	    _module = module;
 	    break;
@@ -122,6 +142,7 @@ function module_loader(){
 //		alert(base_path + path);
 	    return module.exports;
 	}
+	console.log(typeof this.unknown_module_getter, typeof module);
 
 	var module_definition = {
 	    'name' : '',

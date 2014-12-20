@@ -7,17 +7,17 @@ exports.features = {
     'need_address' : 0x00000000,
     //только один экземпляр транспорта возможен, если 1. Опять же имеет смысл для webworker, ajax или когда создатель капсулы устанавливает подобные ограничения даже для tcp, udp и других транспортов
     'only_one_instance' : 0x00000000
-}
+};
 
 exports.instance_interface = function(){
     this.send = function(msg_id, msg, callback){
-    }
+    };
 
     this.on_msg = function(msg_id, callback){
 	
-    }
+    };
     
     this.error_callback = function(error){
-    }
+    };
 
-}
+};
