@@ -1,5 +1,5 @@
 var fs = require('platforms/' + proc.platform + '/modules/fs');
-var mkpath = require('platforms/' + proc.platform + '/modules/mkpath');
+//var mkpath = require('platforms/' + proc.platform + '/modules/mkpath');
 var path = require('platforms/' + proc.platform + '/modules/path');
 
 var dutils = require('deployer/utils.js');
@@ -54,8 +54,11 @@ function assembler_constructor(dir){
 }
 
 exports.assemble = function(dir, config){
+    console.log('privet ot deployer');
     var assembler = assembler_constructor(dir);
-    var generated = dutils.assemble(dir, assembler);
+    dutils.walk_and_do('deployer/configs', assembler);
+    dutils.walk_and_do(dir, assembler);
+    var generated = assembler.generate();
     fs.writeFileSync(dir + '/assembled/constructor.js', "exports.environment =" + generated.constructor);
     fs.writeFileSync(dir + '/assembled/files_to_copy.json', JSON.stringify(assembler.files_to_copy));
     

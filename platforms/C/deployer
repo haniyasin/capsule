@@ -1,4 +1,0 @@
-#!/usr/bin/bash
-
-cd ../..
-../wincapsule/cbc.exe platforms/C/starter.js $1 $2 $3

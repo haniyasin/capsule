@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+
+cd ../../..
+cp ../wincapsule/capsulator.js capsulator.js
+cp ../wincapsule/cbc.exe cbc.exe
+./cbc.exe platforms/C/starter.js $1 $2 $3
+rm capsulator.js
+rm cbc.exe
