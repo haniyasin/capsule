@@ -10,5 +10,5 @@ proc.argv.shift();
 proc.argv.unshift('deployer.js');
 proc.argv.unshift('node');
 //console.log(proc.argv);
-require('deployer.js');
+require('deployer/deployer.js');
 //console.log(proc.platform);

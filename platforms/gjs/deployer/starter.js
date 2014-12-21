@@ -57,7 +57,7 @@ function require(path){
 
 //print(ARGV, ARGV.length);
 var main_loop = new g.MainLoop(null, false);
-imports.deployer;
+imports['deployer/deployer'];
 main_loop.unref();
 main_loop.run();
 

@@ -71,8 +71,12 @@ function assembler_constructor(dir){
 
 exports.assemble = function(dir, config){
     var assembler = assembler_constructor(dir);
-    var generated = dutils.assemble(dir, assembler);
-    generated.constructor = fs.readFileSync('platforms/browser/module_loader.js', 'utf8')
+    dutils.walk_and_do('deployer/configs', assembler);
+    dutils.walk_and_do('platforms/gjs/deployer/configs', assembler);
+    dutils.walk_and_do(dir, assembler);
+    var generated = assembler.generate();
+
+    generated.constructor = fs.readFileSync('parts/module_loader.js', 'utf8')
         + "var Gtk = imports.gi.Gtk;"
         + "var GtkClutter = imports.gi.GtkClutter;"
         +  "GtkClutter.init(null);"

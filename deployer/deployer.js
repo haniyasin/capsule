@@ -1,4 +1,4 @@
-var dutils = require('./utils.js');
+var dutils = require('deployer/utils.js');
 
 var deployer;
 
@@ -6,7 +6,7 @@ function find_deployer(fs, platform){
     var platforms_names = fs.readdirSync('platforms');
     for(var _platform in platforms_names){
 	if(platforms_names[_platform] == platform)
-	    return require('platforms/' + platform + '/deployer.js');
+	    return require('platforms/' + platform + '/deployer/deployer.js');
     }
 
     return null;
@@ -51,7 +51,7 @@ function parse_args(argv){
     }
 
     if(argv.length == [5]){
-	//проверяем существование директории
+	//cheking directory existing
 	if(fs.existsSync(argv[4]))
 	    config.dir = argv[4];
 	else 	
@@ -75,7 +75,7 @@ function main(){
 	}
 	deployer[config.action](config.dir, deployer_config);
     }else
-	console.log("\ndeployer.js [platform] [action] [configs_directory]\n"
+	console.log("\ndeployer [platform] [action] [configs_directory]\n"
 		    + "platform - platform from platforms directory if exist\n"
 		    + "action - supported action this platform. May to know is using list action\n"
 		    + "configs_directory - is directory where configs and further produced temporary files is stored\n");    

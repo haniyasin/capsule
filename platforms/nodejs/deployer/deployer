@@ -1,4 +1,4 @@
 #!/usr/bin/bash
 
-cd ../..
-NODE_PATH="./" node platforms/nodejs/starter.js $1 $2 $3
+cd ../../..
+NODE_PATH="./" node platforms/nodejs/deployer/starter.js $1 $2 $3

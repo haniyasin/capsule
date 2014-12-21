@@ -114,12 +114,12 @@ exports.config = function(dir){
 	    fs.writeFileSync(dir + '/config.json', JSON.stringify(this.values));
 	};	
     } catch (x) {
-	console.log('config.json не существует, а надо бы');
+	console.log('config.json is not exists');
 	console.log(x.message);
     }    
 }
 
-exports.assemble = function(dir, assembler){    
+exports.walk_and_do = function(dir, assembler){    
     var filenames = fs.readdirSync(dir);
     for(var ind in filenames){
 	if(filenames[ind].substr(filenames[ind].length - 4,4) == 'json' &&
@@ -131,6 +131,4 @@ exports.assemble = function(dir, assembler){
     dir += '/assembled/';
     if(!fs.existsSync(dir))
 	fs.mkdir(dir);
-
-    return assembler.generate();
-}
+};

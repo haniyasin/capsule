@@ -1,4 +1,3 @@
 #!/usr/bin/bash
-
-cd ../..
-gjs --include-path='./' platforms/gjs/starter.js deployer.js $1 $2 $3
+cd ../../..
+gjs --include-path='./' platforms/gjs/deployer/starter.js deployer.js $1 $2 $3
