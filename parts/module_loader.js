@@ -10,6 +10,7 @@
  * + loading unknown modules throuht callback(for loading modules from disk or every place)
  * + variables module, module.exports and exports is supported
  */
+
 function module_loader(){
     var modules = (function(){
 		       var _modules = [];
@@ -72,11 +73,18 @@ function module_loader(){
     };
 
     this.load = function (path, base_path){
+	var extenstion_re = /(.+).js/;
+	var match = /(.*).js$/.exec(path);
+	if(match != null)
+	    path = match[1];
+	if(path[0] != '.' & base_path != undefined)
+	    base_path = undefined; //making absolute path
+
 	//calculating base_path, path of directory, which is consisting this module
 	if(base_path == undefined){
 	    //base_path undefined if this module load from module_loader.load
 	    //setting base_path to module's directory
-	    var bp_reg = new RegExp("(.+)/(.+)");
+	    var bp_reg = new RegExp("(.+)/(.+)$");
 	    var bpr_ret = bp_reg.exec(path);
 	    if(bpr_ret){
 		base_path = bpr_ret[1] + '/';
@@ -119,11 +127,11 @@ function module_loader(){
 
 	}
 
-	var module = modules.get(base_path + path),
+	var module = modules.get(base_path + path + '.js'),
 	    _module;
 		
 	if(module == null){	
-	    module = this.unknown_module_getter(base_path + path);
+	    module = this.unknown_module_getter(base_path + path + '.js');
 	    if(module == null)
 		throw {code : "MODULE_NOT_FOUND", module_path : base_path + path};		
 	    this.add(base_path + path, ""); //adding empty string, replacing by object later
@@ -142,7 +150,6 @@ function module_loader(){
 //		alert(base_path + path);
 	    return module.exports;
 	}
-	console.log(typeof this.unknown_module_getter, typeof module);
 
 	var module_definition = {
 	    'name' : '',

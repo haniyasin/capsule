@@ -1,6 +1,6 @@
 var fs = require('platforms/' + proc.platform + '/modules/fs');
 //var mkpath = require('platforms/' + proc.platform + '/modules/mkpath');
-var path = require('platforms/' + proc.platform + '/modules/path');
+//var path = require('platforms/' + proc.platform + '/modules/path');
 
 var dutils = require('deployer/utils.js');
 
@@ -54,7 +54,6 @@ function assembler_constructor(dir){
 }
 
 exports.assemble = function(dir, config){
-    console.log('privet ot deployer');
     var assembler = assembler_constructor(dir);
     dutils.walk_and_do('deployer/configs', assembler);
     dutils.walk_and_do(dir, assembler);
@@ -76,7 +75,7 @@ exports.assemble = function(dir, config){
 			 });	    
 	 })(file);	
     }
-
+    
     config.values.state = 'assembled';
     config.write();
 };

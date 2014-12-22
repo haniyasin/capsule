@@ -1,4 +1,4 @@
-var dutils = require('deployer/utils.js');
+var dutils = require('./utils.js');
 
 var deployer;
 
@@ -21,13 +21,13 @@ function parse_args(argv){
 
     if(argv.length < 4)
 	return null;
-    
+    var fs;
     try{
 	proc.target_platform = config.platform = argv[2];
 	//loading filesystem module by platform
-	var fs = require('platforms/' + proc.platform + '/modules/fs.js');
+	fs = require('platforms/' + proc.platform + '/modules/fs');
     } catch (x) {
-	console.log("ERROR: [[", argv[2], "]] is not a platform name. ");
+	console.log("ERROR: [[", argv[2], "]] is not a platform name. ", proc.platform);
 	return null;
     }
 
