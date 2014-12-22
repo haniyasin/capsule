@@ -1,6 +1,6 @@
 var fs = require('platforms/' + proc.platform + '/modules/fs');
-//var mkpath = require('platforms/' + proc.platform + '/modules/mkpath');
-//var path = require('platforms/' + proc.platform + '/modules/path');
+var mkpath = require('platforms/' + proc.platform + '/modules/mkpath');
+var path = require('platforms/' + proc.platform + '/modules/path');
 
 var dutils = require('deployer/utils.js');
 
@@ -78,6 +78,7 @@ exports.assemble = function(dir, config){
     
     config.values.state = 'assembled';
     config.write();
+    console.log("capsule assembling is complete\n");
 };
 
 exports.deploy = function(dir, config){
@@ -85,8 +86,8 @@ exports.deploy = function(dir, config){
 },
 
 exports.run = function(dir, config){    
-    var env = require('../../' + dir + '/assembled/constructor.js').environment;
-//    console.log(__dirname);
+    var env = require(dir + '/assembled/constructor.js').environment;
+    console.log(dir);
     if(config.values.hasOwnProperty('entry')){
 	new Function('env', 'env.' + config.values.entry + '(env);')(env);
     }

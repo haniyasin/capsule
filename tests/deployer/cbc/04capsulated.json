@@ -4,5 +4,5 @@
     "preload" : true,
     "inline" : true,
 
-    "capsulated" : "tests/deployer/nodejs_cli/capsulated.js"
+    "capsulated" : "tests/deployer/cbc/capsulated.js"
 }

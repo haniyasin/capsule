@@ -1,0 +1,7 @@
+{
+    "capsule" : {
+	"dependencies" : {
+	    "uuid" : "dependencies/uuid.js"
+	}
+    }
+}

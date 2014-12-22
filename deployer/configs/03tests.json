@@ -3,6 +3,7 @@
     
     "capsule" : {
 	"tests" : {
+	    "preload" : false,
 	    "modules" :{
 		"uuid" : "tests/modules/uuid.js",
 		"timer" : "tests/modules/timer.js",

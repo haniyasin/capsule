@@ -14,15 +14,6 @@ var proc = {
 proc.argv.unshift(proc.platform);
 
 /*
- * пока не забыл. Необходимо сделать такую фичу, как пометка под какой платформой мы реально работаем
- * Например мы запускаем deployer для browser. Но ведь этот deployer может быть запущен как под nodejs,
- * так и под gjs. Нужно лишь сообщить deployer browser реальное название платформы и тогда он подгрузит
- * mkpath, fs, http_responder из нужной платформы. 
- * Это также значит, что запускать такие deployer как браузерный, надо из-под той платформы, которая
- * хостовая. Задачка однако:)
-*/
-
-/*
  * console.log wrapper around gjs print
  */
 var console = { log : function(){print.apply(null, arguments);} };

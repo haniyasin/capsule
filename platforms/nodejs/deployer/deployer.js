@@ -86,7 +86,7 @@ exports.deploy = function(dir, config){
 },
 
 exports.run = function(dir, config){    
-    var env = require('../../../' + dir + '/assembled/constructor.js').environment;
+    var env = require(dir + '/assembled/constructor.js').environment;
 //    console.log(__dirname);
     if(config.values.hasOwnProperty('entry')){
 	new Function('env', 'env.' + config.values.entry + '(env);')(env);
