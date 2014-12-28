@@ -9,6 +9,12 @@
     
     "capsule" : {
 	"modules" : {
+	    "types" : {
+		"record" : "platforms/browser/modules/types/record.js",
+		"binary" : "platforms/browser/modules/types/binary.js",
+		"image" : "platforms/browser/modules/types/image.js",
+		"video" : "platforms/browser/modules/types/image.js"
+	    },
 	    "timer" : "modules/timer.js",
 	    "ui" : {
 		"Compositer" : "platforms/browser/modules/ui/Compositer.js",

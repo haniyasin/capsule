@@ -318,13 +318,13 @@
 var oio = io_open("file://", id, image, false);
 
 // implicitly content loading
-var image = oio.bind(); //automatic reading later when calling get_data
+var _image = oio.bind(); //automatic reading later when calling get_data
 
 //explicitly content loading
-var image  = oio.read();
+_image  = oio.read();
 
-var cimage = comp.image_create({width : "100%", height : "100%"}, image); //calling image.get_data()
-transport.send('firstimage', image);
+var cimage = comp.image_create({width : "100%", height : "100%"}, _image); //calling image.get_data()
+transport.send('firstimage', _image);
 
 
 //video example
@@ -350,4 +350,5 @@ transport.on_msg('movie',
 						       oio.write(video, function(err){ if(!err) console.log('усё хорошо');});
 						   }, 10000, false);
 				  });
-		});
+				  });
+		
