@@ -312,3 +312,42 @@
      К числу основных методов записи и чтения, добавлено следующее:
 
      queue.on_arrive(cb);
+
+**** примеры
+//image example
+var oio = io_open("file://", id, image, false);
+
+// implicitly content loading
+var image = oio.bind(); //automatic reading later when calling get_data
+
+//explicitly content loading
+var image  = oio.read();
+
+var cimage = comp.image_create({width : "100%", height : "100%"}, image); //calling image.get_data()
+transport.send('firstimage', image);
+
+
+//video example
+//подобно тому как вверху, в общем также, так что не стоит тоже самое писать
+//implicitly
+transport.on_msg('movie', 
+		 function(video){
+		    comp.video_create({width : "100%", height: "100%"}, video);
+		 });
+transport.on_msg('movie',
+		function(video){
+		    var oio = io_create("file://" + id, true);
+//		    oio.bind(video);
+		    oio.write(video, function(err){ if(!err) console.log('усё хорошо');});
+		});
+//explicitly
+transport.on_msg('movie',
+		function(video){
+		    video.preload({ length : -1}, function(){
+				      var oio = io_create("file://" + id, true);
+				      //		    oio.bind(video);
+				      timer.create(function(){
+						       oio.write(video, function(err){ if(!err) console.log('усё хорошо');});
+						   }, 10000, false);
+				  });
+		});
