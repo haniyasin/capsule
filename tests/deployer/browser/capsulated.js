@@ -49,6 +49,23 @@ exports.main = function(env){
 				       source : iimage
 				   });
     comp.frame_add(0, cimage);
+    var packer = require('types/packer'),
+    definition = [
+	'name:Cstring',
+	'time:Cstring',
+	'osen:uint8',
+	'god:uint8'
+    ],
+    _pack = new packer(definition,
+		       {
+			   name : 'vahaha',
+			   time : 'vsegda',
+			   osen : 25,
+			   god : 15
+		       });
+    var ser = _pack.serialize();
+    alert(ser);
+    alert(JSON.stringify(_pack.deserialize(definition, ser)));
 };
 
 

@@ -10,7 +10,7 @@
     "capsule" : {
 	"types" : {
 	    "record" : "platforms/browser/types/record.js",
-	    "binary" : "platforms/browser/types/binary.js",
+	    "packer" : "platforms/browser/types/packer.js",
 	    "image" : "platforms/browser/types/image.js",
     	    "video" : "platforms/browser/types/video.js"
 	},

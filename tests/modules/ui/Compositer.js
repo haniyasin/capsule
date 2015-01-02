@@ -537,11 +537,11 @@ function video_player(comp){
 }
 
 exports.test = function(){
-    var comp = new (require('../../../modules/ui/Compositer.js')).Compositer();
+    var comp = new (require('modules/ui/Compositer')).Compositer();
 
 //    slideup_cubes_test(comp);   
-    original_test2(comp);
+//    original_test2(comp);
 //    original_test1(comp);
-//    create_move_remove_test(comp);
-//    video_player(comp);
+//    create_move_remove_test(comp); //this test is depends of gjs
+    video_player(comp);
 };
