@@ -156,7 +156,10 @@ function deploy_on_http(dir, config, capsule_files, capsule){
 
 exports.assemble = function(dir, config){
     var assembler = assembler_constructor(dir);
-    var generated = dutils.assemble(dir, assembler);
+    dutils.walk_and_do('deployer/configs', assembler);
+    dutils.walk_and_do('platforms/browser/deployer/configs', assembler);
+    dutils.walk_and_do(dir, assembler);
+    var generated = assembler.generate();
     generated.constructor = generated.script_inline 
 	+ "var head = document.getElementsByTagName('head')[0]; "
 	+ "function constructor(module_loader){\n return " 
