@@ -60,8 +60,8 @@ function file_open_form(comp, parent_frame){
 }
 
 function video_player(comp){
-    var player_frame = comp.frame_create({ x : '10%', y : '10%', width : '80%', height : '80%', z_index : 2}),
-    video = comp.video_create({ x : 0, y : 0, width : '100%', height : '90%', z_index : 1, opacity : 1}),
+    var player_frame = comp.frame_create({ x : '0%', y : '0%', width : '100%', height : '100%', z_index : 2}),
+    video = comp.video_create({ x : '0%', y : '0%', width : '100%', height : '90%', z_index : 1, opacity : 1}),
     vcontrol = comp.video_get_control(video),
     addr_form = new file_open_form(comp, 0),
     source = null,
@@ -76,7 +76,7 @@ function video_player(comp){
 				   }),
     frame_timeline = comp.frame_create(
 	{
-	    width : '90%',
+	    width : '89%',
 	    height : '8%',
 	    x : '10%',
 	    y : '91%',
@@ -114,36 +114,14 @@ function video_player(comp){
     comp.frame_add(frame_timeline, image_timepoint);
     comp.frame_add(0, player_frame);
 
-    var anim_size_up = comp.anim_create([
-					    {
-						duration : 300,
-						actions : {
-						    x : -10,
-						    y : -10,
-						    width : 20,
-						    height : 20
-						}
-					    }
-					]),
-    anim_size_down = comp.anim_create([
-					    {
-						duration : 300,
-						actions : {
-						    x : 10,
-						    y : 10,
-						    width : -20,
-						    height : -20
-						}
-					    }
-					]),
-    anim_slide_down = comp.anim_create([
-					   {
-					       duration : 300,
-					       actions : {
-						   y : 30   
+    var anim_slide_down = comp.anim_create([
+					       {
+						   duration : 300,
+						   actions : {
+						       y : 30   
+						   }
 					       }
-					   }
-				       ]),
+					   ]),
     anim_slide_up = comp.anim_create([
 					 {
 					     duration : 300,
@@ -152,8 +130,6 @@ function video_player(comp){
 					     } 
 					 }
 				     ]),
-    banimsu = comp.anim_bind(player_frame, anim_size_up),
-    banimsd = comp.anim_bind(player_frame, anim_size_down),
     banimslu = comp.anim_bind(player_frame, anim_slide_up),
     banimsld = comp.anim_bind(player_frame, anim_slide_down);
 
@@ -161,7 +137,6 @@ function video_player(comp){
     var pause = true;
     playc.on_press(function(){
 		       function play(){
-			   comp.anim_start(banimsu);
 			   vcontrol.play();
 			   playc.set_label('pause');
 			   pause = false;				  			   
@@ -179,43 +154,68 @@ function video_player(comp){
 			   }
 			   play();
 		       } else {
-			   comp.anim_start(banimsd);
 			   vcontrol.pause();
 			   playc.set_label('play');
 			   pause = true;
 		       }
 		   });
     vcontrol.set_volume(0.2);
-    var timepoint = 0;
+    var step, prev_step = 0, position_step;;
     vcontrol.on_timeupdate(function(){
-			       var point_to_slide = Math.round(vcontrol.get_position() / (vcontrol.get_duration() / 100));
-			       if(point_to_slide > timepoint){
-				   var position_change_anim = comp.anim_create([
-										   {
-										       duration : 0,
-										       actions : {
-											   x : point_to_slide
-										       }
-										   }
-									       ]);
+			       if(typeof(position_step) == 'undefined')
+				    position_step = vcontrol.get_duration() / 200;
+			       step = Math.round(vcontrol.get_position() / position_step)/2;
+			       if(step > prev_step || step < prev_step){
+				   var inc_anim = comp.anim_create([
+								       {
+									   duration : 0,
+									   actions : {
+									       x : step - prev_step
+									   }
+								       }
+								   ]);
 //				   alert(point_to_slide);
-				   comp.anim_start(comp.anim_bind(image_timepoint, position_change_anim));
-				   timepoint += point_to_slide;				   
+				   comp.anim_start(comp.anim_bind(image_timepoint, inc_anim));
+				   prev_step = step;
 			       }
 			   });
+    var point_drag = false, drag_prev_step;
     comp.event_register(frame_timeline, 'pointer_down', function(pointer_obj){
-			    var new_timepoint = pointer_obj.shift().x;
-			    vcontrol.set_position(vcontrol.get_duration() / 100 * new_timepoint);
+			    point_drag = true;
+			    drag_prev_step = prev_step;
+			});
+    comp.event_register(frame_timeline, 'pointer_motion', function(pointer_obj){
+			    if(!point_drag)
+				return;
+			    var drag_step = pointer_obj.shift().x,
+			    timepoint_slide_anim = comp.anim_create([
+									{
+									    duration : 0,
+									    actions : {
+										x : drag_step - drag_prev_step
+									    }
+									}
+								    ]);
+			    comp.anim_start(comp.anim_bind(image_timepoint, timepoint_slide_anim));
+			    drag_prev_step = drag_step;
+			});
+    comp.event_register(frame_timeline, 'pointer_up', function(pointer_obj){
+			    if(!point_drag)
+				return;
+			    point_drag = false;
+			    step = pointer_obj.shift().x;
+///			    print('eee', prev_step, step, (vcontrol.get_duration() / 100) * step);
+			    vcontrol.set_position((vcontrol.get_duration() / 100) * step);
 			    var timepoint_slide_anim = comp.anim_create([
 									    {
 										duration : 300,
 										actions : {
-										    x : new_timepoint - timepoint
+										    x : step - prev_step
 										}
 									    }
 									]);
 			    comp.anim_start(comp.anim_bind(image_timepoint, timepoint_slide_anim));
-			    timepoint = new_timepoint;
+			    prev_step = step;
 			});
 }
 
