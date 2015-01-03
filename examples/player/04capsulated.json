@@ -1,0 +1,8 @@
+{
+    "type" : "module",
+
+    "preload" : true,
+    "inline" : true,
+
+    "capsulated" : "examples/player/capsulated.js"
+}

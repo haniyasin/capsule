@@ -1,4 +1,4 @@
-var dutils = require('./utils.js');
+var dutils = require('deployer/utils.js');
 
 var deployer;
 

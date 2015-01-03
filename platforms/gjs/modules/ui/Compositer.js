@@ -120,8 +120,9 @@ function button(){
 				 create : function(info){
 				     if(!info.hasOwnProperty('label'))
 					 info.label = 'button';
-				     var widget = new Gtk.Button.new_with_label(info.label);
-				     var element = new element_obj_proto(new GtkClutter.Actor.new_with_contents(widget), info);
+//				     print(Gtk.Button.new_with_label);
+				     var widget = Gtk.Button.new_with_label(info.label);
+				     var element = new element_obj_proto(GtkClutter.Actor.new_with_contents(widget), info);
 				     element.widget = widget;
 				     element.actor.show();
 				     element.control = {
