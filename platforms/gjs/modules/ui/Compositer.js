@@ -84,7 +84,7 @@ function image(){
 					      return error('comp.image', 'invalid content of source field');
 					     
 				      } else {
-					  print('comp.image', 'please set image.source');
+//					  print('comp.image', 'please set image.source');
 					  set_random_background(element.actor);    
 				      }
 				      return elements.put(element);
@@ -126,6 +126,7 @@ function button(){
 				     element.widget = widget;
 				     element.actor.show();
 				     element.control = {
+					 set_label : function(label){widget.set_label(label);},
 					 on_press : function(callback){
 					     element.widget.connect('pressed', callback);
 					 }
@@ -151,11 +152,20 @@ function entry(){
 					 info.placeholder = 'enter text';
 				     var widget = new Gtk.Entry();
 				     widget.set_placeholder_text(info.placeholder);
-				     var element = new element_obj_proto(new GtkClutter.Actor.new_with_contents(widget), info);
+				     var element = new element_obj_proto(GtkClutter.Actor.new_with_contents(widget), info);
 				     element.widget = widget;
 				     element.actor.show();
 				     element.control = {
-					 'on_text_change' : function(callback){
+					 set_placeholder : function(placeholder){
+					     widget.set_placeholder_text(placeholder);
+					 },
+					 get_value : function(){
+					     return widget.get_text();
+					 },
+					 set_value : function(value){
+					     widget.set_text(value);
+					 },
+					 on_text_change : function(callback){
 					     element.widget.connect('activate', callback);
 					 }
 				     };
@@ -174,21 +184,29 @@ function entry(){
 }
 
 function video(){
+    function load_video(element, info){
+	element.pipeline = Gst.parse_launch("playbin " + 'uri=' + info.source);
+	element.sink = new ClutterGst.VideoSink();
+	//				     element.sink = Gst.ElementFactory.make('cluttersink', 'bat');
+	element.sink.texture = element.actor;
+	element.pipeline.video_sink = element.sink;			
+    }
     return new element_proto('video', {
 				 create : function(info){
 				     var element = new element_obj_proto(new Clutter.Texture( {}), info);
-				     if(!info.hasOwnProperty('source'))
-					 info.source = "uri=http://docs.gstreamer.com/media/sintel_trailer-480p.webm";
-				     element.pipeline = Gst.parse_launch("playbin " + info.source);
-				     element.sink = new ClutterGst.VideoSink();
-//				     element.sink = Gst.ElementFactory.make('cluttersink', 'bat');
-				     element.sink.texture = element.actor;
-				     element.pipeline.video_sink = element.sink;
+				     if(!info.hasOwnProperty('source')){
+					 info.source = "http://docs.gstreamer.com/media/sintel_trailer-480p.ogv";
+					 load_video(element, info);
+				     }
 				     
 //				     element.actor.add_child(element.actor);
 				     element.actor.show();
 
 				     element.control = {
+					 load : function(source){
+					     info.source = source;
+					     load_video(element, info);
+					 },
 					 play : function(){
 					     element.pipeline.set_state(Gst.State.PLAYING);
 					 },
@@ -215,7 +233,7 @@ function video(){
 					     let self = this;
 					     GLib.timeout_add(GLib.PRIORITY_HIGH, 200, function(){
 								  if(curtime < self.get_position()){
-								      print('hoho');
+//								      print('hoho');
 								      callback();
 								      curtime = self.get_position();
 								  }
@@ -552,7 +570,7 @@ function props_manager(element){
 	}
 	if(typeof element.childs != 'undefined'){
 	    //this is frame
-		print('eeerrr');
+//		print('eeerrr');
 	    for(child in element.childs){
 		for(prop in types){
 		    element.childs[child].props_manager[prop].apply();

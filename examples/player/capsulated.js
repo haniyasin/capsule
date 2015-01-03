@@ -1,49 +1,85 @@
+function file_open_form(comp, parent_frame){
+    var form_frame = comp.frame_create({
+					   x : '10%',
+					   y : '10%',
+					   width : '80%',
+					   height : '20%',
+					   opacity : '100%',
+					   z_index : 1
+				       }),
+    okb = comp.button_create({
+				 x : '90%',
+				 y : '0%',
+				 width : '10%',
+				 height : '100%',
+				 label : 'ok'
+			     }),
+    okc = comp.button_get_control(okb),
+    addre = comp.entry_create({
+				  x : '0%',
+				  y : '0%',
+				  width : '90%',
+				  height : '100%',
+				  placeholder : "http://docs.gstreamer.com/media/sintel_trailer-480p.ogv"
+			      }),
+    addrc = comp.entry_get_control(addre),
+    anim_show = comp.anim_create([
+					   {
+					       duration : 1000,
+					       actions : {
+						   opacity : -100   
+					       }
+					   }
+				       ]),
+    anim_hide = comp.anim_create([
+					 {
+					     duration : 300,
+					     actions : {
+						 opacity : 100
+					     } 
+					 }
+				     ]),
+    banimshow = comp.anim_bind(form_frame, anim_show),
+    banimhide = comp.anim_bind(form_frame, anim_hide),    
+    setup_callback;
+
+    addrc.set_value("http://docs.gstreamer.com/media/sintel_trailer-480p.ogv");
+    comp.frame_add(form_frame, okb);
+    comp.frame_add(form_frame, addre);
+    comp.frame_add(parent_frame, form_frame);
+    okc.on_press(function(){
+		     comp.anim_start(banimhide);
+		     if(typeof(setup_callback) != undefined)
+			 setup_callback(addrc.get_value());
+		 });
+    
+    this.setup = function(callback){
+	setup_callback = callback;
+	comp.anim_start(banimshow);
+    };
+}
+
 function video_player(comp){
-    var player_frame = comp.frame_create({ x : '10%', y : '10%', width : '80%', height : '80%'}),
-    video = comp.video_create({ x : 0, y : 0, width : '100%', height : '100%', z_index : 1, opacity : 1}),
+    var player_frame = comp.frame_create({ x : '10%', y : '10%', width : '80%', height : '80%', z_index : 2}),
+    video = comp.video_create({ x : 0, y : 0, width : '100%', height : '90%', z_index : 1, opacity : 1}),
     vcontrol = comp.video_get_control(video),
+    addr_form = new file_open_form(comp, 0),
+    source = null,
     playb = comp.button_create({
-				       x : '5%',
-				       y : '94%',
-				       width : '10%',
-				       height : '7%',
-				       z_index : 2,
-				       opacity : 0.7,
-				       label : 'начать'
-				   }),
-    pauseb = comp.button_create({
-				       x : '85%',
-				       y : '94%',
-				       width : '10%',
-				       height : '7%',
-				       z_index : 2,
-				       opacity : 0.7,
-				       label : 'пауза'
-				   }),
-    backwardb = comp.button_create({
-				      x : '40%',
-				      y : '95%',
-				      width : '10%',
-				      height : '10%',
-				      z_index : 2,
-				      opacity : 0.7,
-				      label : 'назад'
-				  }),
-    forwardb = comp.button_create({
-				       x : '50%',
-				       y : '95%',
+				       x : '0%',
+				       y : '90%',
 				       width : '10%',
 				       height : '10%',
 				       z_index : 2,
-				       opacity : 0.7,
-				       label : 'вперёд'
+				       opacity : 0.9,
+				       label : 'play'
 				   }),
     frame_timeline = comp.frame_create(
 	{
-	    width : '68%',
-	    height : '6%',
-	    x : '16%',
-	    y : '94%',
+	    width : '90%',
+	    height : '8%',
+	    x : '10%',
+	    y : '91%',
 	    z_index : 2
 	}
     ),
@@ -73,9 +109,6 @@ function video_player(comp){
     
     comp.frame_add(player_frame, video);
     comp.frame_add(player_frame, playb);
-    comp.frame_add(player_frame, pauseb);
-//    comp.frame_add(player_frame, forwardb); 
-//    comp.frame_add(player_frame, backwardb);
     comp.frame_add(player_frame, frame_timeline);
     comp.frame_add(frame_timeline, image_timeline);
     comp.frame_add(frame_timeline, image_timepoint);
@@ -103,17 +136,55 @@ function video_player(comp){
 						}
 					    }
 					]),
+    anim_slide_down = comp.anim_create([
+					   {
+					       duration : 300,
+					       actions : {
+						   y : 30   
+					       }
+					   }
+				       ]),
+    anim_slide_up = comp.anim_create([
+					 {
+					     duration : 300,
+					     actions : {
+						 y : -30
+					     } 
+					 }
+				     ]),
     banimsu = comp.anim_bind(player_frame, anim_size_up),
-    banimsd = comp.anim_bind(player_frame, anim_size_down);
+    banimsd = comp.anim_bind(player_frame, anim_size_down),
+    banimslu = comp.anim_bind(player_frame, anim_slide_up),
+    banimsld = comp.anim_bind(player_frame, anim_slide_down);
 
-    comp.button_get_control(playb).on_press(function(){
-						comp.anim_start(banimsu);
-						vcontrol.play();
-					    });
-    comp.button_get_control(pauseb).on_press(function(){
-						 comp.anim_start(banimsd);
-						 vcontrol.pause();
-					     });
+    var playc = comp.button_get_control(playb);
+    var pause = true;
+    playc.on_press(function(){
+		       function play(){
+			   comp.anim_start(banimsu);
+			   vcontrol.play();
+			   playc.set_label('pause');
+			   pause = false;				  			   
+		       }
+		       if(pause){
+			   if(source == null){
+			       addr_form.setup(function(address){
+						   source = address;
+						   vcontrol.load(source);
+						   comp.anim_start(banimslu);
+						   play();
+					       });
+			       comp.anim_start(banimsld);
+			       return;
+			   }
+			   play();
+		       } else {
+			   comp.anim_start(banimsd);
+			   vcontrol.pause();
+			   playc.set_label('play');
+			   pause = true;
+		       }
+		   });
     vcontrol.set_volume(0.2);
     var timepoint = 0;
     vcontrol.on_timeupdate(function(){
@@ -146,8 +217,6 @@ function video_player(comp){
 			    comp.anim_start(comp.anim_bind(image_timepoint, timepoint_slide_anim));
 			    timepoint = new_timepoint;
 			});
-//    comp.button_get_control(forwardb).on_press(function(){vcontrol.set_position(vcontrol.get_position() + 5000);});
-//    comp.button_get_control(backwardb).on_press(function(){vcontrol.set_position(vcontrol.get_position() - 5000);});
 }
 
 exports.main = function(){
