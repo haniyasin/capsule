@@ -163,7 +163,7 @@ function module_loader(){
 			 })(this));
 	
 	//replace module source or function with resultated object
-	modules.replace(base_path + path, module_definition);
+	modules.replace(base_path + path + '.js', module_definition);
 	
 	return module_definition.exports;	
     };

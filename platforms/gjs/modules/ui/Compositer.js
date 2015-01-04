@@ -257,7 +257,7 @@ function video(){
 }
 
 function element(){
-    return new element_proto('elemement', {
+    return new element_proto('element', {
 				 change_props : function(id, info){
 				     var element = elements.take(id);
 				     element.props_manager.set_all(info);
@@ -680,8 +680,10 @@ exports.elements = elements;
 
 exports.manager = manager;
 
-exports.element_proto = element_obj_proto;
+exports.element_proto = element_proto;
+
+exports.element_obj__proto = element_obj_proto;
 
 exports.create = function(){
     return new comp();
-}
+};

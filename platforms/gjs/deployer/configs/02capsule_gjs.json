@@ -18,6 +18,7 @@
 	    },
 	    "ui" : {
 		"Compositer" : "platforms/gjs/modules/ui/Compositer.js",
+		"dnd" : "platforms/gjs/modules/ui/dnd.js",
 		"video" : {
 		    "mplayer" : "platforms/gjs/modules/ui/video/mplayer.js"
 		}

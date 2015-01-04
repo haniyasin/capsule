@@ -1,3 +1,7 @@
+/*
+ * Example Player application base on capsule API(ui, io)
+ */
+
 function file_open_form(comp, parent_frame){
     var form_frame = comp.frame_create({
 					   x : '10%',
@@ -7,6 +11,7 @@ function file_open_form(comp, parent_frame){
 					   opacity : '100%',
 					   z_index : 1
 				       }),
+    drag_dest = new comp.dnd_destination(form_frame, null, null, null),
     okb = comp.button_create({
 				 x : '90%',
 				 y : '0%',
@@ -220,7 +225,10 @@ function video_player(comp){
 }
 
 exports.main = function(){
-    var comp = (require('modules/ui/Compositer')).create();
+    var Compositer = require('modules/ui/Compositer');
+    require('modules/ui/dnd');//подключаем возможности dnd в Compositer
 
+//    print(JSON.stringify(Compositer));
+    var comp = Compositer.create();
     video_player(comp);
 };
