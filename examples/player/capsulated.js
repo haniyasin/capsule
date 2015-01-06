@@ -8,31 +8,32 @@ function file_open_form(comp, parent_frame){
 					   y : '10%',
 					   width : '80%',
 					   height : '20%',
-					   opacity : '100%',
+					   opacity : 1,
 					   z_index : 1
 				       }),
-    drag_dest = new comp.dnd_destination(form_frame, null, null, null),
     okb = comp.button_create({
-				 x : '90%',
+				 x : '70%',
 				 y : '0%',
-				 width : '10%',
+				 width : '5%',
 				 height : '100%',
-				 label : 'ok'
+				 label : 'ok',
+				 z_index : 2
 			     }),
     okc = comp.button_get_control(okb),
     addre = comp.entry_create({
 				  x : '0%',
 				  y : '0%',
-				  width : '90%',
+				  width : '70%',
 				  height : '100%',
-				  placeholder : "http://docs.gstreamer.com/media/sintel_trailer-480p.ogv"
+				  placeholder : "http://docs.gstreamer.com/media/sintel_trailer-480p.ogv",
+				  z_index : 2
 			      }),
     addrc = comp.entry_get_control(addre),
     anim_show = comp.anim_create([
 					   {
 					       duration : 1000,
 					       actions : {
-						   opacity : -100   
+						   opacity : 0   
 					       }
 					   }
 				       ]),
@@ -40,7 +41,7 @@ function file_open_form(comp, parent_frame){
 					 {
 					     duration : 300,
 					     actions : {
-						 opacity : 100
+						 opacity : 1
 					     } 
 					 }
 				     ]),
@@ -52,12 +53,13 @@ function file_open_form(comp, parent_frame){
     comp.frame_add(form_frame, okb);
     comp.frame_add(form_frame, addre);
     comp.frame_add(parent_frame, form_frame);
+    
     okc.on_press(function(){
 		     comp.anim_start(banimhide);
 		     if(typeof(setup_callback) != undefined)
 			 setup_callback(addrc.get_value());
 		 });
-    
+
     this.setup = function(callback){
 	setup_callback = callback;
 	comp.anim_start(banimshow);
@@ -67,6 +69,14 @@ function file_open_form(comp, parent_frame){
 function video_player(comp){
     var player_frame = comp.frame_create({ x : '0%', y : '0%', width : '100%', height : '100%', z_index : 2}),
     video = comp.video_create({ x : '0%', y : '0%', width : '100%', height : '90%', z_index : 1, opacity : 1}),
+    drag_dest = comp.dnd_destination_create({
+						x : '0%',
+						y : '0%',
+						width : '100%',
+						height : '100%',
+						opacity : 0.1,
+						z_index : 1
+					    }, null, null, null),
     vcontrol = comp.video_get_control(video),
     addr_form = new file_open_form(comp, 0),
     source = null,
@@ -113,6 +123,7 @@ function video_player(comp){
 
     
     comp.frame_add(player_frame, video);
+    comp.frame_add(player_frame, drag_dest.id);
     comp.frame_add(player_frame, playb);
     comp.frame_add(player_frame, frame_timeline);
     comp.frame_add(frame_timeline, image_timeline);
@@ -140,12 +151,23 @@ function video_player(comp){
 
     var playc = comp.button_get_control(playb);
     var pause = true;
+
+    function play(){
+	vcontrol.play();
+	playc.set_label('pause');
+	pause = false;				  			   
+    }
+    drag_dest.on('drop', function(context, x, y){
+		     return true;
+		 });
+    drag_dest.on('data', function(context, x, y){
+		     source = context.data;
+		     vcontrol.load(source);
+		     play();
+		     print(context.data);
+		 });
+
     playc.on_press(function(){
-		       function play(){
-			   vcontrol.play();
-			   playc.set_label('pause');
-			   pause = false;				  			   
-		       }
 		       if(pause){
 			   if(source == null){
 			       addr_form.setup(function(address){

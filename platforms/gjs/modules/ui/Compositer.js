@@ -42,16 +42,20 @@ function frame(){
 				 add : function(parent_id, child_id){
 				     var child = elements.take(child_id);
 				     var parent = elements.take(parent_id);
-				     parent.childs.push(child);
-				     child.parent = parent;
 				     parent.actor.add_actor(child.actor);
+				     child.parent = parent;
+				     parent.childs.push(child);
+				     if(child.hasOwnProperty('on_add'))
+					 child.on_add(parent_id);
 				     child.props_manager.apply_all();
 				 },
 				 remove : function(parent_id, child_id){
 				     var parent = elements.take(parent_id);
 				     var child = elements.take(child_id);
-				     parent.actor.remove_child(child.actor);
+				     parent.actor.remove_child(child.actor);				     
 				     child.parent = undefined;
+				     if(child.hasOwnProperty('on_remove'))
+					 child.on_remove();
 				 }
 			     });
 }
@@ -439,9 +443,14 @@ function event(){
 			     });
 }
 
+function prop_handlers(){
+    this.get = function(prop){
+    };
+}
+
 function element_proto(name, props){
     this.name = name;
-    this.props = props;    
+    this.props = props;
 }
 
 function props_manager(element){
@@ -504,6 +513,7 @@ function props_manager(element){
 		value = element.parent.props_manager[parent_prop_name].get() / 100 * this.value;
 	    }
 
+	    element.prop_handlers
 	    element.actor['set_' + prop_name](value);
 
 	    //for frame recalculating all childs for properly % geometry
@@ -578,7 +588,7 @@ function props_manager(element){
 	    }
 	}
     };
-
+    
 }
 
 function element_obj_proto(actor, info){
@@ -662,6 +672,7 @@ function comp(){
     var actor = new GtkClutter.Embed();
     actor.show();
     actor.set_size_request(800, 400);
+    this.root_actor = actor;
     this.root.add(actor);
     var stage = this.root_actor  = actor.get_stage();
     var color = new Clutter.Color();
@@ -682,7 +693,7 @@ exports.manager = manager;
 
 exports.element_proto = element_proto;
 
-exports.element_obj__proto = element_obj_proto;
+exports.element_obj_proto = element_obj_proto;
 
 exports.create = function(){
     return new comp();
