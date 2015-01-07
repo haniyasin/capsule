@@ -190,6 +190,15 @@ function entry(){
 function video(){
     function load_video(element, info){
 	element.pipeline = Gst.parse_launch("playbin " + 'uri=' + info.source);
+	var bus = element.pipeline.get_bus();
+	bus.add_watch(-1, function(bus, message){
+			  print('hhh');
+			  print(message.type);
+			  print(JSON.stringify(Gst.MessageType));
+		      });
+//	element.pipeline = Gst.Element.make_from_uri(Gst.URIType.SRC, info.source + '', 'video');
+	print(element.pipeline);
+	print('uri=' + info.source);
 	element.sink = new ClutterGst.VideoSink();
 	//				     element.sink = Gst.ElementFactory.make('cluttersink', 'bat');
 	element.sink.texture = element.actor;

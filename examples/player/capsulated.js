@@ -68,13 +68,14 @@ function file_open_form(comp, parent_frame){
 
 function video_player(comp){
     var player_frame = comp.frame_create({ x : '0%', y : '0%', width : '100%', height : '100%', z_index : 2}),
-    video = comp.video_create({ x : '0%', y : '0%', width : '100%', height : '90%', z_index : 1, opacity : 1}),
+    video = comp.video_create({ x : '0%', y : '0%', width : '100%', height : '90%', z_index : 2, opacity : 1}),
     drag_dest = comp.dnd_destination_create({
 						x : '0%',
 						y : '0%',
 						width : '100%',
 						height : '100%',
 						opacity : 0.1,
+						color : 'blue',
 						z_index : 1
 					    }, null, null, null),
     vcontrol = comp.video_get_control(video),
@@ -106,7 +107,7 @@ function video_player(comp){
             x : 0,
             y : '35%',
 
-            z_index : 1,
+            z_index : 2,
 
             source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2Bg+A8AAQMBAKJTBdAAAAAASUVORK5CYII='
         }),
@@ -157,14 +158,17 @@ function video_player(comp){
 	playc.set_label('pause');
 	pause = false;				  			   
     }
+    
+    drag_dest.on('motion', function(context, x, y){
+		     return true;
+		 });
     drag_dest.on('drop', function(context, x, y){
 		     return true;
 		 });
     drag_dest.on('data', function(context, x, y){
 		     source = context.data;
 		     vcontrol.load(source);
-		     play();
-		     print(context.data);
+//		     play();
 		 });
 
     playc.on_press(function(){

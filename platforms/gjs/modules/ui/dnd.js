@@ -21,7 +21,7 @@ function dnd(){
 					  copy : 1,
 					  move : 2
 				      },
-				      source_create : function(options, target_list, action_after){
+				      source_create : function(info, options, target_list, action_after){
 					  this.element;
 					  //data_request, data_delete, begin, end, failed
 					  this.on = function(){
@@ -86,11 +86,15 @@ function dnd(){
 						      
 						      case 'data' : 
 						      widget.connect('drag-data-received', function(widget, context, x, y, data, info, time){
+									 var dstr = data.get_data();
+//									 dstr.shift();
+//									 print(JSON.stringify(dstr), dstr.length);
+									 dstr[dstr.length - 2] = '\0';
 									 context = {
-									   data : data.get_data() 
+									   data : dstr
 									 };
 //									 print('data', data.get_data_type(), data.get_data());
-									 return callback(context, x, y)
+									 return callback(context, x, y);
 								     });
 						      break;
 						  }
