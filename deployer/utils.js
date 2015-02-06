@@ -1,9 +1,11 @@
 var fs = require('platforms/' + proc.platform + '/modules/fs');
 
-var types = {"envelop" : 1,
-		 "module" : 2,
-		 "script" : 3
-		};
+var types = {
+    "envelop" : 1,
+    "module" : 2,
+    "script" : 3,
+    "image" : 4
+};
 
 function tree_walker(tree, assembler){
     for(var key in tree){

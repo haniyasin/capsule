@@ -1,34 +1,41 @@
 /*
- * Example Player application base on capsule API(ui, io)
+ * Example Player application based on capsule API(ui, io)
  */
 
 function file_open_form(comp, parent_frame){
     var form_frame = comp.frame_create({
 					   x : '10%',
-					   y : '10%',
+					   y : '20%',
 					   width : '80%',
-					   height : '20%',
+					   height : '60%',
 					   opacity : 1,
 					   z_index : 1
 				       }),
-    okb = comp.button_create({
-				 x : '70%',
-				 y : '0%',
-				 width : '5%',
-				 height : '100%',
-				 label : 'ok',
-				 z_index : 2
-			     }),
-    okc = comp.button_get_control(okb),
+    text = comp.text_create({
+				x : '0%',
+				y : '0%',
+				width : '100%',
+				height : '30%',
+				text : 'выберите файл или перетащите его сюда'
+			    }),
     addre = comp.entry_create({
 				  x : '0%',
-				  y : '0%',
-				  width : '70%',
-				  height : '100%',
+				  y : '30%',
+				  width : '90%',
+				  height : '70%',
 				  placeholder : "http://docs.gstreamer.com/media/sintel_trailer-480p.ogv",
 				  z_index : 2
 			      }),
     addrc = comp.entry_get_control(addre),
+    okb = comp.button_create({
+				 x : '90%',
+				 y : '30%',
+				 width : '10%',
+				 height : '70%',
+				 label : 'ok',
+				 z_index : 2
+			     }),
+    okc = comp.button_get_control(okb),
     anim_show = comp.anim_create([
 					   {
 					       duration : 1000,
@@ -50,8 +57,9 @@ function file_open_form(comp, parent_frame){
     setup_callback;
 
     addrc.set_value("http://docs.gstreamer.com/media/sintel_trailer-480p.ogv");
-    comp.frame_add(form_frame, okb);
+    comp.frame_add(form_frame, text);
     comp.frame_add(form_frame, addre);
+    comp.frame_add(form_frame, okb);
     comp.frame_add(parent_frame, form_frame);
     
     okc.on_press(function(){
@@ -67,15 +75,26 @@ function file_open_form(comp, parent_frame){
 }
 
 function video_player(comp){
-    var player_frame = comp.frame_create({ x : '0%', y : '0%', width : '100%', height : '100%', z_index : 2}),
-    video = comp.video_create({ x : '0%', y : '0%', width : '100%', height : '90%', z_index : 2, opacity : 1}),
+    alert('data:image/svg+xml;base64,' + require('images/main_bg'));
+    var player_frame = comp.frame_create({ x : '0%', y : '0%', 
+					   width : '100%', height : '100%', 
+					   z_index : 2}),
+    bg_image = comp.image_create({
+				     x : '0%', y : '0%',
+				     width : '100%', height : '100%',
+				     z_index : 1,
+				     source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2Bg+A8AAQMBAKJTBdAAAAAASUVORK5CYII='
+//				     source : 'data:image/svg+xml;base64,' + require('images/main_bg')
+				}),
+    video = comp.video_create({ x : '0%', y : '0%', 
+				width : '100%', height : '90%', 
+				z_index : 2, opacity : 1}),
     drag_dest = comp.dnd_destination_create({
 						x : '0%',
 						y : '0%',
 						width : '100%',
 						height : '100%',
 						opacity : 0.1,
-						color : 'blue',
 						z_index : 1
 					    }, null, null, null),
     vcontrol = comp.video_get_control(video),
@@ -122,7 +141,7 @@ function video_player(comp){
 	    source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY3growIAAycBLhVrvukAAAAASUVORK5CYII=' 
 	});
 
-    
+    comp.frame_add(player_frame, bg_image);
     comp.frame_add(player_frame, video);
     comp.frame_add(player_frame, drag_dest.id);
     comp.frame_add(player_frame, playb);
@@ -257,4 +276,5 @@ exports.main = function(){
 //    print(JSON.stringify(Compositer));
     var comp = Compositer.create();
     video_player(comp);
+//    alert(require('images/main_bg'));
 };

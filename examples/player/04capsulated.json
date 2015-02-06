@@ -4,5 +4,10 @@
     "preload" : true,
     "inline" : true,
 
+    "images" : {
+	"type" : "image",
+	
+	"main_bg" : "examples/player/images/main_bg.svg"
+    },
     "capsulated" : "examples/player/capsulated.js"
 }

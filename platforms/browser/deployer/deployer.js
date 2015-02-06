@@ -1,3 +1,4 @@
+var base64 = require('platforms/' + proc.platform + '/modules/base64');
 var fs = require('platforms/' + proc.platform + '/modules/fs');
 var mkpath = require('platforms/' + proc.platform + '/modules/mkpath.js');
 
@@ -84,8 +85,22 @@ function assembler_constructor(dir){
     };
 
     assembler.do_file = function(name, file_path){
-	var flags = this.s.flags;
-	if(this.s.type == dutils.types.script){
+	var flags = this.s.flags,
+	self = this;
+
+	function module_declare(content){
+	    var module_load = new module_load_emitter(self.get_path(name), content, name, flags.inline);
+	    self.block +=  module_load.emit_declare();
+	    var _block_load = module_load.emit_load();
+	    
+	    if(!flags.preload)
+		self.block_load += _block_load;		    
+	    else 
+		self.block += _block_load;	    
+	}
+
+	switch(this.s.type){
+	    case dutils.types.script :
 	    if(flags.inline){
 		this.script_inline += fs.readFileSync(file_path, "utf8");
 	    }
@@ -99,18 +114,18 @@ function assembler_constructor(dir){
 		this.files_to_copy.push({ "path" : file_path,
 					  "new_path" : this.dir + '/deployed/' + file_path});	
 	    }
-	} else {
-	    if(this.s.type == dutils.types.module){
-		var content = fs.readFileSync(file_path,"utf8");
-		var module_load = new module_load_emitter(this.get_path(name), content, name, flags.inline);
-		this.block +=  module_load.emit_declare();
-		var _block_load = module_load.emit_load();
-		
-		if(!flags.preload)
-		    this.block_load += _block_load;		    
-		else 
-		    this.block += _block_load;
-	    }
+	    break;
+
+	    case dutils.types.module : 
+	    var content = fs.readFileSync(file_path,"utf8");
+	    module_declare(content);
+	    break;
+
+	    case dutils.types.image : 
+	    var content = fs.readFileSync(file_path,"utf8");
+	    module_declare("module.exports = \"" + base64.encode(content) + "\";");
+//	    console.log(base64.encode(content));
+	    break;
 	}
     };
 
