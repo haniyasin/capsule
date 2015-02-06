@@ -1,6 +1,7 @@
-var base64 = require('platforms/' + proc.platform + '/modules/base64');
-var fs = require('platforms/' + proc.platform + '/modules/fs');
-var mkpath = require('platforms/' + proc.platform + '/modules/mkpath.js');
+var base64 = require('platforms/' + proc.platform + '/modules/base64'),
+fs = require('platforms/' + proc.platform + '/modules/fs'),
+path = require('platforms/' + proc.platform + '/modules/path'),
+mkpath = require('platforms/' + proc.platform + '/modules/mkpath.js');
 
 var dutils = require('deployer/utils.js');
 var cb_synchronizer = require('parts/cb_synchronizer.js');
@@ -99,6 +100,7 @@ function assembler_constructor(dir){
 		self.block += _block_load;	    
 	}
 
+	var content;
 	switch(this.s.type){
 	    case dutils.types.script :
 	    if(flags.inline){
@@ -117,14 +119,22 @@ function assembler_constructor(dir){
 	    break;
 
 	    case dutils.types.module : 
-	    var content = fs.readFileSync(file_path,"utf8");
+	    content = fs.readFileSync(file_path,"utf8");
 	    module_declare(content);
 	    break;
 
 	    case dutils.types.image : 
-	    var content = fs.readFileSync(file_path,"utf8");
-	    module_declare("module.exports = \"" + base64.encode(content) + "\";");
-//	    console.log(base64.encode(content));
+	    content = fs.readFileSync(file_path);
+	    var itype;
+	    switch(path.extname(file_path)){
+		case '.png' :
+		itype = 'png';
+		break;
+		case '.svg' : 
+		itype = 'svg+xml';
+		break;
+	    }
+	    module_declare("var timage = require('types/image');\n module.exports = new timage(\"" + itype + "\", \"base64\", \"" + base64.encode(content) + "\");");
 	    break;
 	}
     };
