@@ -1,4 +1,4 @@
-var error = require('../../parts/error.js');
+var error = require('parts/error');
 
 exports.create = function(callback, milisec, cyclic){
     if(typeof(setInterval) == 'undefined'

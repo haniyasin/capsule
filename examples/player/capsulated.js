@@ -2,44 +2,33 @@
  * Example Player application based on capsule API(ui, io)
  */
 
-function slide_animation(comp){
-    this.objects = [];
+function animation_toggle(comp, name, on_chain, off_chain){
+    var aonchain = comp.anim_create(on_chain),
+    aoffchain = comp.anim_create(off_chain);
 
-    var anim_down = comp.anim_create([
-					       {
-						   duration : 300,
-						   actions : {
-						       y : 90   
-						   }
-					       }
-					   ]),
-    anim_up = comp.anim_create([
-					 {
-					     duration : 300,
-					     actions : {
-						 y : -90
-					     } 
-					 }
-				     ]);
-    function hup(){
-	comp.anim_start(this.banimslu);	
+    function hon(){
+	this.toggled = true;
+	comp.anim_start(this.baon);	
     }
 
-    function hdown(){
-	comp.anim_start(this.banimsld);		
+    function hoff(){
+	this.toggled = false;
+	comp.anim_start(this.baoff);		
     }
     this.bind = function(widget){
-	widget.anim = {
-	    banimslu : comp.anim_bind(widget.frame, anim_up),
-	    banimsld : comp.anim_bind(widget.frame, anim_down),
-	    up : hup,
-	    down : hdown
+	widget[name] = {
+	    toggled : false,
+	    baon : comp.anim_bind(widget.frame, aonchain),
+	    baoff : comp.anim_bind(widget.frame, aoffchain),
+	    on : hon,
+	    off : hoff
 	};
     };
 
     this.unbind = function(widget){
 	comp.anim_unbind(widget.anim.banimslu);
 	comp.anim_unbind(widget.anim.banimsld);
+	widget[slide] = undefined;
     };
 }
 
@@ -103,6 +92,7 @@ function file_opener_widget(comp, parent, info){
     addrc.set_value("http://docs.gstreamer.com/media/sintel_trailer-480p.ogv");
     comp.frame_add(form_frame, bg);
     comp.frame_add(form_frame, text);
+    comp.frame_add(form_frame, addre);
     comp.frame_add(form_frame, okb);
     comp.frame_add(parent.frame, form_frame);
     parent.file_opener = this;
@@ -120,7 +110,8 @@ function file_opener_widget(comp, parent, info){
 }
 
 function controls_widget(comp, player, parent, info){
-    var frame_timeline = comp.frame_create(
+    var self = this,
+    frame_timeline = comp.frame_create(
 	{
 	    width : '89%',
 	    height : '100%',
@@ -142,9 +133,9 @@ function controls_widget(comp, player, parent, info){
     image_timeline = comp.image_create(
         {
             width : '100%',
-            height : '100%',
+            height : '30%',
             x : '0%',
-            y : '0%',
+            y : '35%',
             z_index : 2,
 
             source : require('images/blue')
@@ -153,12 +144,12 @@ function controls_widget(comp, player, parent, info){
 	{ 
 	    x : '0%', 
 	    y : '0%', 
-	    width : '4%', 
+	    width : '5%', 
 	    height : '100%', 
 	    opacity : 0.8,
 	    z_index : 2,
 
-	    source : require('images/red')
+	    source : require('images/timepoint')
 	});
     this.frame = comp.frame_create(info);
     comp.frame_add(parent.frame, this.frame);
@@ -167,8 +158,9 @@ function controls_widget(comp, player, parent, info){
     comp.frame_add(frame_timeline, image_timeline);
     comp.frame_add(frame_timeline, image_timepoint);
 
-    var playc = comp.button_get_control(playb);
-    var pause = true;
+    var playc = comp.button_get_control(playb),
+    pause = true,
+    controls_standby = 0;
 
     function play(){
 	player.vcontrol.play();
@@ -176,15 +168,16 @@ function controls_widget(comp, player, parent, info){
 	pause = false;				  			   
     }
     playc.on_press(function(){
+		       controls_standby = 0;
 		       if(pause){
 			   if(player.source == null){
 			       player.file_opener.setup(function(address){
 							    player.source = address;
 							    player.vcontrol.load(player.source);
-							    player.anim.up();
+							    player.slide.off();
 							    play();
 							});
-			       player.anim.down();
+			       player.slide.on();
 			       return;
 			   }
 			   play();
@@ -216,6 +209,7 @@ function controls_widget(comp, player, parent, info){
 			   });
     var point_drag = false, drag_prev_step;
     comp.event_register(frame_timeline, 'pointer_down', function(pointer_obj){
+			    controls_standby = 0;
 			    point_drag = true;
 			    drag_prev_step = prev_step;
 			});
@@ -237,6 +231,7 @@ function controls_widget(comp, player, parent, info){
     comp.event_register(frame_timeline, 'pointer_up', function(pointer_obj){
 			    if(!point_drag)
 				return;
+			    controls_standby = 0;
 			    point_drag = false;
 			    step = pointer_obj.shift().x;
 			    ///			    print('eee', prev_step, step, (vcontrol.get_duration() / 100) * step);
@@ -252,26 +247,82 @@ function controls_widget(comp, player, parent, info){
 			    comp.anim_start(comp.anim_bind(image_timepoint, timepoint_slide_anim));
 			    prev_step = step;
 			});
+
+    var anim_appear = new animation_toggle(comp, 'appear', 
+					  [
+					      {
+						  duration : 300,
+						  actions : {
+						      opacity : -100   
+						  }
+					      }
+					  ],
+					  [
+					      {
+						  duration : 300,
+						  actions : {
+						      opacity : 100
+						  }
+					      }
+					  ]);
+    anim_appear.bind(this);
+
+    var activity_timer = require('modules/timer').create(function(){
+							     if(controls_standby == 3 && !self.appear.toggled)
+								 self.appear.on();
+							     else
+								 controls_standby += 1;					     
+				      }, 1000, true);
+    comp.event_register(this.frame, 'pointer_motion', function(){
+			    if(controls_standby >= 3)
+				self.appear.off();
+			    controls_standby = 0;
+			});    
+
+    this.destroy = function(){
+	activity_timer.destroy();
+	comp.event_unregister(frame_timeline, 'pointer_up');
+	comp.event_unregister(frame_timeline, 'pointer_down');
+	comp.event_unregister(frame_timeline, 'pointer_motion');
+	player.vcontrol.on_timeupdate(function(){});
+
+	comp.frame_remove(image_timepoint);
+	comp.image_destroy(image_timepoint);
+	comp.frame_remove(image_timeline);
+	comp.image_destroy(image_timeline);
+	comp.frame_remove(frame_timeline);
+	comp.frame_destroy(frame_timeline);
+	comp.frame_remove(playb);
+	comp.button_destroy(playb);
+    };
 }
 
 function player_widget(comp, parent, info){
-    var player_frame = this.frame = comp.frame_create(info),
-    bg_image = comp.image_create({
-				     x : '0%', y : '0%',
-				     width : '100%', height : '100%',
-				     z_index : 1,
-				     source : require('images/main_bg')
-				}),
+    var frame = this.frame = comp.frame_create(info),
+    bg = comp.image_create({
+			       x : '0%', y : '0%',
+			       width : '100%', height : '100%',
+			       z_index : 1,
+			       source : require('images/main_bg')
+			   }),
     video = comp.video_create({ x : '0%', y : '1%', 
 				width : '100%', height : '89%', 
-				z_index : 2, opacity : 1});
+				z_index : 2});
+    comp.frame_add(frame, bg);
+    comp.frame_add(frame, video);
+    comp.frame_add(parent.frame, frame);
+
     this.vcontrol = comp.video_get_control(video),
     this.vcontrol.set_volume(0.2);
-    this.source = null;
-
-    comp.frame_add(player_frame, bg_image);
-    comp.frame_add(player_frame, video);
-    comp.frame_add(parent.frame, player_frame);
+    this.source = null;    
+    
+    this.destroy = function(){
+	comp.frame_remove(video);
+	comp.video_destroy(video);
+	comp.frame_remove(bg);
+	comp.image_destroy(bg);
+	comp.frame_destroy(frame);
+    };
 }
 
 function dnd_widget(comp, player, info){
@@ -289,15 +340,35 @@ function dnd_widget(comp, player, info){
     drag_dest.on('data', function(context, x, y){
 		     vcontrol.load(player.source = context.data);
 		 });
+
+    this.destroy = function(){
+	drag_dest.destroy();
+    };
 }
 
 exports.main = function(){
     var Compositer = require('modules/ui/Compositer');
     require('modules/ui/dnd');//подключаем возможности dnd в Compositer
 
-//    print(JSON.stringify(Compositer));
     var comp = Compositer.create(),
-    sanim = new slide_animation(comp),
+    sanim = new animation_toggle(comp, 'slide',
+				 [
+				     {
+					 duration : 300,
+					 actions : {
+					     y : 90   
+					 }
+				     }
+				 ],
+				 [
+				     {
+					 duration : 300,
+					 actions : {
+					     y : -90
+					 } 
+				     }
+				]
+				),
     player = new player_widget(comp, {frame : 0}, {
 				   x : '0%', y : '0%', 
 				   width : '100%', height : '100%', 
@@ -315,7 +386,8 @@ exports.main = function(){
 				       x : '1%',
 				       y : '88%',
 				       width : '98%',
-				       height : '10'
+				       height : '10',
+				       opacity : '0%'
 			    }),
     dnd = new dnd_widget(comp, player, {
 			     x : '0%',
@@ -327,5 +399,4 @@ exports.main = function(){
 			 });    
 
     sanim.bind(player);
-    sanim.bind(file_opener);
 };

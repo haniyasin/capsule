@@ -10,7 +10,8 @@
 	"blue" : "examples/player/images/blue.png",
 	"red" : "examples/player/images/red.png",
 	"file_form_bg" : "examples/player/images/file_form_bg.svg",
-	"main_bg" : "examples/player/images/main_bg.svg"
+	"main_bg" : "examples/player/images/main_bg.svg",
+	"timepoint" : "examples/player/images/timepoint.svg"
     },
     "capsulated" : "examples/player/capsulated.js"
 }
