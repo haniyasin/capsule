@@ -19,7 +19,6 @@
 	    "utils" : "parts/utils.js",
 	    "error" : "parts/error.js"
 	},
-
 	"modules" : {
 	    "uuid" : {
 		"this" : "modules/uuid.js"
@@ -34,6 +33,12 @@
 		}
 	    },
 	    "sequence" : "modules/sequence.js"
+	},
+	"blocks" : {
+	    "ui" : {
+		"animation" : "blocks/ui/animation.js",
+		"player" : "blocks/ui/player.js"
+	    }
 	}
     }
 }
