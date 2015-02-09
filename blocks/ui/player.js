@@ -26,17 +26,19 @@ exports.video = function (comp, parent, info){
 
 //ui controls for player(play|pause, progressbar, volumecontrol etc)
 exports.controls = function(comp, player, parent, info){
+    /*
+     * common functionality
+     */
     var self = this,
-    frame_timeline = comp.frame_create(
-	{
-	    width : '89%',
-	    height : '100%',
-	    x : '11%',
-	    y : '0%',
-	    z_index : 2
-	}
-    ),
-    playb = comp.button_create(
+    controls_standby = 0;
+    
+    this.frame = comp.frame_create(info);
+    comp.frame_add(parent.frame, this.frame);
+
+    /*
+     * play|pause button
+     */
+    var play_b = comp.button_create(
 	{
 	    x : '0%',
 	    y : '0%',
@@ -45,8 +47,95 @@ exports.controls = function(comp, player, parent, info){
 	    z_index : 2,
 	    opacity : 0.9,
 	    label : 'play'
-	}),
-    image_timeline = comp.image_create(
+	}), 
+    playc = comp.button_get_control(play_b),
+    pause = true;
+
+    comp.frame_add(this.frame, play_b);
+    function play(){
+	player.vcontrol.play();
+	playc.set_label('pause');
+	pause = false;				  			   
+    }
+    playc.on_press(function(){
+		       controls_standby = 0;
+		       if(pause)
+			   play();
+		       else {
+			   player.vcontrol.pause();
+			   playc.set_label('play');
+			   pause = true;
+		       }
+		   });
+
+    /*
+     * fullscreen button
+     */
+    var fullscreen_i = comp.image_create(
+	{
+	    x : '96%', 
+	    y : '0%', 
+	    width : '4%', 
+	    height : '100%', 
+	    z_index : 2,
+
+	    source : require('images/red')	    
+	}
+    ),
+    fullscreen_at = new animation.toggle(comp, 'fullscreen',
+				  [
+				      {
+					  duration : 300,
+					  actions : {
+					      x : -1,
+					      y : -1,
+					      width : 2,
+					      height : 2
+					  }
+				      }
+				  ],
+				  [
+				      {
+					  duration : 300,
+					  actions : {
+					      x : 1,
+					      y : 1,
+					      width : -2,
+					      height : -2
+					  } 
+				      }
+				  ]
+				 ),
+    fullscreen = false, fullscreen_pressed;
+    
+    fullscreen_at.bind(player);
+    comp.frame_add(this.frame, fullscreen_i);
+    comp.event_register(fullscreen_i, 'pointer_down', function(){
+			    fullscreen_pressed = true;
+			});
+    comp.event_register(fullscreen_i, 'pointer_up', function(){
+			    if(fullscreen_pressed && fullscreen == false){
+				fullscreen = true;
+				player.fullscreen.on();
+			    }else if(fullscreen_pressed && fullscreen == true){
+				fullscreen = false;
+				player.fullscreen.off();
+			    }
+			});
+    
+    /*
+     * progressbar
+     */
+    var timeline_f = comp.frame_create(
+	{
+	    width : '84%',
+	    height : '100%',
+	    x : '11%',
+	    y : '0%',
+	    z_index : 2
+	}
+    ),
+    timeline_i = comp.image_create(
         {
             width : '100%',
             height : '30%',
@@ -56,7 +145,7 @@ exports.controls = function(comp, player, parent, info){
 
             source : require('images/blue')
         }),
-    image_timepoint = comp.image_create(
+    timepoint_i = comp.image_create(
 	{ 
 	    x : '0%', 
 	    y : '0%', 
@@ -66,45 +155,13 @@ exports.controls = function(comp, player, parent, info){
 	    z_index : 2,
 
 	    source : require('images/timepoint')
-	});
-    this.frame = comp.frame_create(info);
-    comp.frame_add(parent.frame, this.frame);
-    comp.frame_add(this.frame, playb);
-    comp.frame_add(this.frame, frame_timeline);
-    comp.frame_add(frame_timeline, image_timeline);
-    comp.frame_add(frame_timeline, image_timepoint);
+	}),
+    step, prev_step = 0, position_step;;
 
-    var playc = comp.button_get_control(playb),
-    pause = true,
-    controls_standby = 0;
+    comp.frame_add(this.frame, timeline_f);
+    comp.frame_add(timeline_f, timeline_i);
+    comp.frame_add(timeline_f, timepoint_i);
 
-    function play(){
-	player.vcontrol.play();
-	playc.set_label('pause');
-	pause = false;				  			   
-    }
-    playc.on_press(function(){
-		       controls_standby = 0;
-		       if(pause){
-			   if(player.source == null){
-			       player.file_opener.setup(function(address){
-							    player.source = address;
-							    player.vcontrol.load(player.source);
-							    player.slide.off();
-							    play();
-							});
-			       player.slide.on();
-			       return;
-			   }
-			   play();
-		       } else {
-			   player.vcontrol.pause();
-			   playc.set_label('play');
-			   pause = true;
-		       }
-		   });
-
-    var step, prev_step = 0, position_step;;
     player.vcontrol.on_timeupdate(function(){
 			       if(typeof(position_step) == 'undefined')
 				   position_step = player.vcontrol.get_duration() / 200;
@@ -118,18 +175,17 @@ exports.controls = function(comp, player, parent, info){
 									   }
 								       }
 								   ]);
-				   //				   alert(point_to_slide);
-				   comp.anim_start(comp.anim_bind(image_timepoint, inc_anim));
+				   comp.anim_start(comp.anim_bind(timepoint_i, inc_anim));
 				   prev_step = step;
 			       }
 			   });
     var point_drag = false, drag_prev_step;
-    comp.event_register(frame_timeline, 'pointer_down', function(pointer_obj){
+    comp.event_register(timeline_f, 'pointer_down', function(pointer_obj){
 			    controls_standby = 0;
 			    point_drag = true;
 			    drag_prev_step = prev_step;
 			});
-    comp.event_register(frame_timeline, 'pointer_motion', function(pointer_obj){
+    comp.event_register(timeline_f, 'pointer_motion', function(pointer_obj){
 			    if(!point_drag)
 				return;
 			    var drag_step = pointer_obj.shift().x,
@@ -141,10 +197,10 @@ exports.controls = function(comp, player, parent, info){
 									    }
 									}
 								    ]);
-			    comp.anim_start(comp.anim_bind(image_timepoint, timepoint_slide_anim));
+			    comp.anim_start(comp.anim_bind(timepoint_i, timepoint_slide_anim));
 			    drag_prev_step = drag_step;
 			});
-    comp.event_register(frame_timeline, 'pointer_up', function(pointer_obj){
+    comp.event_register(timeline_f, 'pointer_up', function(pointer_obj){
 			    if(!point_drag)
 				return;
 			    controls_standby = 0;
@@ -160,7 +216,7 @@ exports.controls = function(comp, player, parent, info){
 										}
 									    }
 									]);
-			    comp.anim_start(comp.anim_bind(image_timepoint, timepoint_slide_anim));
+			    comp.anim_start(comp.anim_bind(timepoint_i, timepoint_slide_anim));
 			    prev_step = step;
 			});
 
@@ -197,18 +253,23 @@ exports.controls = function(comp, player, parent, info){
 
     this.destroy = function(){
 	activity_timer.destroy();
-	comp.event_unregister(frame_timeline, 'pointer_up');
-	comp.event_unregister(frame_timeline, 'pointer_down');
-	comp.event_unregister(frame_timeline, 'pointer_motion');
+	comp.event_unregister(timeline_f, 'pointer_up');
+	comp.event_unregister(timeline_f, 'pointer_down');
+	comp.event_unregister(timeline_f, 'pointer_motion');
 	player.vcontrol.on_timeupdate(function(){});
+	comp.frame_remove(timepoint_i);
+	comp.image_destroy(timepoint_i);
+	comp.frame_remove(timeline_i);
+	comp.image_destroy(timeline_i);
+	comp.frame_remove(timeline_f);
+	comp.frame_destroy(timeline_f);
 
-	comp.frame_remove(image_timepoint);
-	comp.image_destroy(image_timepoint);
-	comp.frame_remove(image_timeline);
-	comp.image_destroy(image_timeline);
-	comp.frame_remove(frame_timeline);
-	comp.frame_destroy(frame_timeline);
-	comp.frame_remove(playb);
-	comp.button_destroy(playb);
+	comp.frame_remove(play_b);
+	comp.button_destroy(play_b);
+
+	comp.frame_remove(fullscreen_i);
+	comp.image_destroy(fullscreen_i);
+	comp.event_unregister(fullscreen_i, 'pointer_down');
+	comp.event_unregister(fullscreen_i, 'pointer_down');
     };
 };

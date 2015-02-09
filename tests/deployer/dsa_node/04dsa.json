@@ -1,6 +1,0 @@
-{
-    "dsa" : {
-	"mq" : "dsa/mq.js",
-	"service_loader" : "dsa/service_loader.js"
-    }
-}

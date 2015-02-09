@@ -1,8 +1,0 @@
-{
-    "type" : "module",
-
-    "preload" : true,
-    "inline" : true,
-
-    "capsulated" : "tests/deployer/dsa_browser/capsulated.js"
-}

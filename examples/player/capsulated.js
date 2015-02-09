@@ -2,7 +2,7 @@
  * Example Player application based on capsule API(ui, io)
  */
 
-function file_opener_widget(comp, parent, info){
+function file_opener_widget(comp, player, parent, info){
     var form_frame = this.frame = comp.frame_create(info),
     bg = comp.image_create({
 			       x : '0%',
@@ -19,63 +19,57 @@ function file_opener_widget(comp, parent, info){
 				width : '100%',
 				height : '30%',
 				z_index : 2,
-				text : 'выберите файл или перетащите его сюда'
+				text : 'выберите или перетащите файл'
 			    }),
-    addre = comp.entry_create({
-				  x : '5%',
+    addr_e = comp.entry_create({
+				   x : '2%',
+				   y : '30%',
+				   width : '86%',
+				   height : '30%',
+				   z_index : 2,
+				   placeholder : "http://docs.gstreamer.com/media/sintel_trailer-480p.ogv"
+			       }),
+    addr_c = comp.entry_get_control(addr_e),
+    ok_b = comp.button_create({
+				  x : '88%',
 				  y : '30%',
-				  width : '80%',
-				  height : '65%',
+				  width : '10%',
+				  height : '30%',
 				  z_index : 2,
-				  placeholder : "http://docs.gstreamer.com/media/sintel_trailer-480p.ogv"
-			      }),
-    addrc = comp.entry_get_control(addre),
-    okb = comp.button_create({
-				 x : '85%',
-				 y : '30%',
-				 width : '10%',
-				 height : '65%',
-				 z_index : 2,
-				 label : 'ok'
+				  label : 'ok'
 			     }),
-    okc = comp.button_get_control(okb),
-    anim_show = comp.anim_create([
-					   {
-					       duration : 1000,
-					       actions : {
-						   opacity : 0   
-					       }
-					   }
-				       ]),
-    anim_hide = comp.anim_create([
-					 {
-					     duration : 300,
-					     actions : {
-						 opacity : 1
-					     } 
-					 }
-				     ]),
-    banimshow = comp.anim_bind(form_frame, anim_show),
-    banimhide = comp.anim_bind(form_frame, anim_hide),    
-    setup_callback;
+    ok_c = comp.button_get_control(ok_b),
+    filechooser = comp.button_create({
+					 x : '2%',
+					 y : '60%',
+					 width : '96%',
+					 height : '30%',
+					 z_index : 2,
+					 label : 'выбрать нужный файл'
+				     });
 
-    addrc.set_value("http://docs.gstreamer.com/media/sintel_trailer-480p.ogv");
+    function file_choosen(address){
+	player.source = address;
+	player.vcontrol.load(player.source);
+	player.slide.on();
+	//player.slide.off();
+    }
+
+    addr_c.set_value("http://docs.gstreamer.com/media/sintel_trailer-480p.ogv");
     comp.frame_add(form_frame, bg);
     comp.frame_add(form_frame, text);
-    comp.frame_add(form_frame, addre);
-    comp.frame_add(form_frame, okb);
+    comp.frame_add(form_frame, addr_e);
+    comp.frame_add(form_frame, ok_b);
+    comp.frame_add(form_frame, filechooser);
     comp.frame_add(parent.frame, form_frame);
     parent.file_opener = this;
     
-    okc.on_press(function(){
-		     comp.anim_start(banimhide);
-		     if(typeof(setup_callback) != undefined)
-			 setup_callback(addrc.get_value());
+    ok_c.on_press(function(){
+		      file_choosen(addr_c.get_value());
 		 });
 
     this.setup = function(callback){
 	setup_callback = callback;
-	comp.anim_start(banimshow);
     };
 }
 
@@ -103,6 +97,7 @@ function dnd_widget(comp, player, info){
 exports.main = function(){
     var Compositer = require('modules/ui/Compositer');
     require('modules/ui/dnd');//подключаем возможности dnd в Compositer
+
     var player = require('blocks/ui/player'),
     animation = require('blocks/ui/animation'),
     comp = Compositer.create(),
@@ -111,7 +106,7 @@ exports.main = function(){
 				      {
 					  duration : 300,
 					  actions : {
-					      y : 100   
+					      y : -100   
 					  }
 				      }
 				  ],
@@ -119,7 +114,7 @@ exports.main = function(){
 				      {
 					  duration : 300,
 					  actions : {
-					      y : -100
+					      y : 100
 					  } 
 				      }
 				  ]
@@ -132,11 +127,11 @@ exports.main = function(){
 			   });
     comp.frame_add(0, bg);
     var video = new player.video(comp, {frame : 0}, {
-				   x : '1%', y : '1%', 
-				   width : '98%', height : '97%', 
+				   x : '1%', y : '101%', 
+				   width : '98%', height : '98%', 
 				   z_index : 1
 			       }),
-    file_opener = new file_opener_widget(comp, video, {
+    file_opener = new file_opener_widget(comp, video, video, {
 					     x : '0%',
 					     y : '-100%',
 					     width : '100%',
