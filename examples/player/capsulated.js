@@ -3,6 +3,9 @@
  */
 
 function file_opener_widget(comp, player, parent, info){
+    /*
+     * common functionality
+     */
     var form_frame = this.frame = comp.frame_create(info),
     bg = comp.image_create({
 			       x : '0%',
@@ -20,34 +23,12 @@ function file_opener_widget(comp, player, parent, info){
 				height : '30%',
 				z_index : 2,
 				text : 'выберите или перетащите файл'
-			    }),
-    addr_e = comp.entry_create({
-				   x : '2%',
-				   y : '30%',
-				   width : '86%',
-				   height : '30%',
-				   z_index : 2,
-				   placeholder : "http://docs.gstreamer.com/media/sintel_trailer-480p.ogv"
-			       }),
-    addr_c = comp.entry_get_control(addr_e),
-    ok_b = comp.button_create({
-				  x : '88%',
-				  y : '30%',
-				  width : '10%',
-				  height : '30%',
-				  z_index : 2,
-				  label : 'ok'
-			     }),
-    ok_c = comp.button_get_control(ok_b),
-    filechooser = comp.button_create({
-					 x : '2%',
-					 y : '60%',
-					 width : '96%',
-					 height : '30%',
-					 z_index : 2,
-					 label : 'выбрать нужный файл'
-				     });
+			    });
 
+    comp.frame_add(form_frame, bg);
+    comp.frame_add(form_frame, text);
+    comp.frame_add(parent.frame, form_frame);
+    parent.file_opener = this;
     function file_choosen(address){
 	player.source = address;
 	player.vcontrol.load(player.source);
@@ -55,15 +36,56 @@ function file_opener_widget(comp, player, parent, info){
 	//player.slide.off();
     }
 
-    addr_c.set_value("http://docs.gstreamer.com/media/sintel_trailer-480p.ogv");
-    comp.frame_add(form_frame, bg);
-    comp.frame_add(form_frame, text);
+    /*
+     * link entering
+     */
+    var addr_e = comp.entry_create({
+				   x : '2%',
+				   y : '30%',
+				   width : '96%',
+				   height : '20%',
+				   z_index : 2,
+				   placeholder : "http://docs.gstreamer.com/media/sintel_trailer-480p.ogv"
+			       }),
+    addr_c = comp.entry_get_control(addr_e);
+
     comp.frame_add(form_frame, addr_e);
+    addr_c.set_value("http://docs.gstreamer.com/media/sintel_trailer-480p.ogv");
+
+    /*
+     * choosing local file
+     */
+    var filechooser = comp.filechooser_create({
+					      x : '2%',
+					      y : '51%',
+					      width : '96%',
+					      height : '20%',
+					      z_index : 2,
+					      label : 'выбрать нужный файл'
+				     });
+    comp.frame_add(form_frame, filechooser.id);
+    filechooser.on_choose(function(context){
+			      file_choosen(context.data);
+			  });
+    /*
+     * dnd file
+     */
+
+    /*
+     * finishing choosing file
+     */
+    var ok_b = comp.button_create({
+				  x : '40%',
+				  y : '72%',
+				  width : '20%',
+				  height : '20%',
+				  z_index : 2,
+				  label : 'ok'
+			     }),
+    ok_c = comp.button_get_control(ok_b);
+
+
     comp.frame_add(form_frame, ok_b);
-    comp.frame_add(form_frame, filechooser);
-    comp.frame_add(parent.frame, form_frame);
-    parent.file_opener = this;
-    
     ok_c.on_press(function(){
 		      file_choosen(addr_c.get_value());
 		 });
@@ -97,6 +119,7 @@ function dnd_widget(comp, player, info){
 exports.main = function(){
     var Compositer = require('modules/ui/Compositer');
     require('modules/ui/dnd');//подключаем возможности dnd в Compositer
+    require('modules/ui/filechooser'); //подключаем возможности filechooser
 
     var player = require('blocks/ui/player'),
     animation = require('blocks/ui/animation'),

@@ -20,6 +20,7 @@
 		"Compositer" : "platforms/browser/modules/ui/Compositer.js",
 		"base_items" : "platforms/browser/modules/ui/base_items.js",
 		"dnd" : "platforms/browser/modules/ui/dnd.js",
+		"filechooser" : "platforms/browser/modules/ui/filechooser.js",
 		"map" : "platforms/browser/modules/ui/map.js"
 	    },
 	    "http_requester" : "platforms/browser/modules/http_requester.js"	    
