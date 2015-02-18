@@ -27,13 +27,34 @@
       user-select: none; 
       }
     </style>
+    <script type="text/javascript">
+        var capsule = {
+	    /*
+	     * platform - one name of supported capsule platfom
+             * image - capsulated image, usually it's application code
+             */
+	    assemble : function(platform, image){
+	        var assembled_capsule = {
+	            module_add : function(path, body){
+	            },
+	            //return assembled capsule packed into files: capsule.htm, constructor.js
+	            get_as_files : function(){
+	            }
+	        }
+	        return assembled_capsule;
+	    }
+	};
+    </script>
     <script type="text/javascript" src="constructor.js"></script>
     <script type="text/javascript">
       function start(){
-      //need depends functionality
-      var loader = new module_loader();
-      var environment = constructor(loader);
-      starter(environment);
+          //need depends functionality
+          var loader = new module_loader();
+          var environment = constructor(loader);
+          starter(environment);
+          for(ind in blocks){
+              
+          }
       }
     </script>
   </head>
