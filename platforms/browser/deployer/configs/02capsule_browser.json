@@ -16,6 +16,7 @@
 	},
 	"modules" : {
 	    "timer" : "modules/timer.js",
+	    "fs" : "platforms/browser/modules/fs.js",
 	    "ui" : {
 		"Compositer" : "platforms/browser/modules/ui/Compositer.js",
 		"base_items" : "platforms/browser/modules/ui/base_items.js",
