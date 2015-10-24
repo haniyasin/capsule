@@ -26,8 +26,9 @@ exports.main = function(env){
 //    var tcompositer = require('tests/modules/ui/Compositer');
 //    tcompositer.test();
 
-    var fs = require('modules/fs');
-    alert(fs.readFileSync('./'));    
+//    var fs = require('modules/fs');
+//    alert(fs.readFileSync('./'));    
+    alert('ddd');
     return;
 
     var comp = new (require('modules/ui/Compositer')).Compositer();

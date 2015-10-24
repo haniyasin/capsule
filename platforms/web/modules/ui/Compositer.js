@@ -1,6 +1,8 @@
 /*
-  shared objects for client and server implementations of dsa
+  Implementation of capsule Compositer module for browser platform
+
   Copyright (C) 2011  Alexey Bagin aka freeze (email freeze@2du.ru)
+  Copyright (c) 2014-2015  Nikita Zaharov aka ix (email ix@2du.ru)
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as
@@ -15,7 +17,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.'
 
-  version 0.7.5
+  version 0.7.6
 */
 
 /* Compositer */
@@ -224,7 +226,10 @@ var comp = (function () {
     Unit.prototype.types['image'].prototype.init = function (object) {
         if (typeof object.source === 'string') {
             this.html.src = object.source;
-        }
+        } else
+	    if(typeof object.source == 'object'){
+		this.html.src = object.source.get_link_http();
+	    }
 
         this.html.alt = '';
 	this.html.ondragstart = function(){ return false; };
@@ -320,9 +325,18 @@ var comp = (function () {
 	    on_text_change : function(callback){
 		unit.html.onchange = function(){
 		    callback(unit.html.value);
-		}
+		};
+	    },
+	    set_placeholder : function(text){
+		unit.html.placeholder = text;
+	    },
+	    get_value : function(){
+		return unit.html.value;
+	    },
+	    set_value : function(value){
+		unit.html.value = value;
 	    }
-	}
+	};
 
         this.init(object);
 
@@ -348,12 +362,15 @@ var comp = (function () {
 	this.html.type = 'button';
 	var unit = this;
 	this.control = {
-	    on_pressed : function(callback){
+	    on_press : function(callback){
 		unit.html.onclick = function(){
 		    callback();
 		};
+	    },
+	    set_label : function(label){
+		unit.html.value = label;	
 	    }
-	}
+	};
 
         this.init(object);
 
@@ -365,6 +382,63 @@ var comp = (function () {
     Unit.prototype.types['button'].prototype.init = function (object) {
         if (typeof object.label === 'string') {
             this.html.value = object.label;
+        }
+	if (typeof object.on_press === 'function'){
+	    this.html.onclick = object.on_press;
+	}
+    };
+
+    /*Video unit*/
+
+    Unit.prototype.types['video'] = function (object) {
+        this.html = document.createElement('video');
+	var unit = this;
+	this.source_child = document.createElement('source');
+	unit.html.style = 'object-fit:fill;';
+	//if(object.hasOwnProperty('source')){
+//	    unit.source_child.src = "http://docs.gstreamer.com/media/sintel_trailer-480p.ogv";
+	//}
+	this.control = {
+	    load : function(address){
+		unit.source_child.src = address;	
+		unit.html.appendChild(unit.source_child);
+	    },
+	    play : function(callback){
+		unit.html.play();
+	    },
+	    pause : function(){
+		unit.html.pause();
+	    },
+	    set_position : function(mseconds){
+		unit.html.currentTime = mseconds / 1000;
+	    },
+	    get_position : function(){
+		return unit.html.currentTime * 1000;
+	    },
+	    get_duration : function(){
+		return unit.html.duration * 1000;
+	    },
+	    get_volume : function(){
+		return unit.html.volume;
+	    },
+	    set_volume : function(volume){
+		unit.html.volume = volume;
+	    },
+	    on_timeupdate : function(callback){
+		unit.html.ontimeupdate = callback;
+	    }
+	};
+
+        this.init(object);
+
+        this.prepare(object);
+    };
+
+    Unit.prototype.types['video'].prototype = new Unit(undefined, undefined);
+
+    Unit.prototype.types['video'].prototype.init = function (object) {
+        if (typeof object.source === 'string') {
+//            this.html.size = object.size;
         }
     };
 
@@ -865,7 +939,7 @@ var comp = (function () {
 
         if (event.type === 'animation_stopped') {
 	    if(window['incident'].callbacks.hasOwnProperty(event['currentTarget']['elementId']))
-		window['incident'].callbacks[event['currentTarget']['elementId']]('animation_stopped');
+		window['incident'].callbacks[event['currentTarget']['elementId']]['animation_stopped']();
             window['incident'].callback(
                 event['currentTarget']['id'], 'animation_stopped'
             );
@@ -890,21 +964,21 @@ var comp = (function () {
 
                 element = Unit.pool.take(elementId);
 
-//	        console.log('pointer x is', JSON.stringify(event.clientX));
-                eventData = {
-                    'group_id'    : 0,
-                    'pointer_obj' : [{
+	        var re_disassemble = /(\d+)px/;
+	        var x = event.clientX - re_disassemble.exec(element.html.style.left)[1],
+                    y = event.clientY - re_disassemble.exec(element.html.style.top)[1];
+	       
+                eventData = [{
                         'pointer_id' : 0,
 
                         'x' : (element.width.unit  === '%') ?
-                            (100 / element.width.px().value  * event.clientX) :
-                            event.clientX,
+                            (100 / element.width.px().value  * x) :
+                            x,
 
                         'y' : (element.height.unit === '%') ?
-                            (100 / element.height.px().value * event.clientY) :
-                            event.clientY
-                    }]
-                };
+                            (100 / element.height.px().value * y) :
+			    y
+                    }];
             break;
             case 'key':
                 elementId = 0;
@@ -935,11 +1009,12 @@ var comp = (function () {
         window['incident'].callback(elementId, eventName, eventData);
 
 	if(window['incident'].callbacks.hasOwnProperty(elementId))
-	    window['incident'].callbacks[elementId](eventName, eventData);
+	    window['incident'].callbacks[elementId][eventName](eventData);
 
         return undefined;
     };
 		
+    window['incident'].callback = function(){}; // a litle hack for not calling events_callback_set if do not need
     window['incident'].callbacks = [];
 
     window['incident'].correct = {
@@ -1210,6 +1285,32 @@ var comp = (function () {
         return undefined;
     };
 
+    Compositer.prototype['video_create'] = function (object) {
+        var video = new Unit('video', object);
+
+        video.id(Unit.pool.put(video));
+
+        return video.id(undefined);
+    };
+
+    Compositer.prototype['video_get_control'] = function(videoId){
+	return Unit.pool.take(videoId).control;
+    };
+
+    Compositer.prototype['video_destroy'] = function (videoId) {
+        if (typeof videoId !== 'number') {
+            return undefined;
+        }
+
+        if (videoId === 0) {
+            return undefined;
+        }
+
+        Unit.pool.free(videoId);
+
+        return undefined;
+    };
+
     Compositer.prototype['anim_create'] = function (chain) {
         if (typeof chain !== 'object') {
             return undefined;
@@ -1324,8 +1425,11 @@ var comp = (function () {
             return undefined;
         }
 
-	if(typeof(callback) != 'undefined')
-	   window['incident'].callbacks[elementId] = callback;
+	if(typeof(callback) != 'undefined'){
+	    if(!window['incident'].callbacks.hasOwnProperty(elementId))
+		window['incident'].callbacks[elementId] = {};
+	    window['incident'].callbacks[elementId][eventName] = callback;	    
+	}
 
         if (eventName === 'animation_stopped') {
             var bind = Animation.Bind.pool.take(elementId);
@@ -1370,8 +1474,8 @@ var comp = (function () {
             return undefined;
         }
  
-	if(typeof(callback) != 'undefined')
-	   delete window['incident'].callbacks[elementId];
+	if(window['incident'].callbacks[elementId].hasOwnProperty('eventName'))
+	   delete window['incident'].callbacks[elementId][eventName];
 
 	var element;
 
@@ -1418,11 +1522,13 @@ var comp = (function () {
         return undefined;
     };
 
-    return Compositer;
+    return { Compositer : Compositer, Unit : Unit };
 }());
 
-if(typeof(require) != 'undefined')
-    exports.create = function(){ return new comp(); }
-else
-    window['Compositer'] = comp;
+if(typeof(require) != 'undefined'){
+    exports.create = function(){ return new comp.Compositer();};
+    exports.Compositer = comp.Compositer;
+    exports.Unit = comp.Unit;
+} else
+    window['Compositer'] = comp.Compositer;
 

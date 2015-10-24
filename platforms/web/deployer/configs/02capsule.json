@@ -1,0 +1,30 @@
+{
+    "scripts" : {
+	"type" : "script",
+	"inline" : true,
+
+	"uuid" : "dependencies/uuid.js",
+	"module_loader" : "parts/module_loader.js"
+    },
+    
+    "capsule" : {
+	"types" : {
+	    "record" : "platforms/web/types/record.js",
+	    "packer" : "platforms/web/types/packer.js",
+	    "image" : "platforms/web/types/image.js",
+    	    "video" : "platforms/web/types/video.js"
+	},
+	"modules" : {
+	    "timer" : "modules/timer.js",
+	    "fs" : "platforms/web/modules/fs.js",
+	    "ui" : {
+		"Compositer" : "platforms/web/modules/ui/Compositer.js",
+		"base_items" : "platforms/web/modules/ui/base_items.js",
+		"dnd" : "platforms/web/modules/ui/dnd.js",
+		"filechooser" : "platforms/web/modules/ui/filechooser.js",
+		"map" : "platforms/web/modules/ui/map.js"
+	    },
+	    "http_requester" : "platforms/web/modules/http_requester.js"	    
+	}
+    }
+}

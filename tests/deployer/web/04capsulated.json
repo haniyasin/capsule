@@ -4,5 +4,5 @@
     "preload" : true,
     "inline" : true,
 
-    "capsulated" : "tests/deployer/browser/capsulated.js"
+    "capsulated" : "tests/deployer/web/capsulated.js"
 }

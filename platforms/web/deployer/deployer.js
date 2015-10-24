@@ -182,7 +182,7 @@ function deploy_on_http(dir, config, capsule_files, capsule){
 exports.assemble = function(dir, config){
     var assembler = assembler_constructor(dir);
     dutils.walk_and_do('deployer/configs', assembler);
-    dutils.walk_and_do('platforms/browser/deployer/configs', assembler);
+    dutils.walk_and_do('platforms/web/deployer/configs', assembler);
     dutils.walk_and_do(dir, assembler);
     var generated = assembler.generate();
     generated.constructor = generated.script_inline 
@@ -223,7 +223,7 @@ exports.deploy = function(dir, config){
     var file_reading_sync = cb_synchronizer.create();
     var capsule_files = {"files_to_copy" : []};
 
-    fs.readFile('platforms/browser/capsule.htm', 
+    fs.readFile('platforms/web/capsule.htm', 
 		file_reading_sync.add(function(err, data){
 					  capsule_files.capsule = data.toString();
 				      }));
