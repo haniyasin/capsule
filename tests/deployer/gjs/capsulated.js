@@ -1,5 +1,6 @@
 exports.main = function(env){
     var capsule = env.capsule;
+    print('hoi');
 //    capsule.tests.modules.transport.direct.test(capsule);
 //    capsule.tests.modules.timer.test(capsule);
     

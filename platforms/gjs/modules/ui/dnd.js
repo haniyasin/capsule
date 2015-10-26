@@ -2,10 +2,8 @@
  * drag and drop interface.
  */
 
-const GLib = imports.gi.GLib;
 const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
-const Clutter = imports.gi.Clutter;
 const GtkClutter = imports.gi.GtkClutter;
 
 var comp = require('./Compositer');
