@@ -8,6 +8,9 @@
 		"pipe" : "platforms/gjs/parts/connectors/pipe.js"
 	    }
 	},
+	"types" : {
+	    "image" : "platforms/gjs/types/image.js"
+	},
 	"modules" : {
 	    "path" : "platforms/gjs/modules/path.js",
 	    "mkpath" : "platforms/gjs/modules/mkpath.js",

@@ -66,29 +66,24 @@ function image(){
 				      var element = new element_obj_proto(new Clutter.Actor(), info);
 				      element.actor.show();
 				      if(info.hasOwnProperty('source')){
-					  var re_result;
-					  if((re_result = /data:image\/(\w+);base64,/.exec(info.source))){
-					      var data = info.source.substr(re_result[0].length);
-					      if( re_result[1] == 'png'){
-						  var loader = GdkPixbuf.PixbufLoader.new_with_type('png');
-						  print(loader.write(GLib.base64_decode(data)));
-					//	  loader.set_size(100, 100);
-						  var pixbuf = loader.get_pixbuf();
-						  element.image = new Clutter.Image();
-						  element.image.set_data(pixbuf.get_pixels(),
-									 pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888,
-									 pixbuf.get_width(),
-									 pixbuf.get_height(),
-									 pixbuf.get_rowstride());
-						  element.actor.content = element.image;
-					      } else if( re_result[1] == 'svg'){
-					      }
-					      
-					  } else
-					      return error('comp.image', 'invalid content of source field');
-					     
+					  switch(info.source.type){
+					      case "png" : 
+					      var pixbuf = info.source.pixbuf;
+					      element.image = new Clutter.Image();
+					      element.image.set_data(pixbuf.get_pixels(),
+								     pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888,
+								     pixbuf.get_width(),
+								     pixbuf.get_height(),
+								     pixbuf.get_rowstride());
+					      break;
+					      case "svg+xml" : 
+					      element.image = new Clutter.Image();
+					      break;
+					  }
+					  
+					  element.actor.content = element.image;
 				      } else {
-//					  print('comp.image', 'please set image.source');
+					  //					  print('comp.image', 'please set image.source');
 					  set_random_background(element.actor);    
 				      }
 				      return elements.put(element);

@@ -65,11 +65,9 @@ exports.writeFileSync = function(path, data){
     var file = gio.file_new_for_path(path);
     var ostream;
 
-    if(file.query_exists(null)){
-	var iostream = file.open_readwrite(null);
-	ostream = iostream.output_stream;
-    }else
-	ostream = file.create(gio.FileCreateFlags.NONE,null) ;
+    if(file.query_exists(null))
+	g.unlink(path);
+    ostream = file.create(gio.FileCreateFlags.NONE,null) ;
 
     ostream.seek(0, g.SeekType.SET, null);
     ostream.write(data, null);
