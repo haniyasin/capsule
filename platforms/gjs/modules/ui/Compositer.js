@@ -67,7 +67,7 @@ function image(){
 				      element.actor.show();
 				      if(info.hasOwnProperty('source')){
 					  switch(info.source.type){
-					      case "png" : 
+					      case "png" :
 					      var pixbuf = info.source.pixbuf;
 					      element.image = new Clutter.Image();
 					      element.image.set_data(pixbuf.get_pixels(),

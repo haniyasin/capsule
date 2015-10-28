@@ -1,3 +1,6 @@
+const GdkPixbuf = imports.gi.GdkPixbuf;
+const g = imports.gi.GLib;
+
 function image(type, encoding, data){
     this.capsule_type = 'image';
     this.id = 'generated';
@@ -8,7 +11,7 @@ function image(type, encoding, data){
 	switch(this.type){
 	    case "png" : 
 	    let loader = GdkPixbuf.PixbufLoader.new_with_type('png');
-	    loader.write(GLib.base64_decode(data));
+	    loader.write(g.base64_decode(data));
 	    this.pixbuf = loader.get_pixbuf();
 	    break;
 	    case "svg+xml" :
