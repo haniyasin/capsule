@@ -478,7 +478,7 @@ function props_manager(element){
 		return;
 	    
 	    var re_result;
-	    if((re_result = /^(\d+)%$/.exec(value))){
+	    if((re_result = /^([\-\d]+)%$/.exec(value))){
 		this.value = parseInt(re_result[1]);
 		this.type = '%';
 	    } else {
@@ -518,6 +518,7 @@ function props_manager(element){
 	    }
 
 	    element.prop_handlers
+	    print(prop_name, value);
 	    element.actor['set_' + prop_name](value);
 
 	    //for frame recalculating all childs for properly % geometry
