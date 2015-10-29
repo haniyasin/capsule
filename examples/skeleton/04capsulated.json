@@ -1,0 +1,14 @@
+{
+    "type" : "module",
+
+    "preload" : true,
+    "inline" : true,
+
+    "images" : {
+	"type" : "image",
+	
+	"blue" : "examples/skeleton/images/blue.png",
+	"red" : "examples/skeleton/images/red.png"
+    },
+    "capsulated" : "examples/skeleton/capsulated.js"
+}

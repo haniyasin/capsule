@@ -1,5 +1,5 @@
 /*
-  Implementation of capsule Compositer module for browser platform
+  Implementation of capsule Compositer module for web platform
 
   Copyright (C) 2011  Alexey Bagin aka freeze (email freeze@2du.ru)
   Copyright (c) 2014-2015  Nikita Zaharov aka ix (email ix@2du.ru)

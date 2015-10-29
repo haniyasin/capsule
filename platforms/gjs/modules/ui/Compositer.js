@@ -103,6 +103,7 @@ function text(){
 				     var element = new element_obj_proto(new Clutter.Text(), info);
 				     if(!info.hasOwnProperty('text'))
 					 info.text = 'text';
+				     element.actor.set_font_name("Sans 26");
 				     element.actor.set_text(info.text);
 				     element.actor.show();
 				     return elements.put(element);
@@ -517,8 +518,7 @@ function props_manager(element){
 		value = element.parent.props_manager[parent_prop_name].get() / 100 * this.value;
 	    }
 
-	    element.prop_handlers
-	    print(prop_name, value);
+//	    element.prop_handlers
 	    element.actor['set_' + prop_name](value);
 
 	    //for frame recalculating all childs for properly % geometry
@@ -686,7 +686,7 @@ function comp(){
     color.red = 240;
     color.green = 250;
     stage.set_background_color(color);
-    this.frame_create({ x : 0, y : 0, width : 800, height : 400, opacity : 0.9 });
+    this.frame_create({ x : 0, y : 0, width : 800, height : 400, opacity : 1 });
     var element = elements.take(0);
     element.props_manager.apply_all();
     this.root_actor.add_actor(element.actor);

@@ -240,6 +240,7 @@ exports.controls = function(comp, player, parent, info){
     anim_appear.bind(this);
 
     var activity_timer = require('modules/timer').create(function(){
+	return;
 							     if(controls_standby == 3 && !self.appear.toggled)
 								 self.appear.on();
 							     else

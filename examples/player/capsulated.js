@@ -21,6 +21,7 @@ function file_opener_widget(comp, player, parent, info){
 				y : '0%',
 				width : '100%',
 				height : '30%',
+				opacity : 1,
 				z_index : 2,
 				text : 'выберите или перетащите файл'
 			    });
@@ -120,7 +121,6 @@ exports.main = function(){
     var Compositer = require('modules/ui/Compositer');
     require('modules/ui/dnd');//подключаем возможности dnd в Compositer
     require('modules/ui/filechooser'); //подключаем возможности filechooser
-
     var player = require('blocks/ui/player'),
     animation = require('blocks/ui/animation'),
     comp = Compositer.create(),
@@ -149,14 +149,15 @@ exports.main = function(){
 			       source : require('images/main_bg')
 			   });
     comp.frame_add(0, bg);
+
     var video = new player.video(comp, {frame : 0}, {
-				   x : '1%', y : '101%', 
+				   x : '1%', y : '101%', //101 
 				   width : '98%', height : '98%', 
 				   z_index : 1
 			       }),
     file_opener = new file_opener_widget(comp, video, video, {
 					     x : '0%',
-					     y : '-100%',
+					     y : '-100%', //-100
 					     width : '100%',
 					     height : '90%',
 					     opacity : 1,
@@ -167,10 +168,10 @@ exports.main = function(){
 				       y : '89%',
 				       width : '98%',
 				       height : '10%',
-				       opacity : '0%',
-				       z_index : 1
-			    }),
-    dnd = new dnd_widget(comp, video, {
+				       opacity : 1,
+				       z_index : 0
+			    });
+/*    dnd = new dnd_widget(comp, video, {
 			     x : '0%',
 			     y : '0%',
 			     width : '100%',
@@ -178,7 +179,7 @@ exports.main = function(){
 			     opacity : 0.1,
 			     z_index : 2
 			 });    
-
+*/
     sanim.bind(video);
 
     this.destroy = function(){
