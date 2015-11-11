@@ -23,26 +23,14 @@ exports.main = function(env){
     
 //    thttp.test({ 'url' : 'http://localhost:8810/krevetk/o', 'method' : 'POST'}, capsule);
 
-//    var tcompositer = require('tests/modules/ui/Compositer');
-//    tcompositer.test();
+    var tcompositer = require('tests/modules/ui/Compositer');
+    tcompositer.test();
 
 //    var fs = require('modules/fs');
 //    alert(fs.readFileSync('./'));    
-    alert('ddd');
+
     return;
 
-    var comp = new (require('modules/ui/Compositer')).Compositer();
-    var image = require('types/image');
-    var iimage = new image('png', 'base64', "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY3growIAAycBLhVrvukAAAAASUVORK5CYII=");
-
-    var cimage = comp.image_create({
-				       x : '25%',
-				       y : '25%',
-				       width : '20%',
-				       height : '20%',
-				       source : iimage
-				   });
-    comp.frame_add(0, cimage);
     var packer = require('types/packer'),
     definition = [
 	'name:Cstring',

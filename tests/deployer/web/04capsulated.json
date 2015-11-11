@@ -4,5 +4,13 @@
     "preload" : true,
     "inline" : true,
 
-    "capsulated" : "tests/deployer/web/capsulated.js"
+    "capsulated" : "tests/deployer/web/capsulated.js",
+    
+    "images" : {
+	"type" : "image",
+	
+	"red" : "tests/deployer/web/images/red.png",
+	"green" : "tests/deployer/web/images/green.png",
+	"blue" : "tests/deployer/web/images/blue.png"
+    }
 }

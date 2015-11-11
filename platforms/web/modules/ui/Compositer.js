@@ -829,7 +829,7 @@ var comp = (function () {
         Animation.worker.pool.free(this.workerPoolId);
 
         if (this.callback) {
-            window['incident']({type : 'animation_stopped', currentTarget : this});
+            window['incident']({type : 'animation_stopped', currentTarget : this.id});
         }
 
         return true;

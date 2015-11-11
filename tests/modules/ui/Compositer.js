@@ -1,72 +1,62 @@
 var DEBUG = 1;
 
 function slideup_cubes_test(comp){
-    var image = comp.image_create({ x : 10, y : 10, width : 50, height : 50, opacity : 0.8});
+    var image = comp.image_create({ x : "2%", y : "2%", width : "20%", height : "20%", opacity : 1});
     comp.frame_add(0, image);
-    var green = comp.image_create({ x : 40, y : 40, width : 50, height : 50, opacity : 0.8,
-				source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2D4zwAAAgIBANHTRkQAAAAASUVORK5CYII='});
+    var green = comp.image_create({ x : "3%", y : "10%", width : "20%", height : "30%", opacity : 1,
+				source : require('images/green')});
     comp.frame_add(0, green);
-    image = comp.image_create({ x : 70, y : 70, width : 50, height : 50, opacity : 0.8 });
-    comp.frame_add(0, image);
-    var image1 = comp.image_create({ x : 100, y : 100, width : 50, height : 50, opacity : 0.8 });
-    comp.frame_add(0, image1);
-    var red = comp.image_create({ x : 130, y : 130, width : 50, height : 50, opacity : 0.8,
-				    source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY3growIAAycBLhVrvukAAAAASUVORK5CYII=' });
+    var red = comp.image_create({ x : "20%", y : "32%", width : "20%", height : "30%", opacity : 1,
+				    source : require('images/red')});
     comp.frame_add(0, red);
     var anim = comp.anim_create([
 				    {
 					duration : 1000,
 					actions : {
-					    x : 100
+					    x : 30
 					}
 				    },
 				    {
 					duration : 1000,
 					actions : {
-					    width : 100,
-					    height : 100
+					    width : 20,
+					    height : 20
 					}
 				    },
 				    {
 					duration : 500,
 					actions : {
-					    y : -50
+					    y : -20
 					}
 				    },
 				    {
 					duration : 500,
 					actions : {
-					    y : 50
+					    y : 20
 					}
 				    },
 				    {
 					duration : 1000,
 					actions : {
-					    width : -100,
-					    height : -100
+					    width : -20,
+					    height : -20
 					}
 				    },
 				    {
 					duration : 1000,
 					actions : {
-					    x : -100
+					    x : -30
 					}
 				    }
 			    ]);
 
     var banim_red = comp.anim_bind(red, anim);
     var banim_green = comp.anim_bind(green, anim);
-    var banim1 = comp.anim_bind(image1, anim);
-    var banim = comp.anim_bind(0, anim);
     comp.anim_start(banim_red);
     comp.anim_start(banim_green);
-    comp.anim_start(banim1);
-    comp.anim_start(banim);
     comp.event_register(banim_red, 'animation_stopped', function(event_name) {
 			    comp.anim_start(banim_red);
 			    comp.anim_start(banim_green);
-			    comp.anim_start(banim1);
-			    comp.anim_start(banim);
 			});  
     };
 
@@ -95,7 +85,7 @@ function original_test2(comp){
 
             z_index : '1',
 
-            source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY3growIAAycBLhVrvukAAAAASUVORK5CYII='
+            source : require('images/red')
         }
     ),
 
@@ -109,7 +99,7 @@ function original_test2(comp){
 
             z_index : '2',
 
-            source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2D4zwAAAgIBANHTRkQAAAAASUVORK5CYII='
+            source : require('images/green')
         }
     ),
 
@@ -123,7 +113,7 @@ function original_test2(comp){
 
             z_index : '3',
 
-            source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2Bg+A8AAQMBAKJTBdAAAAAASUVORK5CYII='
+            source : require('images/blue')
         }
     ),
 
@@ -202,7 +192,7 @@ function original_test1(comp){
 
             z_index : '1',
 
-            source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY3growIAAycBLhVrvukAAAAASUVORK5CYII='
+            source : require('images/red')
         }
     ),
 
@@ -216,7 +206,7 @@ function original_test1(comp){
 
             z_index : '2',
 
-            source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2D4zwAAAgIBANHTRkQAAAAASUVORK5CYII='
+            source : require('images/green')
         }
     ),
 
@@ -230,7 +220,7 @@ function original_test1(comp){
 
             z_index : '3',
 
-            source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2Bg+A8AAQMBAKJTBdAAAAAASUVORK5CYII='
+            source : require('images/blue')
         }
     ),
 
@@ -278,7 +268,7 @@ function original_test1(comp){
 				   }
 			       ]),
 
-    bind_right = comp.anim_bind(frame, anim_right);
+    bind_right = comp.anim_bind(frame, anim_right),
     bind_down  = comp.anim_bind(frame, anim_down),
     bind_left  = comp.anim_bind(frame, anim_left),
     bind_up    = comp.anim_bind(frame, anim_up),
@@ -323,7 +313,7 @@ function original_test1(comp){
 function create_move_remove_test(comp){    
     var rand = comp.image_create({ x : 70, y : 10, width : 50, height : 50, opacity : 0.8, z_index : 1}),
     green = comp.image_create({ width : '100%', height : '100%', opacity : 1, z_index : 1,
-				source : 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2D4zwAAAgIBANHTRkQAAAAASUVORK5CYII='}),
+				source : require('images/green')}),
     text = comp.text_create({ x : '10%', y : '5%', width : '80%', height : '90%', opacity : 0.9, text : 'haha'}),
     frame = comp.frame_create( { x : '5%', y : '5%', width : '50%', height : '50%', opacity : 0.5, z_index : 2 }),
     frame_t = comp.frame_create( { x : 40, y : 40, width : 50, height : 50, opacity : 0.8, z_index : 2 });
@@ -537,11 +527,10 @@ function video_player(comp){
 }
 
 exports.test = function(){
-    var comp = new (require('modules/ui/Compositer')).Compositer();
-
-//    slideup_cubes_test(comp);   
-//    original_test2(comp);
-//    original_test1(comp);
+    var comp = new (require('modules/ui/Compositer')).create();
+    slideup_cubes_test(comp);   
+    original_test2(comp);
+    original_test1(comp);
 //    create_move_remove_test(comp); //this test is depends of gjs
-    video_player(comp);
+//    video_player(comp);
 };

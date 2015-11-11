@@ -12,12 +12,13 @@ exports.main = function(env){
 //    thttp.test({ 'url' : 'http://localhost:8810/krevetk/o', 'method' : 'POST'}, capsule);
 //    capsule.tests.modules.storage.low_level.test();
 
-//    capsule.tests.modules.ui.Compositer.test(capsule); 
-/*
-    var comp = capsule.modules.ui.Compositer.create();
+    var ctest = require('tests/modules/ui/Compositer');
+    ctest.test(capsule); 
+
+//    var comp = capsule.modules.ui.Compositer.create();
 //    var comp1 = capsule.modules.ui.Compositer.create();
 
-    var video = capsule.modules.ui.video.mplayer.create({
+/*    var video = capsule.modules.ui.video.mplayer.create({
 							    width : '100%',
 							    height : '100%'
 							}, capsule);	
