@@ -669,25 +669,30 @@ function comp(){
     Clutter.init(null);
     Gst.init(null, null);
     this.root = new Gtk.Window({ type : Gtk.WindowType.TOPLEVEL });
-    this.root.title = 'GJS compositer prototype';
+    this.root.title = 'GJS Compositer';
     this.root.show();
 
-    var actor = new GtkClutter.Embed();
-    actor.show();
-    actor.set_size_request(800, 400);
-    this.root_actor = actor;
-    this.root.add(actor);
-    var stage = this.root_actor  = actor.get_stage();
-/*    var color = new Clutter.Color();
-    color.alpha = 200;
-    color.blue = 150;
-    color.red = 240;
-    color.green = 250;
-//    stage.set_background_color(color);*/
+    var cembed = new GtkClutter.Embed();
+    cembed.show();
+    this.root.add(cembed);
+    var stage = this.root_actor  = cembed.get_stage();
     set_random_background(stage);
-    this.frame_create({ x : 0, y : 0, width : 800, height : 400, opacity : 1 });
+    this.frame_create({ x : 0, y : 0, width : 100, height : 200, opacity : 1 });
     var element = elements.take(0);
     element.props_manager.apply_all();
+    cembed.connect('configure-event', 
+		      function(window, event){
+			  var width = stage.get_width(),
+			      height = stage.get_height();
+			  if(element.props_manager.width.get() != width){
+			      element.props_manager.width.set(width);
+			      element.props_manager.width.apply();
+			  }
+			  if(element.props_manager.height.get() != height){
+			      element.props_manager.height.set(height);
+			      element.props_manager.height.apply();
+			  }
+		      });
     this.root_actor.add_actor(element.actor);
 }
 
