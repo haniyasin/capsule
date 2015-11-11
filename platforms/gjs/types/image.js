@@ -1,4 +1,5 @@
 const GdkPixbuf = imports.gi.GdkPixbuf;
+const rsvg = imports.gi.Rsvg;
 const g = imports.gi.GLib;
 
 function image(type, encoding, data){
@@ -7,14 +8,17 @@ function image(type, encoding, data){
     if(typeof(type) == 'string'){
 	this.type = type;
 	this.encoding = encoding;
-	this.data = data;
+	this.data = g.base64_decode(data);
 	switch(this.type){
 	    case "png" : 
 	    let loader = GdkPixbuf.PixbufLoader.new_with_type('png');
-	    loader.write(g.base64_decode(data));
+	    loader.write(this.data);
 	    this.pixbuf = loader.get_pixbuf();
 	    break;
+
 	    case "svg+xml" :
+	    let handle = rsvg.Handle.new_from_data(this.data);
+	    this.pixbuf = handle.get_pixbuf();
 	    break;
 	}
     }

@@ -66,20 +66,13 @@ function image(){
 				      var element = new element_obj_proto(new Clutter.Actor(), info);
 				      element.actor.show();
 				      if(info.hasOwnProperty('source')){
-					  switch(info.source.type){
-					      case "png" :
-					      var pixbuf = info.source.pixbuf;
-					      element.image = new Clutter.Image();
-					      element.image.set_data(pixbuf.get_pixels(),
-								     pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888,
-								     pixbuf.get_width(),
-								     pixbuf.get_height(),
-								     pixbuf.get_rowstride());
-					      break;
-					      case "svg+xml" : 
-					      element.image = new Clutter.Image();
-					      break;
-					  }
+					  var pixbuf = info.source.pixbuf;
+					  element.image = new Clutter.Image();
+					  element.image.set_data(pixbuf.get_pixels(),
+								 pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888,
+								 pixbuf.get_width(),
+								 pixbuf.get_height(),
+								 pixbuf.get_rowstride());
 					  
 					  element.actor.content = element.image;
 				      } else {
@@ -105,6 +98,11 @@ function text(){
 					 info.text = 'text';
 				     element.actor.set_font_name("Sans 26");
 				     element.actor.set_text(info.text);
+//				     var widget = new Gtk.Label();
+//				     widget.expand = true;
+///				     widget.set_text(info.text);
+//				     var element = new element_obj_proto(GtkClutter.Actor.new_with_contents(widget), info);
+//				     element.widget = widget;
 				     element.actor.show();
 				     return elements.put(element);
 				 },
@@ -680,12 +678,13 @@ function comp(){
     this.root_actor = actor;
     this.root.add(actor);
     var stage = this.root_actor  = actor.get_stage();
-    var color = new Clutter.Color();
+/*    var color = new Clutter.Color();
     color.alpha = 200;
     color.blue = 150;
     color.red = 240;
     color.green = 250;
-    stage.set_background_color(color);
+//    stage.set_background_color(color);*/
+    set_random_background(stage);
     this.frame_create({ x : 0, y : 0, width : 800, height : 400, opacity : 1 });
     var element = elements.take(0);
     element.props_manager.apply_all();
