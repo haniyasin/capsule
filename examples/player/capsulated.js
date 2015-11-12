@@ -150,24 +150,29 @@ exports.main = function(){
 			   });
     comp.frame_add(0, bg);
 
-    var video = new player.video(comp, {frame : 0}, {
-				   x : '1%', y : '101%', //101 
-				   width : '98%', height : '98%', 
-				   z_index : 1
-			       }),
+    var video = new player.video(comp, {frame : 0}, 
+				 {
+				     x : '0%', y : '0%',
+				     width : '100%', height : '200%'
+				 },
+				 {
+				     x : '1%', y : '51%', //101 
+				     width : '98%', height : '48%', 
+				     z_index : 1
+				 }),
     file_opener = new file_opener_widget(comp, video, video, {
 					     x : '0%',
-					     y : '-100%', //-100
+					     y : '0%', 
 					     width : '100%',
-					     height : '90%',
+					     height : '50%',
 					     opacity : 1,
 					     z_index : 1
 					 }),
     controls = new player.controls(comp, video, video, {
 				       x : '1%',
-				       y : '89%',
+				       y : '94%',
 				       width : '98%',
-				       height : '10%',
+				       height : '5%',
 				       opacity : 1,
 				       z_index : 0
 			    });

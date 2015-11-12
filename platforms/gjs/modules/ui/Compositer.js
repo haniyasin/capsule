@@ -520,9 +520,18 @@ function props_manager(element){
 	    element.actor['set_' + prop_name](value);
 
 	    //for frame recalculating all childs for properly % geometry
+	    var echild;
 	    if(element.hasOwnProperty('childs')){
 		for(child in element.childs){
-		    element.childs[child].props_manager[prop_name].apply();
+		    echild = element.childs[child];
+		    if(prop_name == 'width'){
+			echild.props_manager['width'].apply();
+			echild.props_manager['x'].apply();			
+		    }
+		    if(prop_name == 'height'){
+			echild.props_manager['height'].apply();
+			echild.props_manager['y'].apply();			
+		    }
 		}
 	    }
 	};	

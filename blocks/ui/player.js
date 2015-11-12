@@ -5,11 +5,9 @@
 var animation = require('blocks/ui/animation');
 
 //video frame without controls
-exports.video = function (comp, parent, info){
-    var frame = this.frame = comp.frame_create(info),
-    video = comp.video_create({ x : '0%', y : '0%', 
-				width : '100%', height : '100%', 
-				z_index : 2});
+exports.video = function (comp, parent, frame_info, video_info){
+    var frame = this.frame = comp.frame_create(frame_info),
+    video = comp.video_create(video_info);
     comp.frame_add(frame, video);
     comp.frame_add(parent.frame, frame);
     
@@ -88,9 +86,9 @@ exports.controls = function(comp, player, parent, info){
 					  duration : 300,
 					  actions : {
 					      x : -1,
-					      y : -1,
+					      y : -6,
 					      width : 2,
-					      height : 2
+					      height : 8
 					  }
 				      }
 				  ],
@@ -99,9 +97,9 @@ exports.controls = function(comp, player, parent, info){
 					  duration : 300,
 					  actions : {
 					      x : 1,
-					      y : 1,
+					      y : 6,
 					      width : -2,
-					      height : -2
+					      height : -8
 					  } 
 				      }
 				  ]
@@ -163,22 +161,24 @@ exports.controls = function(comp, player, parent, info){
     comp.frame_add(timeline_f, timepoint_i);
 
     player.vcontrol.on_timeupdate(function(){
-			       if(typeof(position_step) == 'undefined')
-				   position_step = player.vcontrol.get_duration() / 200;
-			       step = Math.round(player.vcontrol.get_position() / position_step)/2;
-			       if(step > prev_step || step < prev_step){
-				   var inc_anim = comp.anim_create([
-								       {
-									   duration : 0,
-									   actions : {
-									       x : step - prev_step
-									   }
-								       }
-								   ]);
-				   comp.anim_start(comp.anim_bind(timepoint_i, inc_anim));
-				   prev_step = step;
-			       }
-			   });
+				      if(typeof(position_step) == 'undefined')
+					  position_step = player.vcontrol.get_duration() / 190;
+				      step = Math.round(player.vcontrol.get_position() / position_step)/2;
+
+				      console.log(position_step, player.vcontrol.get_position() / position_step/2);
+				      if(step > prev_step || step < prev_step){
+					  var inc_anim = comp.anim_create([
+									      {
+										  duration : 0,
+										  actions : {
+										      x : step - prev_step
+										  }
+									      }
+									  ]);
+					  comp.anim_start(comp.anim_bind(timepoint_i, inc_anim));
+					  prev_step = step;
+				      }
+				  });
     var point_drag = false, drag_prev_step;
     comp.event_register(timeline_f, 'pointer_down', function(pointer_obj){
 			    controls_standby = 0;
