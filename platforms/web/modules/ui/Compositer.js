@@ -1311,6 +1311,17 @@ var comp = (function () {
         return undefined;
     };
 
+    Compositer.prototype['element_change_props'] = function(elementId, info){
+	var element = Unit.pool.take(elementId);
+	var field;
+	for(field in info){
+	    console.log(info[field]);
+	    element[field].value = info[field];
+	    element[field].apply(element);
+	}
+	return undefined;	
+    };
+
     Compositer.prototype['anim_create'] = function (chain) {
         if (typeof chain !== 'object') {
             return undefined;

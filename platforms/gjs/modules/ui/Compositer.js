@@ -482,7 +482,6 @@ function props_manager(element){
 		this.type = '%';
 	    } else {
 		this.value = value;
-	    	this.type = 'p';
 	    }
 	};
 

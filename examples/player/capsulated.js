@@ -175,7 +175,7 @@ exports.main = function(){
 				       height : '5%',
 				       opacity : 1,
 				       z_index : 0
-			    });
+			    })
 /*    dnd = new dnd_widget(comp, video, {
 			     x : '0%',
 			     y : '0%',
@@ -183,8 +183,8 @@ exports.main = function(){
 			     height : '80%',
 			     opacity : 0.1,
 			     z_index : 2
-			 });    
-*/
+			 });    */
+
     sanim.bind(video);
 
     this.destroy = function(){

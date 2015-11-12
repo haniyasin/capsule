@@ -154,7 +154,7 @@ exports.controls = function(comp, player, parent, info){
 
 	    source : require('images/timepoint')
 	}),
-    step, prev_step = 0, position_step;;
+    current_position, prev_step = 0, position_step;;
 
     comp.frame_add(this.frame, timeline_f);
     comp.frame_add(timeline_f, timeline_i);
@@ -163,21 +163,11 @@ exports.controls = function(comp, player, parent, info){
     player.vcontrol.on_timeupdate(function(){
 				      if(typeof(position_step) == 'undefined')
 					  position_step = player.vcontrol.get_duration() / 190;
-				      step = Math.round(player.vcontrol.get_position() / position_step)/2;
-
-				      console.log(position_step, player.vcontrol.get_position() / position_step/2);
-				      if(step > prev_step || step < prev_step){
-					  var inc_anim = comp.anim_create([
-									      {
-										  duration : 0,
-										  actions : {
-										      x : step - prev_step
-										  }
-									      }
-									  ]);
-					  comp.anim_start(comp.anim_bind(timepoint_i, inc_anim));
-					  prev_step = step;
-				      }
+//				      print(player.vcontrol.get_duration(), player.vcontrol.get_position());
+				      current_position = Math.round(player.vcontrol.get_position() / position_step) / 2;
+				      
+//				      console.log(position_step, player.vcontrol.get_position() / position_step/2);
+				      comp.element_change_props(timepoint_i, { x : current_position });
 				  });
     var point_drag = false, drag_prev_step;
     comp.event_register(timeline_f, 'pointer_down', function(pointer_obj){
@@ -186,6 +176,7 @@ exports.controls = function(comp, player, parent, info){
 			    drag_prev_step = prev_step;
 			});
     comp.event_register(timeline_f, 'pointer_motion', function(pointer_obj){
+			    return;
 			    if(!point_drag)
 				return;
 			    var drag_step = pointer_obj.shift().x,
@@ -201,23 +192,14 @@ exports.controls = function(comp, player, parent, info){
 			    drag_prev_step = drag_step;
 			});
     comp.event_register(timeline_f, 'pointer_up', function(pointer_obj){
-			    if(!point_drag)
-				return;
+//			    if(!point_drag)
+//				return;
 			    controls_standby = 0;
 			    point_drag = false;
-			    step = pointer_obj.shift().x;
-			    ///			    print('eee', prev_step, step, (vcontrol.get_duration() / 100) * step);
+			    var step = Math.round(pointer_obj.shift().x);
 			    player.vcontrol.set_position((player.vcontrol.get_duration() / 100) * step);
-			    var timepoint_slide_anim = comp.anim_create([
-									    {
-										duration : 300,
-										actions : {
-										    x : step - prev_step
-										}
-									    }
-									]);
-			    comp.anim_start(comp.anim_bind(timepoint_i, timepoint_slide_anim));
-			    prev_step = step;
+//			    console.log(step, prev_step, step - prev_step);
+			    comp.element_change_props(timepoint_i, { x : step });
 			});
 
     var anim_appear = new animation.toggle(comp, 'appear', 
