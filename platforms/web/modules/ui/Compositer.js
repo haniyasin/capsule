@@ -1315,7 +1315,6 @@ var comp = (function () {
 	var element = Unit.pool.take(elementId);
 	var field;
 	for(field in info){
-	    console.log(info[field]);
 	    element[field].value = info[field];
 	    element[field].apply(element);
 	}
