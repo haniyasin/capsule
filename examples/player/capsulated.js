@@ -33,8 +33,7 @@ function file_opener_widget(comp, player, parent, info){
     function file_choosen(address){
 	player.source = address;
 	player.vcontrol.load(player.source);
-	player.slide.on();
-	//player.slide.off();
+	player.slide.toggle();
     }
 
     /*
@@ -145,7 +144,7 @@ exports.main = function(){
     bg = comp.image_create({
 			       x : '0%', y : '0%',
 			       width : '100%', height : '100%',
-			       z_index : 0,
+			       z_index : 1,
 			       source : require('images/main_bg')
 			   });
     comp.frame_add(0, bg);
@@ -173,9 +172,8 @@ exports.main = function(){
 				       y : '94%',
 				       width : '98%',
 				       height : '5%',
-				       opacity : 1,
 				       z_index : 0
-			    })
+			    });
 /*    dnd = new dnd_widget(comp, video, {
 			     x : '0%',
 			     y : '0%',

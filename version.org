@@ -1,5 +1,5 @@
-* v0.1 final - is current version 
-  first ready to use version of capsule. Many bugs is still here:)
+* v0.2 experimental - is current version 
+  Capsule is worked, but is still buggy:)
 
 * how versions is marked
 ** experimental
@@ -16,14 +16,14 @@
 
 ** v0.2
 + sequence module integrating and using within capsule modules
-+ low level storage modules for nodejs, browser.
++ low level storage modules for nodejs, web.
   simple api: stat, create, delete, read_chunk, append_chunk
 + hi level storage module, using low level modules as backend
   api is more like storage service from dsa: stat, create, delete, update, extract
 + udp based implementations sockets modules like http/sockets with partially rewriting
   transport/http into multi-backends transport with http/sockets and upd/sockets backends.
+** v0.3
 + node-webkit as platform and deployer target.
   node-webkit specific code for Compositer and etc. Probably not much work is needed.
-** v0.3
 + binary_container
 + compositer_layers

@@ -827,10 +827,8 @@ var comp = (function () {
         }
 
         Animation.worker.pool.free(this.workerPoolId);
-
-        if (this.callback) {
-            window['incident']({type : 'animation_stopped', currentTarget : this.id});
-        }
+        //if (this.callback) //нужно для восстановления доставки события по binded_id
+        window['incident']({type : 'animation_stopped', currentTarget : this.elementId});
 
         return true;
     };
@@ -938,10 +936,10 @@ var comp = (function () {
         }
 
         if (event.type === 'animation_stopped') {
-	    if(window['incident'].callbacks.hasOwnProperty(event['currentTarget']['elementId']))
-		window['incident'].callbacks[event['currentTarget']['elementId']]['animation_stopped']();
+	    if(window['incident'].callbacks.hasOwnProperty(event['currentTarget']))
+		window['incident'].callbacks[event['currentTarget']]['animation_stopped']();
             window['incident'].callback(
-                event['currentTarget']['id'], 'animation_stopped'
+                event['currentTarget'], 'animation_stopped'
             );
         }
 

@@ -240,7 +240,6 @@ function video(){
 					     let self = this;
 					     GLib.timeout_add(GLib.PRIORITY_HIGH, 200, function(){
 								  if(curtime < self.get_position()){
-//								      print('hoho');
 								      callback();
 								      curtime = self.get_position();
 								  }
@@ -297,7 +296,7 @@ function animation(){
 					 }
 					 with(chain[part]){
 					     if(typeof duration == 'undefined')
-						 return new error('Compositer animation error', 'chain block has no duration propertie');
+						 return new error('Compositer animation error', 'chain block has no duration property');
 					     if(typeof actions != 'undefined'){
 						 var new_frames_num = prev_frames_num + frames_num;
 						 for(action in actions){
@@ -343,14 +342,12 @@ function animation(){
 								      for (prop_name in changing_props){
 									  element.props_manager[prop_name].update(changing_props[prop_name]);
 									  element.props_manager[prop_name].apply();
-//									  print(prop_name);
 								      }
 								      banim.cur_frame++;
 								  }else{
 								      if(typeof started[sanim_ind] != 'indefined'){
-									  var ended_anim = started[sanim_ind];
 									  started.splice(sanim_ind, 1);
-									  comp.event__emit(ended_anim, 'animation_stopped');
+									  comp.event__emit(banim.element, 'animation_stopped');
 								      }
 								  }
 							      }
@@ -466,24 +463,35 @@ function props_manager(element){
 	z_index : 'true'
     };
 
-    function geometry_prop(prop_name, parent_prop_name){
-	if(typeof parent_prop_name == 'undefined')
-	    parent_prop_name = prop_name;
-	this.value = 0,
-	this.type = 'p';
-
+    function property_proto(){
+	this.default = true;
 	this.set = function(value){
 	    if(typeof value == 'undefined')
 		return;
-	    
-	    var re_result;
-	    if((re_result = /^([\-\d]+)%$/.exec(value))){
+	    var re_result = /^([\-\d]+)%$/.exec(value);
+	    if(re_result){
 		this.value = parseInt(re_result[1]);
-		this.type = '%';
+		this.type = '%'; //percents		
 	    } else {
-		this.value = value;
+		if(this.default)
+		    this.type = 'a'; //absolute(pixels, numbers etc
+	     	this.value = value;
 	    }
+	    this.default = false;
+	};	
+
+	this.update = function(inc_value){
+	    this.default = false;
+	    this.value += inc_value;
 	};
+    }
+
+    function geometry_prop(prop_name, parent_prop_name){
+	if(typeof parent_prop_name == 'undefined')
+	    parent_prop_name = prop_name;
+
+	this.value = 0,
+	this.type = 'a';
 
 	this.get_pos_absolute = function(){
 	    var cur_elem = element;
@@ -496,17 +504,13 @@ function props_manager(element){
 	},
 
 	this.get = function(){
-	    if(this.type == 'p')
+	    if(this.type == 'a')
 		    return this.value;
 	    else 
 		if (element.hasOwnProperty('parent'))
 		    return element.parent.props_manager[parent_prop_name].get() / 100 * this.value;
 
 	    return null;	    
-	};
-
-	this.update = function(inc_value){
-	    this.value += inc_value;
 	};
 
 	this.apply = function(){
@@ -535,46 +539,51 @@ function props_manager(element){
 	    }
 	};	
     }
+    geometry_prop.prototype = new property_proto();
+
+    function opacity_prop(){
+	this.value = 100;
+	this.type = '%';
+
+	this.get = function() {
+	  return this.value;  
+	};
+
+	this.apply = function(){
+	    if(this.type == '%')
+		element.actor.opacity = this.value * 2.5;
+	    else 
+		if(this.type == 'a')
+		    element.actor.opacity = this.value * 255;
+	};	
+    }
+    opacity_prop.prototype = new property_proto();
+
+    function z_index_prop(){
+	this.value = 1;
+
+	this.set = function(value){
+	    if(typeof value == 'undefined')
+		return;
+	    this.value = value * -1;
+	};
+
+	this.get = function(){
+	    return value * -1;
+	};
+
+	this.apply = function(){
+	    element.actor.z_position = this.value;
+	};	
+    }
+    z_index_prop.prototype = new property_proto();
 
     this.x = new geometry_prop('x', 'width');
     this.y = new geometry_prop('y', 'height');
     this.width = new geometry_prop('width');
     this.height = new geometry_prop('height');
-    this.opacity = {
-	value : 1,
-	get : function() {
-	  return this.value;  
-	},
-	set : function(value){
-	    if(typeof value == 'undefined')
-		return;
-	    this.value = value;
-	},
-	update : function(inc_value){
-	    this.value += inc_value;
-	},
-	apply : function(){
-	    element.actor.opacity = this.value * 255;
-	}
-    };
-
-    this.z_index = {
-	value : 1,
-	get : function(){
-	    return value * -1;
-	},
-	set : function(value){
-	    if(typeof value == 'undefined')
-		return;
-	    this.value = value * -1;
-	},
-	update : function(inc_value){
-	    this.value += inc_value; 
-	},
-	apply : function(){
-	    element.actor.z_position = this.value;
-	}
-    };
+    this.opacity = new opacity_prop();
+    this.z_index = new z_index_prop();
 
     this.set_all = function(info, init){
 	for(type in types){
@@ -685,7 +694,7 @@ function comp(){
     this.root.add(cembed);
     var stage = this.root_actor  = cembed.get_stage();
     set_random_background(stage);
-    this.frame_create({ x : 0, y : 0, width : 100, height : 200, opacity : 1 });
+    this.frame_create({ x : 0, y : 0, width : 100, height : 200, opacity : 100 });
     var element = elements.take(0);
     element.props_manager.apply_all();
     cembed.connect('configure-event', 

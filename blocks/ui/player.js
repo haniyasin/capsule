@@ -22,6 +22,10 @@ exports.video = function (comp, parent, frame_info, video_info){
     };
 };
 
+function play_control(comp, player, parent){
+    
+}
+
 //ui controls for player(play|pause, progressbar, volumecontrol etc)
 exports.controls = function(comp, player, parent, info){
     /*
@@ -104,7 +108,7 @@ exports.controls = function(comp, player, parent, info){
 				      }
 				  ]
 				 ),
-    fullscreen = false, fullscreen_pressed;
+    fullscreen_pressed;
     
     fullscreen_at.bind(player);
     comp.frame_add(this.frame, fullscreen_i);
@@ -112,12 +116,9 @@ exports.controls = function(comp, player, parent, info){
 			    fullscreen_pressed = true;
 			});
     comp.event_register(fullscreen_i, 'pointer_up', function(){
-			    if(fullscreen_pressed && fullscreen == false){
-				fullscreen = true;
-				player.fullscreen.on();
-			    }else if(fullscreen_pressed && fullscreen == true){
-				fullscreen = false;
-				player.fullscreen.off();
+			    if(fullscreen_pressed){
+				fullscreen_pressed = false;
+				player.fullscreen.toggle();				
 			    }
 			});
     
@@ -140,6 +141,7 @@ exports.controls = function(comp, player, parent, info){
             x : '0%',
             y : '35%',
             z_index : 2,
+	    opacity : 1,
 
             source : require('images/blue')
         }),
@@ -162,6 +164,9 @@ exports.controls = function(comp, player, parent, info){
 
     var point_drag = false;
     player.vcontrol.on_timeupdate(function(){
+				      if(player.vcontrol.get_duration() == player.vcontrol.ge_position()){
+					  //FIXME изменение кнопки play после окончания файла
+				      }
 				      if(point_drag)
 					  return; //do nothing if a point was dragged
 
@@ -211,13 +216,12 @@ exports.controls = function(comp, player, parent, info){
 
     var activity_timer = require('modules/timer').create(function(){
 							     if(controls_standby == 3 && !self.appear.toggled)
-								 self.appear.on();
+								 self.appear.toggle();
 							     else
-								 controls_standby += 1;					     
-				      }, 1000, true);
+								 controls_standby += 1;								      }, 1000, true);
     comp.event_register(this.frame, 'pointer_motion', function(){
 			    if(controls_standby >= 3)
-				self.appear.off();
+				self.appear.toggle();
 			    controls_standby = 0;
 			});    
 
