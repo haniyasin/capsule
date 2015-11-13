@@ -186,13 +186,12 @@ function video(){
 	element.pipeline = Gst.parse_launch("playbin " + 'uri=' + info.source);
 	var bus = element.pipeline.get_bus();
 	bus.add_watch(-1, function(bus, message){
-			  print('hhh');
 			  print(message.type);
 			  print(JSON.stringify(Gst.MessageType));
 		      });
 //	element.pipeline = Gst.Element.make_from_uri(Gst.URIType.SRC, info.source + '', 'video');
-	print(element.pipeline);
-	print('uri=' + info.source);
+//	print(element.pipeline);
+//	print('uri=' + info.source);
 	element.sink = new ClutterGst.VideoSink();
 	//				     element.sink = Gst.ElementFactory.make('cluttersink', 'bat');
 	element.sink.texture = element.actor;
@@ -283,6 +282,7 @@ function animation(){
 				 create : function(chain){
 				     var frames = [];
 				     var prev_frames_num = 0;
+				     var part;
 				     for(part in chain){
 					 var frames_num = chain[part].duration / 1000 * fps;
 					 if(chain[part].duration == 0){
@@ -299,8 +299,10 @@ function animation(){
 						 return new error('Compositer animation error', 'chain block has no duration property');
 					     if(typeof actions != 'undefined'){
 						 var new_frames_num = prev_frames_num + frames_num;
+						 var action;
 						 for(action in actions){
 						     var step = actions[action] / frames_num;
+						     var ind;
 						     for(ind = prev_frames_num;  ind < new_frames_num; ind++){
 							 if(typeof frames[ind] == 'undefined')
 							     frames[ind] = {};
@@ -334,11 +336,12 @@ function animation(){
 					 timeline = new Clutter.Timeline({duration : 1000});
 
 					 timeline.connect('new-frame', function() {
+							      var sanim_ind;
 							      for(sanim_ind in started){
 								  var banim = binded.take(started[sanim_ind]);
 								  var element = elements.take(banim.element);
 								  if(banim.cur_frame < banim.frames.length){
-								      var changing_props = banim.frames[banim.cur_frame];
+								      var changing_props = banim.frames[banim.cur_frame], prop_name;
 								      for (prop_name in changing_props){
 									  element.props_manager[prop_name].update(changing_props[prop_name]);
 									  element.props_manager[prop_name].apply();
@@ -468,6 +471,7 @@ function props_manager(element){
 	this.set = function(value){
 	    if(typeof value == 'undefined')
 		return;
+
 	    var re_result = /^([\-\d]+)%$/.exec(value);
 	    if(re_result){
 		this.value = parseInt(re_result[1]);
@@ -525,6 +529,7 @@ function props_manager(element){
 	    //for frame recalculating all childs for properly % geometry
 	    var echild;
 	    if(element.hasOwnProperty('childs')){
+		var child;
 		for(child in element.childs){
 		    echild = element.childs[child];
 		    if(prop_name == 'width'){
@@ -550,6 +555,7 @@ function props_manager(element){
 	};
 
 	this.apply = function(){
+	    print('hohoho', this.value, this.default);
 	    if(this.type == '%')
 		element.actor.opacity = this.value * 2.5;
 	    else 
@@ -586,6 +592,7 @@ function props_manager(element){
     this.z_index = new z_index_prop();
 
     this.set_all = function(info, init){
+	var type;
 	for(type in types){
 	    if(info.hasOwnProperty(type))
 		this[type].set(info[type]);
@@ -595,12 +602,13 @@ function props_manager(element){
     };
 
     this.apply_all = function(){
+	var prop;
 	for(prop in types){
 	    this[prop].apply();
 	}
 	if(typeof element.childs != 'undefined'){
 	    //this is frame
-//		print('eeerrr');
+	    var child;
 	    for(child in element.childs){
 		for(prop in types){
 		    element.childs[child].props_manager[prop].apply();
@@ -662,6 +670,7 @@ var manager = {
 	    var module = this.modules[module],
 	        name = module.name,
 	        props = module.props;
+	    var prop;
 	    for(prop in props){
 		comp[name + '_' + prop] = props[prop];		
 	    }
@@ -694,7 +703,7 @@ function comp(){
     this.root.add(cembed);
     var stage = this.root_actor  = cembed.get_stage();
     set_random_background(stage);
-    this.frame_create({ x : 0, y : 0, width : 100, height : 200, opacity : 100 });
+    this.frame_create({ x : 0, y : 0, width : 100, height : 200, opacity : 1 });
     var element = elements.take(0);
     element.props_manager.apply_all();
     cembed.connect('configure-event', 

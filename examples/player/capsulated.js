@@ -12,7 +12,6 @@ function file_opener_widget(comp, player, parent, info){
 			       y : '0%',
 			       width : '100%',
 			       height : '100%',
-			       opacity : 1,
 			       z_index : 1,
 			       source : require('images/file_form_bg')
 			   }),
@@ -21,7 +20,6 @@ function file_opener_widget(comp, player, parent, info){
 				y : '0%',
 				width : '100%',
 				height : '30%',
-				opacity : 1,
 				z_index : 2,
 				text : 'выберите или перетащите файл'
 			    });

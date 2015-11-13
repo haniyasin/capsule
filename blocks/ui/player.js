@@ -47,7 +47,6 @@ exports.controls = function(comp, player, parent, info){
 	    width : '10%',
 	    height : '100%',
 	    z_index : 2,
-	    opacity : 0.9,
 	    label : 'play'
 	}), 
     playc = comp.button_get_control(play_b),
@@ -151,7 +150,7 @@ exports.controls = function(comp, player, parent, info){
 	    y : '0%', 
 	    width : '5%', 
 	    height : '100%', 
-	    opacity : 0.8,
+	    opacity : '80%',
 	    z_index : 2,
 
 	    source : require('images/timepoint')
@@ -164,7 +163,7 @@ exports.controls = function(comp, player, parent, info){
 
     var point_drag = false;
     player.vcontrol.on_timeupdate(function(){
-				      if(player.vcontrol.get_duration() == player.vcontrol.ge_position()){
+				      if(player.vcontrol.get_duration() == player.vcontrol.get_position()){
 					  //FIXME изменение кнопки play после окончания файла
 				      }
 				      if(point_drag)
@@ -198,7 +197,7 @@ exports.controls = function(comp, player, parent, info){
     var anim_appear = new animation.toggle(comp, 'appear', 
 					  [
 					      {
-						  duration : 300,
+						  duration : 200,
 						  actions : {
 						      opacity : -100   
 						  }
@@ -206,7 +205,7 @@ exports.controls = function(comp, player, parent, info){
 					  ],
 					  [
 					      {
-						  duration : 300,
+						  duration : 200,
 						  actions : {
 						      opacity : 100
 						  }
