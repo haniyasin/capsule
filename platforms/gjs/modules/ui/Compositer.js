@@ -220,7 +220,7 @@ function video(){
 					     element.pipeline.set_state(Gst.State.PAUSED);
 					 },
 					 set_position : function(msecond){	
-					     element.pipeline.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH, msecond * Gst.MSECOND);				     
+					     print(msecond *Gst.MSECOND,element.pipeline.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH, msecond *Gst.MSECOND));				     
 					 },
 					 get_position : function(){
 					     return element.pipeline.query_position(Gst.Format.TIME)[1] / Gst.MSECOND;
@@ -555,7 +555,6 @@ function props_manager(element){
 	};
 
 	this.apply = function(){
-	    print('hohoho', this.value, this.default);
 	    if(this.type == '%')
 		element.actor.opacity = this.value * 2.5;
 	    else 
