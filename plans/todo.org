@@ -1,5 +1,23 @@
-* browser/capsule
-** deployer
+* v0.3
++ low level storage modules for nodejs, web.
+  simple api: stat, create, delete, read_chunk, append_chunk
++ hi level storage module, using low level modules as backend
+  api is more like storage service from dsa: stat, create, delete, update, extract
+* v0.4
++ sprout module integrating and using within capsule modules
++ udp based implementations sockets modules like http/sockets with partially rewriting
+  transport/http into multi-backends transport with http/sockets and upd/sockets backends.
++ node-webkit as platform and deployer target.
+  node-webkit specific code for Compositer and etc. Probably not much work is needed.
++ ui refactoring
++ binary_container
++ compositer_layers
+
+   
+   
+* на когданибудь
+** platforms/web/
+*** deployer
 + to implement dependencies resolving mechanics
 + to implement online download script and module and integrating that technic to dependecies resolving for
   download modules what need for loading other module
@@ -9,8 +27,5 @@
    files in one and loading that code like a modules but into global scope
   
 
-** http_requester|http_responent|http_sockets -
+*** http_requester|http_responent|http_sockets -
    + bug with reply, which consist string 'undefined'. Now is hacked around this.
-
-
-   
