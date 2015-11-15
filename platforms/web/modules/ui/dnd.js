@@ -1,4 +1,5 @@
-var comp = require('./Compositer');
+var comp = require('./Compositer'),
+    tfile;
 
 /* dnd_source unit */
 
@@ -45,6 +46,9 @@ comp.Compositer.prototype.dnd_source_create = function(info, options, target_lis
 };
 
 comp.Compositer.prototype.dnd_destination_create = function(info, options, target_list, action_after){
+    if(!tfile)
+	tfile = require('types/file');
+
     var unit = new comp.Unit('dnd_dest', info);
     
     unit.id(comp.Unit.pool.put(unit));
@@ -91,7 +95,7 @@ comp.Compositer.prototype.dnd_destination_create = function(info, options, targe
 					       for(ind in files){
 						   var file = files[ind];
 						   
-						   context.data = URL.createObjectURL(file);
+						   context.file = new tfile(URL.createObjectURL(file));
 						   ondata(context);
 
 					       }

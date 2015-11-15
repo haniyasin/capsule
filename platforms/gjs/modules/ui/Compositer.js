@@ -220,7 +220,7 @@ function video(){
 					     element.pipeline.set_state(Gst.State.PAUSED);
 					 },
 					 set_position : function(msecond){	
-					     print(msecond *Gst.MSECOND,element.pipeline.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH, msecond *Gst.MSECOND));				     
+					     element.pipeline.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH, msecond *Gst.MSECOND);				     
 					 },
 					 get_position : function(){
 					     return element.pipeline.query_position(Gst.Format.TIME)[1] / Gst.MSECOND;

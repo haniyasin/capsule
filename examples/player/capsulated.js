@@ -108,7 +108,8 @@ function dnd_widget(comp, player, info){
 		     return true;
 		 });
     drag_dest.on('data', function(context, x, y){
-		     player.vcontrol.load(player.source = context.data);
+		     player.vcontrol.load(player.source = context.file);
+		     player.slide.toggle();
 		 });
 
     this.destroy = function(){
@@ -175,15 +176,15 @@ exports.main = function(){
 				       width : '98%',
 				       height : '5%',
 				       z_index : 0
-			    });
-/*    dnd = new dnd_widget(comp, video, {
+			    }),
+    dnd = new dnd_widget(comp, video, {
 			     x : '0%',
 			     y : '0%',
 			     width : '100%',
 			     height : '80%',
 			     opacity : 0.1,
-			     z_index : 2
-			 });    */
+			     z_index : 0
+			 });    
 
     sanim.bind(video);
 

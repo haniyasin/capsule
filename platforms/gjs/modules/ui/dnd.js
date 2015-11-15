@@ -6,7 +6,8 @@ const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
 const GtkClutter = imports.gi.GtkClutter;
 
-var comp = require('./Compositer');
+var comp = require('./Compositer'),
+    tfile;
 
 function dnd(){
     return new comp.element_proto('dnd', 
@@ -40,6 +41,8 @@ function dnd(){
 				       * DND destination constructor
 				       */
 				      destination_create : function(info, options, target_list, action_after){
+					  if(!tfile)
+					      tfile = require('types/file');
 					  var widget =  Gtk.Label.new('DND');	
 					  var element = new comp.element_obj_proto(GtkClutter.Actor.new_with_contents(widget), info);
 					  
@@ -86,10 +89,11 @@ function dnd(){
 						      widget.connect('drag-data-received', function(widget, context, x, y, data, info, time){
 									 var dstr = data.get_data();
 //									 dstr.shift();
-//									 print(JSON.stringify(dstr), dstr.length);
-									 dstr[dstr.length - 2] = '\0';
+//									 print('dfdffff');
+//									 dstr[dstr.length - 2] = '\0';
+//									 print(dstr);
 									 context = {
-									   data : dstr
+									   file : new tfile(dstr)
 									 };
 //									 print('data', data.get_data_type(), data.get_data());
 									 return callback(context, x, y);
