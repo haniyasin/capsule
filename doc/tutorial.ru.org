@@ -74,7 +74,7 @@
    
    Итак, любой модуль это в любом случае .js файл. Да, могут быть исключения для различных платформ, где модули
    встроены, но это другой разговор. Подгружается модуль с помощью стандартного выражения  для commonjs 
-   окружений: require(somepath)
+   окружений: require(somepath) 
    Все модули, даже стандартные, формируют единое виртуальное дерево модулей с помощью единого механизма,
    который является частью капсулизации(процесса сборки приложения и всех его зависимостей в пакет). Частью
    это процесса является конфиг сборки - файл с расширеним .json, подобно тому что был предыдущей главе под 
@@ -87,27 +87,27 @@
    Ну если с модулями всем, кто писал на js всё более-менее понятно, то что есть ресурс? Ресурс в понимании
    capsule это некоторая порция данных, для которых есть встроенный тип. Например ресурсом может быть
    изображение. В таком случае вы добавляете это изображение в конфиг сборки, допустим таким образом:
-   ```javascript
+   #+BEGIN_SRC javascript
    "images" : {
        "type" : "image",
 
        "blue" : "tutproject/images/blue.png"
    }
-   ```
+   #+END_SRC
    В результате, blue.png упакуется в приложение вместе с основным кодом и будет доступно для использования
    внутри него с помощью:
-   ```javascript
+   #+BEGIN_SRC javascript
    var blue = require('images/blue')
-   ```
+   #+END_SRC
    Как это происходит, и что возвращает require? Как точно изображение упакуется в приложение зависит от
    платформы, скажем для web и для gjs(на данный момент) - изображение упаковывается в base64, а затем в 
    модуль. То есть данные изображения упаковываются в модуль, при подгрузки которого данные изображения 
    передаются реализации встроенного типа - в нашем случае это будет types/image. На выходе мы получаем
    объект types/image, который уже готов к применению в любом модуле capsule.
    Это значит, что можно сделать так:
-   ```javascript
+   #+BEGIN_SRC javascript
    comp.frame_add(frame1, comp.image_create({source : blue}));
-   ```
+   #+END_SRC
    и если frame1 это допустим область в середине экрана, то мы получим синию точку в этой области.
    
    Зачем такие сложности, если можно взять, прочитать файл, распарсить его с помощью нужного модуля и
@@ -130,7 +130,7 @@
    
    Самое время для пары примеров кода. 
    Пример с time:
-   ```javascript
+   #+BEGIN_SRC javascript
    var timer = require('modules/timer');
    timeout = timer.create(function(){
                                         console.log('tick once');
@@ -139,12 +139,12 @@
                                         console.log('tick each 200 millisec
                                      }, 200, true);
 				     
-   ```
+   #+END_SRC
    Первый вызов create создаёт одноразовое срабатывание таймера, потому что последний аргумент cyclic 
    установлен в false. Второй вызов создаёт срабатывание каждые 200 миллисекунд.
 
    Пример с Compositer:
-   ```javascript
+   #+BEGIN_SRC javascript
    var comp = require('modules/ui/Compositer').create(), 
    //загружаем модуль и создаём экземляр Compositer, что аналогично созданию окна
        center_area = comp.frame_create({
@@ -166,7 +166,7 @@
    //фрейм, который располагается по центру наносится на root фрейм, он же окно, он же 0
    comp.frame_add(center_area, image);
    //изображение наносится на к center_area
-   ```
+   #+END_SRC
 ** Пишем что-нибудь работающее с ui
 
 ** Конфиги сборки
@@ -180,7 +180,7 @@
    Допустим мы захотели выделить в отдельный файл часто используемые в проекте объекты. Ну и конечно добавить
    пару изображений для использования, куда же без них. Значит наш итоговый конфиг будет выглядеть примерно
    так:
-   ```javascript
+   #+BEGIN_SRC javascript
    {
        "type" : "module",
 
@@ -202,7 +202,7 @@
        "commonlib" : "examples/skeleton/commonlib.js",
        "capsulated" : "examples/skeleton/capsulated.js"
    }  
-   ```
+   #+END_SRC
    А теперь разберём написанное.
    Поле type указывает на то, какого типа файлы будут загружены. Доступны всего несколько вариантов:
    + module
@@ -225,15 +225,15 @@
    Ну и конечно commonlib. Добавлен как и capsulated, ничего нового. Теперь кратко о том, как использовать
    добавленное нами в коде.
 
-   ```javascript
+   #+BEGIN_SRC javascript
    var round = require('newimages/round'),
        cursor = require('newimages/cursor'),
        commonlib = require('commonlib');
-   ```
+   #+END_SRC
 
    Ну и в завершении о модулях. Они оформляются в формате commonjs. Подобробно о нём можно найти на просторах
    интернета. Вот пример модуля commonlib:
-   ```javascript
+   #+BEGIN_SRC javascript
    function private_print(printer, message){
     console.log(printer, message);
    }
@@ -245,22 +245,24 @@
    exports.printer_two = function(message){
        private_print('two is printed:', message);
    }
-   ```
+   #+END_SRC
    Затем модуль используется так:
-   ```javascript
+   #+BEGIN_SRC javascript
    commonlib.printer_one('hello tutor');
    commonlib.printer_two('hello tutor');
-   ```
+   #+END_SRC
    В результате будет напечатано:
    one is printed: hello tutor
    two is printed: hello tutor
 
    При этом использовать можно только те функции, которые присвоены с помощью объекта exports.
    private_print не будет видна за пределами файла, то есть нельзя её использовать через 
-   ```commonlib.private_print```
+   #+BEGIN_SRC javascript 
+   commonlib.private_print
+   #+END_SRC
 
    Ещё один способ опубликовать функции модуля, это присвоить сразу объект, например так:
-   ```javascript
+   #+BEGIN_SRC javascript
    modules.exports = {
        printer_one : function(message){
            private_print('one is printed:', message);
@@ -269,7 +271,7 @@
            private_print('two is printed:', message);
        }
    }
-   ```
+   #+END_SRC
    Делает тоже, что и пример выше но позволяет присваивать сразу объект. Иногда удобно:)
    
 ** Ну в заключении о том, во что и как собирается ваше приложение
