@@ -136,7 +136,7 @@
                                         console.log('tick once');
                                     }, 100, false);
    interval = timer.create(function(){
-                                        console.log('tick each 200 millisec
+                                        console.log('tick each 200 millisec');
                                      }, 200, true);
 				     
    #+END_SRC

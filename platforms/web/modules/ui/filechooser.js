@@ -1,4 +1,5 @@
-var comp = require('./Compositer');
+var tfile,
+    comp = require('./Compositer');
 
 /* filechooser unit */
 
@@ -22,7 +23,8 @@ comp.Unit.prototype.types['filechooser'].prototype.init = function (object) {
 
 comp.Compositer.prototype.filechooser_create = function(info, options){
     var unit = new comp.Unit('filechooser', info);
-    
+    if(!tfile)
+	tfile = require('types/file');
     unit.id(comp.Unit.pool.put(unit));
 
     return {
@@ -30,9 +32,9 @@ comp.Compositer.prototype.filechooser_create = function(info, options){
 	on_choose : function(callback){
 	    unit.html.onchange = function(){ 
 		var context = {};
-		context.name = unit.html.files[0].name;
-		context.data = URL.createObjectURL(unit.html.files[0]);
-		callback(context); 
+		var file = new tfile(URL.createObjectURL(unit.html.files[0]));
+		file.name = unit.html.files[0].name;
+		callback(file); 
 	    };
 	}
     };

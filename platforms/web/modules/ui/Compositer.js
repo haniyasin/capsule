@@ -399,8 +399,8 @@ var comp = (function () {
 //	    unit.source_child.src = "http://docs.gstreamer.com/media/sintel_trailer-480p.ogv";
 	//}
 	this.control = {
-	    load : function(address){
-		unit.source_child.src = address;	
+	    load : function(file){
+		unit.source_child.src = file.uri;	
 		unit.html.appendChild(unit.source_child);
 	    },
 	    play : function(callback){

@@ -23,7 +23,7 @@
  */
 
 //object - это объект одного из типов капсулы, то есть может быть как image, collection, так и file
-module.exports = function(object){
+module.exports = function(uri){
     //internal browser api
 
     //getting url, created from blob object
@@ -33,5 +33,5 @@ module.exports = function(object){
     //public api
     
     this.name;
-    this.path;
+    this.uri = uri;
 };

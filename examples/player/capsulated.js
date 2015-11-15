@@ -2,6 +2,7 @@
  * Example Player application based on capsule API(ui, io)
  */
 
+var tfile;
 function file_opener_widget(comp, player, parent, info){
     /*
      * common functionality
@@ -28,9 +29,10 @@ function file_opener_widget(comp, player, parent, info){
     comp.frame_add(form_frame, text);
     comp.frame_add(parent.frame, form_frame);
     parent.file_opener = this;
-    function file_choosen(address){
-	player.source = address;
-	player.vcontrol.load(player.source);
+    function file_choosen(file){
+//	console.log(address);
+	player.source = file;
+	player.vcontrol.load(file);
 	player.slide.toggle();
     }
 
@@ -59,11 +61,11 @@ function file_opener_widget(comp, player, parent, info){
 					      width : '96%',
 					      height : '20%',
 					      z_index : 2,
-					      label : 'выбрать нужный файл'
+					      label : 'Возьмите файлег'
 				     });
     comp.frame_add(form_frame, filechooser.id);
-    filechooser.on_choose(function(context){
-			      file_choosen(context.data);
+    filechooser.on_choose(function(file){
+			      file_choosen(file);
 			  });
     /*
      * dnd file
@@ -85,7 +87,7 @@ function file_opener_widget(comp, player, parent, info){
 
     comp.frame_add(form_frame, ok_b);
     ok_c.on_press(function(){
-		      file_choosen(addr_c.get_value());
+		      file_choosen(new tfile(addr_c.get_value()));
 		 });
 
     this.setup = function(callback){
@@ -115,6 +117,8 @@ function dnd_widget(comp, player, info){
 }
 
 exports.main = function(){
+    if(!tfile)
+	tfile = require('types/file');
     var Compositer = require('modules/ui/Compositer');
     require('modules/ui/dnd');//подключаем возможности dnd в Compositer
     require('modules/ui/filechooser'); //подключаем возможности filechooser

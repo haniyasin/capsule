@@ -11,6 +11,7 @@
 	"types" : {
 	    "record" : "platforms/web/types/record.js",
 	    "packer" : "platforms/web/types/packer.js",
+	    "file" : "platforms/web/types/file.js",
 	    "image" : "platforms/web/types/image.js",
     	    "video" : "platforms/web/types/video.js"
 	},

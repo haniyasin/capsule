@@ -50,11 +50,15 @@
       function start(){
           //need depends functionality
           var loader = new module_loader();
-          var environment = constructor(loader);
-          starter(environment);
-          for(ind in blocks){
-              
+          try{
+              var environment = constructor(loader);
+              starter(environment);
+          }catch(x){
+              console.log(JSON.stringify(x));
           }
+//          for(ind in blocks){
+  //            
+    //      }
       }
     </script>
   </head>

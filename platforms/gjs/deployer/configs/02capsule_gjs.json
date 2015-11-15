@@ -9,7 +9,8 @@
 	    }
 	},
 	"types" : {
-	    "image" : "platforms/gjs/types/image.js"
+	    "image" : "platforms/gjs/types/image.js",
+	    "file" : "platforms/gjs/types/file.js"
 	},
 	"modules" : {
 	    "path" : "platforms/gjs/modules/path.js",

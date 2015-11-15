@@ -119,8 +119,8 @@ function button(){
 				     if(!info.hasOwnProperty('label'))
 					 info.label = 'button';
 //				     print(Gtk.Button.new_with_label);
-				     var widget = Gtk.Button.new_with_label(info.label);
-				     var element = new element_obj_proto(GtkClutter.Actor.new_with_contents(widget), info);
+				     var widget = Gtk.Button.new_with_label(info.label),
+				         element = new element_obj_proto(GtkClutter.Actor.new_with_contents(widget), info);
 				     element.widget = widget;
 				     element.actor.show();
 				     element.control = {
@@ -209,8 +209,8 @@ function video(){
 				     element.actor.show();
 
 				     element.control = {
-					 load : function(source){
-					     info.source = source;
+					 load : function(file){
+					     info.source = file.uri;
 					     load_video(element, info);
 					 },
 					 play : function(){
