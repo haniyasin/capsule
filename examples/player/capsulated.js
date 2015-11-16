@@ -82,22 +82,21 @@ function dnd_widget(comp, player, info){
 function playlist(player, info){
     var form_frame = this.frame = comp.frame_create(info),
     bg = comp.image_create({
-			       x : '0%',
-			       y : '0%',
-			       width : '100%',
-			       height : '100%',
-			       z_index : 0,
+			       x : '0%', y : '0%',
+			       width : '100%', height : '100%',z_index : 0,
 			       source : require('images/file_form_bg')
-			   });
-
+			   }),
+    title = comp.text_create({
+				 x : '1%', y : '1%',
+				 width : '98%', height : '10%', z_index : 1,
+				 text : 'Filelist'
+			     });
     comp.frame_add(form_frame, bg);
+    comp.frame_add(form_frame, title);
     comp.frame_add(0, form_frame);
     var add_b = comp.button_create({
-				  x : '1%',
-				  y : '84%',
-				  width : '30%',
-				  height : '15%',
-				  z_index : 2,
+				  x : '1%', y : '89%',
+				  width : '30%', height : '10%', z_index : 2,
 				  label : 'add'
 			     }),
     add_c = comp.button_get_control(add_b);
@@ -106,8 +105,8 @@ function playlist(player, info){
 		       work_zone_switcher.toggle();
 //		      file_choosen(new tfile(addr_c.get_value()));
 		 });
-
-//    var file_opener = new file_opener_widget(comp, player.video, player.video, ),
+/*
+    var file_opener = new file_opener_widget(comp, player.video, player.video, ),
     dnd = new dnd_widget(comp, player.frame, {
 			     x : '0%',
 			     y : '0%',
@@ -115,22 +114,22 @@ function playlist(player, info){
 			     height : '80%',
 			     opacity : 0.1,
 			     z_index : 0
-			 });    
+			 });    */
 }
 
 function player(info){ 
     var self = this,
     video = this.video = new bplayer.video(comp,{
-						   x : '0%', y : '0%',
-						   width : '100%', height : '100%', 
+						   x : '1%', y : '1%',
+						   width : '98%', height : '98%', 
 						   z_index : 1
 					       }),
     controls = new bplayer.controls(comp, video, {
-					x : '23%',
+					x : '2%',
 					y : '88%',
-					width : '47%',
+					width : '96%',
 					height : '10%',
-					z_index : 1
+					z_index : 5
 				    }),
     bg = comp.image_create({
 			       x : '0%', y : '0%',
@@ -161,8 +160,8 @@ function player(info){
 				);
     this.frame = comp.frame_create(info);
     sanim.bind(this);
-//    return;
-//    comp.frame.add(this.frame, controls.frame);
+    comp.frame_add(this.frame, controls.frame);
+    comp.frame_add(this.frame, video.frame);
     comp.frame_add(this.frame, bg);
     comp.frame_add(0, this.frame);
     comp.event_register(bg, 'pointer_down', function(){
@@ -213,18 +212,18 @@ exports.main = function(){
 	     ],
 	     off : [
 		 {
-		   duration : 200,
-		     actions : {
-			 x : 20
-		     }  		     
-		 },
-		 {
 		     duration : 300,
 		     actions : {
 			 x : 16,
 			 width : -36,
 			 z_index : 1
 		     } 
+		 },
+		 {
+		   duration : 200,
+		     actions : {
+			 x : 20
+		     }  		     
 		 }
 	     ]
 	 },

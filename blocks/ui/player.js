@@ -31,7 +31,6 @@ exports.controls = function(comp, player, info){
     controls_standby = 0;
     
     this.frame = comp.frame_create(info);
-//    comp.frame_add(parent.frame, this.frame);
 
     /*
      * play|pause button
@@ -145,7 +144,7 @@ exports.controls = function(comp, player, info){
 	    y : '0%', 
 	    width : '5%', 
 	    height : '100%', 
-	    opacity : '80%',
+	    opacity : '60%',
 	    z_index : 2,
 
 	    source : require('images/timepoint')
@@ -155,7 +154,6 @@ exports.controls = function(comp, player, info){
     comp.frame_add(this.frame, timeline_f);
     comp.frame_add(timeline_f, timeline_i);
     comp.frame_add(timeline_f, timepoint_i);
-
     var point_drag = false;
     player.vcontrol.on_timeupdate(function(){
 				      if(player.vcontrol.get_duration() == player.vcontrol.get_position()){

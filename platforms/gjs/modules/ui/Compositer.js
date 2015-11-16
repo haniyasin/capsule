@@ -570,11 +570,11 @@ function props_manager(element){
 	this.set = function(value){
 	    if(typeof value == 'undefined')
 		return;
-	    this.value = value * -1;
+	    this.value = value;
 	};
 
 	this.get = function(){
-	    return value * -1;
+	    return value;
 	};
 
 	this.apply = function(){
