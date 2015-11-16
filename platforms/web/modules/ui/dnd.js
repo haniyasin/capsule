@@ -85,6 +85,8 @@ comp.Compositer.prototype.dnd_destination_create = function(info, options, targe
 		
 	    case 'drop':
 		unit.html.addEventListener('drop', function(e){
+					       e.stopPropagation();
+					       e.preventDefault();
 					       var context = {
 						   
 					       };
@@ -97,10 +99,7 @@ comp.Compositer.prototype.dnd_destination_create = function(info, options, targe
 						   
 						   context.file = new tfile(URL.createObjectURL(file));
 						   ondata(context);
-
 					       }
-					       e.stopPropagation();
-					       e.preventDefault();
 			       });
 		break;
 		

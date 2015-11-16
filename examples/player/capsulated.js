@@ -2,33 +2,14 @@
  * Example Player application based on capsule API(ui, io)
  */
 
-var tfile;
+var tfile, comp, animation,
+    bplayer;
+
 function file_opener_widget(comp, player, parent, info){
     /*
      * common functionality
      */
-    var form_frame = this.frame = comp.frame_create(info),
-    bg = comp.image_create({
-			       x : '0%',
-			       y : '0%',
-			       width : '100%',
-			       height : '100%',
-			       z_index : 1,
-			       source : require('images/file_form_bg')
-			   }),
-    text = comp.text_create({
-				x : '0%',
-				y : '0%',
-				width : '100%',
-				height : '30%',
-				z_index : 2,
-				text : 'выберите или перетащите файл'
-			    });
 
-    comp.frame_add(form_frame, bg);
-    comp.frame_add(form_frame, text);
-    comp.frame_add(parent.frame, form_frame);
-    parent.file_opener = this;
     function file_choosen(file){
 //	console.log(address);
 	player.source = file;
@@ -74,25 +55,6 @@ function file_opener_widget(comp, player, parent, info){
     /*
      * finishing choosing file
      */
-    var ok_b = comp.button_create({
-				  x : '40%',
-				  y : '72%',
-				  width : '20%',
-				  height : '20%',
-				  z_index : 2,
-				  label : 'ok'
-			     }),
-    ok_c = comp.button_get_control(ok_b);
-
-
-    comp.frame_add(form_frame, ok_b);
-    ok_c.on_press(function(){
-		      file_choosen(new tfile(addr_c.get_value()));
-		 });
-
-    this.setup = function(callback){
-	setup_callback = callback;
-    };
 }
 
 function dnd_widget(comp, player, info){
@@ -117,67 +79,45 @@ function dnd_widget(comp, player, info){
     };
 }
 
-exports.main = function(){
-    if(!tfile)
-	tfile = require('types/file');
-    var Compositer = require('modules/ui/Compositer');
-    require('modules/ui/dnd');//подключаем возможности dnd в Compositer
-    require('modules/ui/filechooser'); //подключаем возможности filechooser
-    var player = require('blocks/ui/player'),
-    animation = require('blocks/ui/animation'),
-    comp = Compositer.create(),
-    sanim = new animation.toggle(comp, 'slide',
-				  [
-				      {
-					  duration : 300,
-					  actions : {
-					      y : -100   
-					  }
-				      }
-				  ],
-				  [
-				      {
-					  duration : 300,
-					  actions : {
-					      y : 100
-					  } 
-				      }
-				  ]
-				 ),
-    bg = comp.image_create({
-			       x : '0%', y : '0%',
-			       width : '100%', height : '100%',
-			       z_index : 1,
-			       source : require('images/main_bg')
-			   });
-    comp.frame_add(0, bg);
-
-    var video = new player.video(comp, {frame : 0}, 
-				 {
-				     x : '0%', y : '0%',
-				     width : '100%', height : '200%'
-				 },
-				 {
-				     x : '1%', y : '51%', //101 
-				     width : '98%', height : '48%', 
-				     z_index : 1
-				 }),
-    file_opener = new file_opener_widget(comp, video, video, {
-					     x : '0%',
+function playlist(player){
+    var form_frame = this.frame = comp.frame_create({
+					     x : '1%',
 					     y : '0%', 
-					     width : '100%',
-					     height : '50%',
+					     width : '20%',
+					     height : '100%',
 					     opacity : 1,
 					     z_index : 1
 					 }),
-    controls = new player.controls(comp, video, video, {
-				       x : '1%',
-				       y : '94%',
-				       width : '98%',
-				       height : '5%',
-				       z_index : 0
-			    }),
-    dnd = new dnd_widget(comp, video, {
+    bg = comp.image_create({
+			       x : '0%',
+			       y : '0%',
+			       width : '100%',
+			       height : '100%',
+			       z_index : 0,
+			       source : require('images/file_form_bg')
+			   });
+
+    comp.frame_add(form_frame, bg);
+    comp.frame_add(player.video.frame, form_frame);
+
+    var add_b = comp.button_create({
+				  x : '1%',
+				  y : '84%',
+				  width : '30%',
+				  height : '15%',
+				  z_index : 2,
+				  label : 'add'
+			     }),
+    add_c = comp.button_get_control(add_b);
+    comp.frame_add(form_frame, add_b);
+    add_c.on_press(function(){
+		       player.video.slide.toggle();
+//		      file_choosen(new tfile(addr_c.get_value()));
+		 });
+    // parent.file_opener = this;
+    return;
+//    var file_opener = new file_opener_widget(comp, player.video, player.video, ),
+    dnd = new dnd_widget(comp, player.video, {
 			     x : '0%',
 			     y : '0%',
 			     width : '100%',
@@ -185,11 +125,66 @@ exports.main = function(){
 			     opacity : 0.1,
 			     z_index : 0
 			 });    
+}
 
+function player(){ 
+    var video = this.video = new bplayer.video(comp, {frame : 0}, 
+					       {
+						   x : '0%', y : '0%',
+						   width : '200%', height : '100%'
+					       },
+					       {
+						   x : '22%', y : '0%', //101 
+						   width : '48%', height : '100%', 
+						   z_index : 1
+					       }),
+    controls = new bplayer.controls(comp, video, video, {
+					x : '22%',
+					y : '95%',
+					width : '50%',
+					height : '5%',
+					z_index : 1
+				    }),    
+    sanim = new animation.toggle(comp, 'slide',
+				 [
+				     {
+					 duration : 300,
+					 actions : {
+					     x : -43   
+					 }
+				     }
+				 ],
+				 [
+				     {
+					 duration : 300,
+					 actions : {
+					     x : 43
+					 } 
+				     }
+				 ]
+				);
     sanim.bind(video);
+    var bg = comp.image_create({
+				   x : '22%', y : '0%',
+				   width : '48%', height : '100%',
+				   z_index : 0,
+				   source : require('images/main_bg')
+			       });
+    comp.frame_add(this.video.frame, bg);
+    comp.event_register(bg, 'pointer_down', function(){
+			    video.slide.toggle();
+			});
+}
 
-    this.destroy = function(){
-	comp.frame_remove(bg);
-	comp.image_destroy(bg);
-    };
+exports.main = function(){
+    if(!tfile)
+	tfile = require('types/file');
+    var Compositer = require('modules/ui/Compositer');
+    require('modules/ui/dnd');//подключаем возможности dnd в Compositer
+    require('modules/ui/filechooser'); //подключаем возможности filechooser
+    comp = Compositer.create();
+    animation = require('blocks/ui/animation');
+    bplayer = require('blocks/ui/player');
+    
+    new playlist(new player());
 };

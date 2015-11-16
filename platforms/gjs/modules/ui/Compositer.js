@@ -701,7 +701,7 @@ function comp(){
     cembed.show();
     this.root.add(cembed);
     var stage = this.root_actor  = cembed.get_stage();
-    set_random_background(stage);
+//    set_random_background(stage);
     this.frame_create({ x : 0, y : 0, width : 100, height : 200, opacity : 1 });
     var element = elements.take(0);
     element.props_manager.apply_all();
