@@ -3,7 +3,7 @@
  */
 
 var tfile, comp, animation,
-    bplayer;
+    bplayer, work_zone_switcher;
 
 function file_opener_widget(comp, player, parent, info){
     /*
@@ -71,7 +71,7 @@ function dnd_widget(comp, player, info){
 		 });
     drag_dest.on('data', function(context, x, y){
 		     player.vcontrol.load(player.source = context.file);
-		     player.slide.toggle();
+		     work_zone_switcher.toggle();
 		 });
 
     this.destroy = function(){
@@ -79,15 +79,8 @@ function dnd_widget(comp, player, info){
     };
 }
 
-function playlist(player){
-    var form_frame = this.frame = comp.frame_create({
-					     x : '1%',
-					     y : '0%', 
-					     width : '20%',
-					     height : '100%',
-					     opacity : 1,
-					     z_index : 1
-					 }),
+function playlist(player, info){
+    var form_frame = this.frame = comp.frame_create(info),
     bg = comp.image_create({
 			       x : '0%',
 			       y : '0%',
@@ -98,8 +91,7 @@ function playlist(player){
 			   });
 
     comp.frame_add(form_frame, bg);
-    comp.frame_add(player.video.frame, form_frame);
-
+    comp.frame_add(0, form_frame);
     var add_b = comp.button_create({
 				  x : '1%',
 				  y : '84%',
@@ -111,13 +103,12 @@ function playlist(player){
     add_c = comp.button_get_control(add_b);
     comp.frame_add(form_frame, add_b);
     add_c.on_press(function(){
-		       player.video.slide.toggle();
+		       work_zone_switcher.toggle();
 //		      file_choosen(new tfile(addr_c.get_value()));
 		 });
-    // parent.file_opener = this;
-    return;
+
 //    var file_opener = new file_opener_widget(comp, player.video, player.video, ),
-    dnd = new dnd_widget(comp, player.video, {
+    dnd = new dnd_widget(comp, player.frame, {
 			     x : '0%',
 			     y : '0%',
 			     width : '100%',
@@ -127,30 +118,33 @@ function playlist(player){
 			 });    
 }
 
-function player(){ 
-    var video = this.video = new bplayer.video(comp, {frame : 0}, 
-					       {
+function player(info){ 
+    var self = this,
+    video = this.video = new bplayer.video(comp,{
 						   x : '0%', y : '0%',
-						   width : '200%', height : '100%'
-					       },
-					       {
-						   x : '22%', y : '0%', //101 
-						   width : '48%', height : '100%', 
+						   width : '100%', height : '100%', 
 						   z_index : 1
 					       }),
-    controls = new bplayer.controls(comp, video, video, {
-					x : '22%',
-					y : '95%',
-					width : '50%',
-					height : '5%',
+    controls = new bplayer.controls(comp, video, {
+					x : '23%',
+					y : '88%',
+					width : '47%',
+					height : '10%',
 					z_index : 1
-				    }),    
+				    }),
+    bg = comp.image_create({
+			       x : '0%', y : '0%',
+			       width : '100%', height : '100%',
+			       z_index : 0,
+			       source : require('images/main_bg')
+			   }),
     sanim = new animation.toggle(comp, 'slide',
 				 [
 				     {
 					 duration : 300,
 					 actions : {
-					     x : -43   
+					     x : -21,
+					     width : 22
 					 }
 				     }
 				 ],
@@ -158,21 +152,21 @@ function player(){
 				     {
 					 duration : 300,
 					 actions : {
-					     x : 43
+					     x : 21,
+					     width : -22,
+					     z_index : 1
 					 } 
 				     }
 				 ]
 				);
-    sanim.bind(video);
-    var bg = comp.image_create({
-				   x : '22%', y : '0%',
-				   width : '48%', height : '100%',
-				   z_index : 0,
-				   source : require('images/main_bg')
-			       });
-    comp.frame_add(this.video.frame, bg);
+    this.frame = comp.frame_create(info);
+    sanim.bind(this);
+//    return;
+//    comp.frame.add(this.frame, controls.frame);
+    comp.frame_add(this.frame, bg);
+    comp.frame_add(0, this.frame);
     comp.event_register(bg, 'pointer_down', function(){
-			    video.slide.toggle();
+			    work_zone_switcher.toggle();
 			});
 }
 
@@ -185,6 +179,79 @@ exports.main = function(){
     comp = Compositer.create();
     animation = require('blocks/ui/animation');
     bplayer = require('blocks/ui/player');
-    
-    new playlist(new player());
+    var iplayer = new player({
+				x : '37%', y : '0%',
+				width : '62%', height : '100%',
+				z_index : 2
+			    }),
+        iplaylist =  new playlist(iplayer, {
+				      x : '1%',
+				      y : '0%', 
+				      width : '35%',
+				      height : '100%',
+				      opacity : 1,
+				      z_index : 1
+				  });
+
+    work_zone_switcher = new animation.many_toggle(comp,
+	[{
+	     elements : [iplayer.frame],
+	     on : [
+		 {
+		   duration : 200,
+		     actions : {
+			 x : -20
+		     }  
+		 },
+		 {
+		     duration : 300,
+		     actions : {
+			 x : -16,
+			 width : 36
+		     }
+		 }
+	     ],
+	     off : [
+		 {
+		   duration : 200,
+		     actions : {
+			 x : 20
+		     }  		     
+		 },
+		 {
+		     duration : 300,
+		     actions : {
+			 x : 16,
+			 width : -36,
+			 z_index : 1
+		     } 
+		 }
+	     ]
+	 },
+	 {
+	     elements : [iplaylist.frame],
+	     on : [
+		 {
+		     duration : 300,
+		     actions : {
+			 x : 10,
+			 y : 10,
+			 width : -20,
+			 height : -20
+		     }
+		 }
+	     ],
+	     off : [
+		 {
+		     duration : 300,
+		     actions : {
+			 x : -10,
+			 y : -10,
+			 width : 20,
+			 height : 20
+		     } 
+		 }
+	     ]
+	 }
+	]);
 };

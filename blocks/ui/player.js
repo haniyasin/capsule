@@ -5,11 +5,8 @@
 var animation = require('blocks/ui/animation');
 
 //video frame without controls
-exports.video = function (comp, parent, frame_info, video_info){
-    var frame = this.frame = comp.frame_create(frame_info),
-    video = comp.video_create(video_info);
-    comp.frame_add(frame, video);
-    comp.frame_add(parent.frame, frame);
+exports.video = function (comp, video_info){
+    var video = this.frame = comp.video_create(video_info);
     
     this.vcontrol = comp.video_get_control(video),
     this.vcontrol.set_volume(0.2);
@@ -18,7 +15,6 @@ exports.video = function (comp, parent, frame_info, video_info){
     this.destroy = function(){
 	comp.frame_remove(video);
 	comp.video_destroy(video);
-	comp.frame_destroy(frame);
     };
 };
 
@@ -27,7 +23,7 @@ function play_control(comp, player, parent){
 }
 
 //ui controls for player(play|pause, progressbar, volumecontrol etc)
-exports.controls = function(comp, player, parent, info){
+exports.controls = function(comp, player, info){
     /*
      * common functionality
      */
@@ -35,7 +31,7 @@ exports.controls = function(comp, player, parent, info){
     controls_standby = 0;
     
     this.frame = comp.frame_create(info);
-    comp.frame_add(parent.frame, this.frame);
+//    comp.frame_add(parent.frame, this.frame);
 
     /*
      * play|pause button
@@ -108,7 +104,6 @@ exports.controls = function(comp, player, parent, info){
 				  ]
 				 ),
     fullscreen_pressed;
-    
     fullscreen_at.bind(player);
     comp.frame_add(this.frame, fullscreen_i);
     comp.event_register(fullscreen_i, 'pointer_down', function(){

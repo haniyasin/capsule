@@ -157,9 +157,12 @@ var comp = (function () {
 
         for (propertyName in this.defaults) {
             if (this.defaults.hasOwnProperty(propertyName)) {
-                if (typeof object[propertyName] === 'string') {
+                if (typeof object[propertyName] === 'string' ||
+		    typeof object[propertyName] === 'number') {
                     value = new Unit.Value(object[propertyName], propertyName);
                 } else {
+//		    if(propertyName == 'z_index')
+//			alert(object[propertyName]);
                     value =
                         new Unit.Value(
                             this.defaults[propertyName], undefined
@@ -507,6 +510,7 @@ var comp = (function () {
         var dissassembleResult;
 
         value =
+            (typeof value === 'number') ? value = { value : value, unit : ''} :
             (typeof value === 'object') ? value :
             (typeof value === 'string') ?
                 (typeof
@@ -694,7 +698,7 @@ var comp = (function () {
     Unit.Value.prototype.types['z_index'].prototype.work = true;
 
     Unit.Value.prototype.types['z_index'].prototype.apply = function (target) {
-        target.html.style.zIndex = Math.round(this.value);
+        target.html.style.zIndex = this.value;
     };
 
 
