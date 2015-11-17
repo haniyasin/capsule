@@ -1,9 +1,11 @@
 exports.main = function(env){
- //   var capsule = env.capsule;
 
-//    var ui = require('modules/ui/Compositer');
-//    var frame = new ui.frame({ width : '80%', height : '80%'});
-//    ui.root.add(frame);
+    var ui =  new (require('modules/ui/Compositer'));
+//    console.log(ui);
+    var frame = new ui.frame({ width : '80%', height : '80%'});
+    frame.add(new ui.image({ width : '100%', height : '100%',source : require('images/red')}));
+    ui.root.add(frame);
+ //   var capsule = env.capsule;
 //    capsule.tests.modules.transport.direct.test(capsule);
 //    capsule.tests.modules.timer.test(capsule);
     

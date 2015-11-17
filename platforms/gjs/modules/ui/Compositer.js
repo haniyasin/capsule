@@ -14,8 +14,8 @@ const Gst = imports.gi.Gst;
 
 var error = require('parts/error.js');
 
-//var bba = require('parts/bb_allocator'),
-  //  id_allocator = new bba.allocator(bba.index_allocator);
+var bba = require('parts/bb_allocator'),
+    id_allocator = new bba.allocator(bba.id_allocator);
 
 function set_random_background(actor){
     var color = new Clutter.Color();
@@ -28,18 +28,17 @@ function set_random_background(actor){
 
 function element(){
     this.id = id_allocator.alloc();
-    this.props_manager = new props_manager(this);
     this.event_callbacks = {};
 
 }
-var pelement = element.prototype;
 
-pelement.init = function(){
+element.prototype.init = function(actor, info){
+    this.props_manager = new props_manager(this);
     this.actor = actor; //Clutter actor
     this.props_manager.set_all(info, true);
 };
 
-pelement.on = function(event, callback){
+element.prototype.on = function(event, callback){
     var listened_elemns = this.comp._listened_elems;
     if(callback !== 'undefined'){
 	//register callback
@@ -81,16 +80,16 @@ pelement.on = function(event, callback){
 	delete this.event_callbacks[event_name];
 };
 
-pelement.destroy = function(){
+element.prototype.destroy = function(){
     //FIXME
 };
 
-pelement.props = function(info){
+element.prototype.props = function(info){
     this.props_manager.set_all(info);
     this.props_manager.apply_all();
 };
 
-function frame(){
+function frame(info){
     this.init(new Clutter.Actor(), info);
     this.childs = [];
     this.actor.show();
@@ -98,231 +97,173 @@ function frame(){
 	set_random_background(this.actor);    
 
 };
-var pframe = frame.prototype;
-pframe = new element();
+frame.prototype = new element();
 
-pframe.destroy = function(){
+frame.prototype.destroy = function(){
     id_allocator.free(this.id);
     this.actor.unref();
 };
 			
-pframe.add = function(child){
-    parent.actor.add_actor(child.actor);
-    child.parent = parent;
-    parent.childs.push(child);
+frame.prototype.add = function(child){
+    this.actor.add_actor(child.actor);
+    child.parent = this;
+    this.childs.push(child);
 //    if(child.hasOwnProperty('on_add'))
 //	child.on_add(parent_id);
     child.props_manager.apply_all();
 };
 
-pframe.remove = function(child){
+frame.prototype.remove = function(child){
     this.actor.remove_child(child.actor);				     
     child.parent = undefined;
 };
 
 
-function image(){
-    return  new element_proto('image', {
-				  create : function(info){
-				      var element = new element_obj_proto(new Clutter.Actor(), info);
-				      element.actor.show();
-				      if(info.hasOwnProperty('source')){
-					  var pixbuf = info.source.pixbuf;
-					  element.image = new Clutter.Image();
-					  element.image.set_data(pixbuf.get_pixels(),
-								 pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888,
-								 pixbuf.get_width(),
-								 pixbuf.get_height(),
-								 pixbuf.get_rowstride());
-					  
-					  element.actor.content = element.image;
-				      } else {
-					  //					  print('comp.image', 'please set image.source');
-					  set_random_background(element.actor);    
-				      }
-				      return elements.put(element);
-				  },
-				  destroy : function(id){
-				      var element = elements.take(id);
-				      element.actor.unref();
-				      element.image.unref();
-				      elements.free(id);
-				  }
-			      });
-}
+function image(info){
+    this.init(new Clutter.Actor(), info);
+    this.actor.show();
+    if(info.hasOwnProperty('source')){
+	var pixbuf = info.source.pixbuf;
+	this.image = new Clutter.Image();
+	this.image.set_data(pixbuf.get_pixels(),
+			    pixbuf.get_has_alpha() ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888,
+			    pixbuf.get_width(),
+			    pixbuf.get_height(),
+			    pixbuf.get_rowstride());
 
-function text(){
-    return new element_proto('text', {
-				 create : function(info){
-				     var element = new element_obj_proto(new Clutter.Text(), info);
-				     if(!info.hasOwnProperty('text'))
-					 info.text = 'text';
-				     element.actor.set_font_name("Sans 26");
-				     element.actor.set_text(info.text);
-//				     var widget = new Gtk.Label();
-//				     widget.expand = true;
-///				     widget.set_text(info.text);
-//				     var element = new element_obj_proto(GtkClutter.Actor.new_with_contents(widget), info);
-//				     element.widget = widget;
-				     element.actor.show();
-				     return elements.put(element);
-				 },
-				 destroy : function(id){
-				     elements.take(id).actor.unref();
-				     elements.free(id);
-				 }
-			     });
-}
-
-function button(){
-    return new element_proto('button', {
-				 create : function(info){
-				     if(!info.hasOwnProperty('label'))
-					 info.label = 'button';
-//				     print(Gtk.Button.new_with_label);
-				     var widget = Gtk.Button.new_with_label(info.label),
-				         element = new element_obj_proto(GtkClutter.Actor.new_with_contents(widget), info);
-				     element.widget = widget;
-				     element.actor.show();
-				     element.control = {
-					 set_label : function(label){widget.set_label(label);},
-					 on_press : function(callback){
-					     element.widget.connect('pressed', callback);
-					 }
-				     };
-				     return elements.put(element);
-				 },
-				 get_control : function(id){
-				     return elements.take(id).control;
-				 },
-				 destroy : function(id){
-				     var element = elements.take(id);
-				     element.actor.unref();
-				     element.widget.unref();
-				     elements.free(id);
-				 }
-			     });
-}
-
-function entry(){
-    return new element_proto('entry', {
-				 create : function(info){
-				     if(!info.hasOwnProperty('placeholder'))
-					 info.placeholder = 'enter text';
-				     var widget = new Gtk.Entry();
-				     widget.set_placeholder_text(info.placeholder);
-				     var element = new element_obj_proto(GtkClutter.Actor.new_with_contents(widget), info);
-				     element.widget = widget;
-				     element.actor.show();
-				     element.control = {
-					 set_placeholder : function(placeholder){
-					     widget.set_placeholder_text(placeholder);
-					 },
-					 get_value : function(){
-					     return widget.get_text();
-					 },
-					 set_value : function(value){
-					     widget.set_text(value);
-					 },
-					 on_text_change : function(callback){
-					     element.widget.connect('activate', callback);
-					 }
-				     };
-				     return elements.put(element);
-				 },
-				 get_control : function(id){
-				     return elements.take(id).control;				     
-				 },
-				 destroy : function(id){
-				     var element = elements.take(id);
-				     element.actor.unref();
-				     element.widget.unref();
-				     elements.free(id);
-				 }
-			     });
-}
-
-function video(){
-    function load_video(element, info){
-	element.pipeline = Gst.parse_launch("playbin " + 'uri=' + info.source);
-	var bus = element.pipeline.get_bus();
-	bus.add_watch(-1, function(bus, message){
-			  print(message.type);
-			  print(JSON.stringify(Gst.MessageType));
-		      });
-//	element.pipeline = Gst.Element.make_from_uri(Gst.URIType.SRC, info.source + '', 'video');
-//	print(element.pipeline);
-//	print('uri=' + info.source);
-	element.sink = new ClutterGst.VideoSink();
-	//				     element.sink = Gst.ElementFactory.make('cluttersink', 'bat');
-	element.sink.texture = element.actor;
-	element.pipeline.video_sink = element.sink;			
+	this.actor.content = this.image;
+    } else {
+	//					  print('comp.image', 'please set image.source');
+	set_random_background(element.actor);    
     }
-    return new element_proto('video', {
-				 create : function(info){
-				     var element = new element_obj_proto(new Clutter.Texture( {}), info);
-				     if(!info.hasOwnProperty('source')){
-					 info.source = "http://docs.gstreamer.com/media/sintel_trailer-480p.ogv";
-					 load_video(element, info);
-				     }
-				     
-//				     element.actor.add_child(element.actor);
-				     element.actor.show();
-
-				     element.control = {
-					 load : function(file){
-					     info.source = file.uri;
-					     load_video(element, info);
-					 },
-					 play : function(){
-					     element.pipeline.set_state(Gst.State.PLAYING);
-					 },
-					 pause : function(){
-					     element.pipeline.set_state(Gst.State.PAUSED);
-					 },
-					 set_position : function(msecond){	
-					     element.pipeline.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH, msecond *Gst.MSECOND);				     
-					 },
-					 get_position : function(){
-					     return element.pipeline.query_position(Gst.Format.TIME)[1] / Gst.MSECOND;
-					 },
-					 get_duration : function(){
-					     return element.pipeline.query_duration(Gst.Format.TIME)[1] / Gst.MSECOND;
-					 },
-					 get_volume : function(){
-					     return 100;
-					 },
-					 set_volume : function(volume){
-					     
-					 },
-					 on_timeupdate : function(callback){
-					     var curtime = 0;
-					     let self = this;
-					     GLib.timeout_add(GLib.PRIORITY_HIGH, 200, function(){
-								  if(curtime < self.get_position()){
-								      callback();
-								      curtime = self.get_position();
-								  }
-								  return true;
-							      });   
-					 }
- 				     };
-				     return elements.put(element);
-				 },
-				 get_control : function(id){
-				     return elements.take(id).control;
-				 },
-				 destroy : function(id){
-				     var element = elements.take(id);
-				     element.actor.unref();
-				     element.pipeline.unref();
-				     element.sink.unref();
-				     elements.free(id);
-				 }
-			     });
 }
 
+image.prototype = new element();
 
+image.prototype.destroy = function(){
+    id_allocator.free(this.id);
+    this.actor.unref();
+    this.image.unref();
+};
+
+
+function text(info){
+    this.init(new Clutter.Text(), info);
+    if(!info.hasOwnProperty('text'))
+	info.text = 'text';
+    element.actor.set_font_name("Sans 26");
+    element.actor.set_text(info.text);
+    element.actor.show();
+}
+
+text.prototype = new element();
+
+text.prototype.destroy = function(){
+    id_allocator.free(this.id);
+    this.actor.unref();
+};
+
+function button(info){
+    if(!info.hasOwnProperty('label'))
+	info.label = 'button';
+    //				     print(Gtk.Button.new_with_label);
+    var widget = Gtk.Button.new_with_label(info.label);
+    this.init(GtkClutter.Actor.new_with_contents(widget), info);
+    this.widget = widget;
+    this.actor.show();
+    this.set_label = function(label){widget.set_label(label);};
+    this.on_press = function(callback){element.widget.connect('pressed', callback);};
+}
+
+button.prototype = new element();
+button.prototype.destroy = function(){
+    id_allocator.free(this.id);
+    this.actor.unref();
+    this.widget.unref();
+};
+
+function entry(info){
+    if(!info.hasOwnProperty('placeholder'))
+	info.placeholder = 'enter text';
+    var widget = new Gtk.Entry();
+    widget.set_placeholder_text(info.placeholder);
+    this.init(GtkClutter.Actor.new_with_contents(widget), info);
+    this.widget = widget;
+    this.actor.show();
+    this.set_placeholder = function(placeholder){ widget.set_placeholder_text(placeholder); };
+    this.get_value = function(){ return widget.get_text() };
+    this.set_value = function(value){ widget.set_text(value); };
+    this.on_text_change = function(callback){ element.widget.connect('activate', callback); };
+}
+
+entry.prototype = new element();
+
+entry.prototype. destroy = function(){
+    id_allocator.free(this.id);
+    this.actor.unref();
+    this.widget.unref();
+};
+
+function load_video(element, info){
+    element.pipeline = Gst.parse_launch("playbin " + 'uri=' + info.source);
+    var bus = element.pipeline.get_bus();
+    bus.add_watch(-1, function(bus, message){
+		      print(message.type);
+		      print(JSON.stringify(Gst.MessageType));
+		  });
+    //	element.pipeline = Gst.Element.make_from_uri(Gst.URIType.SRC, info.source + '', 'video');
+    //	print(element.pipeline);
+    //	print('uri=' + info.source);
+    element.sink = new ClutterGst.VideoSink();
+    //				     element.sink = Gst.ElementFactory.make('cluttersink', 'bat');
+    element.sink.texture = element.actor;
+    element.pipeline.video_sink = element.sink;			
+}
+function video(info){
+    this.init(new Clutter.Texture( {}), info);
+    if(!info.hasOwnProperty('source')){
+	info.source = "http://docs.gstreamer.com/media/sintel_trailer-480p.ogv";
+	load_video(this, info);
+    }
+				     
+    //				     element.actor.add_child(element.actor);
+    this.actor.show();
+    
+    this.load = function(file){
+	info.source = file.uri;
+	load_video(element, info);
+    };
+
+    this.play = function(){ element.pipeline.set_state(Gst.State.PLAYING); };
+    this.pause = function(){ element.pipeline.set_state(Gst.State.PAUSED); };
+    this.set_position = function(msecond){ element.pipeline.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH, msecond *Gst.MSECOND); };	
+    this.get_position = function(){ return element.pipeline.query_position(Gst.Format.TIME)[1] / Gst.MSECOND; };
+    this.get_duration = function(){ return element.pipeline.query_duration(Gst.Format.TIME)[1] / Gst.MSECOND; };
+    this.get_volume = function(){ return 100; }; //FIXME
+    this.set_volume = function(volume){ }; //FIXME
+    this.on_timeupdate = function(callback){
+	var curtime = 0;
+	let self = this;
+	GLib.timeout_add(GLib.PRIORITY_HIGH, 200, function(){
+			     if(curtime < self.get_position()){
+				 callback();
+				 curtime = self.get_position();
+			     }
+			     return true;
+			 });   
+    };
+}
+    
+video.prototype = new element();
+
+video.prototype.destroy = function(id){
+    id_allocator.free(this.id);
+    this.actor.unref();
+    this.pipeline.unref();
+    this.sink.unref();
+};
+
+//start HERE
 function animation(){
     var anims = new Pool(),
         binded = new Pool,
@@ -330,43 +271,40 @@ function animation(){
         fps = 60,
         timeline = null;
 
-    return new element_proto('anim', {
-				 create : function(chain){
-				     var frames = [];
-				     var prev_frames_num = 0;
-				     var part;
-				     for(part in chain){
-					 var frames_num = chain[part].duration / 1000 * fps;
-					 if(chain[part].duration == 0){
-					     with(chain[part]){
-						 frames[prev_frames_num] = {};
-						 for(action in actions){
-						     frames[prev_frames_num][action] = actions[action];
-						 }						 
-					     }
-					     prev_frames_num++;
-					 }
-					 with(chain[part]){
-					     if(typeof duration == 'undefined')
-						 return new error('Compositer animation error', 'chain block has no duration property');
-					     if(typeof actions != 'undefined'){
-						 var new_frames_num = prev_frames_num + frames_num;
-						 var action;
-						 for(action in actions){
-						     var step = actions[action] / frames_num;
-						     var ind;
-						     for(ind = prev_frames_num;  ind < new_frames_num; ind++){
-							 if(typeof frames[ind] == 'undefined')
-							     frames[ind] = {};
-							 frames[ind][action] = step;
-						     }
-						 }						 
-					     }
-					 }
-					 prev_frames_num += frames_num;
-				     }				     
-				     return anims.put(frames);
-				 },
+    var frames = [];
+    var prev_frames_num = 0;
+    var part;
+    for(part in chain){
+	var frames_num = chain[part].duration / 1000 * fps;
+	if(chain[part].duration == 0){
+	    with(chain[part]){
+		frames[prev_frames_num] = {};
+		for(action in actions){
+		    frames[prev_frames_num][action] = actions[action];
+		}						 
+	    }
+	    prev_frames_num++;
+	}
+	with(chain[part]){
+	    if(typeof duration == 'undefined')
+		return new error('Compositer animation error', 'chain block has no duration property');
+	    if(typeof actions != 'undefined'){
+		var new_frames_num = prev_frames_num + frames_num;
+		var action;
+		for(action in actions){
+		    var step = actions[action] / frames_num;
+		    var ind;
+		    for(ind = prev_frames_num;  ind < new_frames_num; ind++){
+			if(typeof frames[ind] == 'undefined')
+			    frames[ind] = {};
+			frames[ind][action] = step;
+		    }
+		}						 
+	    }
+	}
+	prev_frames_num += frames_num;
+    }				     
+
 				 destroy : function(anim_id){
 				     anims.free(anim_id);
 				 },
@@ -451,7 +389,7 @@ function event(){
 				 }
 			     });
 }
-
+*/
 function prop_handlers(){
     this.get = function(prop){
     };
@@ -632,7 +570,7 @@ function ui(){
     cembed.show();
     this.root.add(cembed);
     var stage = this.root_actor  = cembed.get_stage(),
-    root = this.root = new this.frame_create({ x : 0, y : 0, width : 100, height : 200, opacity : 1 });
+    root = this.root = new this.frame({ x : 0, y : 0, width : 100, height : 200, opacity : 1 });
     cembed.connect('configure-event', 
 		      function(window, event){
 			  var width = stage.get_width(),
@@ -654,6 +592,5 @@ ui.prototype = {
     frame : frame,
     image : image
 };
-*/
-//print('dfdfd');
-exports.haha = 'eee'; 
+
+module.exports = ui;
