@@ -2,7 +2,7 @@
  * server implementation api like sockets over http_responder
  */
 
-var error = require('../../../parts/error.js');
+var error = require('parts/error.js');
 
 function get_by_cli_id(array, cli_id, push){
     for(key in array){
@@ -15,7 +15,7 @@ function get_by_cli_id(array, cli_id, push){
     return null;	    
 }
 function response_holder(_incoming, capsule){
-    var ids = new capsule.dependencies.bb_allocator.create(capsule.dependencies.bb_allocator.id_allocator);
+    var ids = new capsule.dependencies.bb_allocator.allocator(capsule.dependencies.bb_allocator.id_allocator);
     var responses = [];
     this.delayed_packets = [];
     var extra_cleaner_timer = null; //extra connection cleaner

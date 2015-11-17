@@ -2,7 +2,7 @@
  * client implementation api like socket over http_requester
  */
 
-var error = require('../../../parts/error.js');
+var error = require('parts/error.js');
 
 function requests_holder(type, modules){
     var requests = []; 

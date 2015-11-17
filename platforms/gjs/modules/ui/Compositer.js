@@ -12,7 +12,10 @@ const GtkClutter = imports.gi.GtkClutter;
 const ClutterGst = imports.gi.ClutterGst;
 const Gst = imports.gi.Gst;
 
-var error = require('../../../../parts/error.js');
+var error = require('parts/error.js');
+
+//var bba = require('parts/bb_allocator'),
+  //  id_allocator = new bba.allocator(bba.index_allocator);
 
 function set_random_background(actor){
     var color = new Clutter.Color();
@@ -23,42 +26,100 @@ function set_random_background(actor){
     actor.set_background_color(color);    
 }
 
-function frame(){
-    return new element_proto('frame', {
-				 create : function(info){
-				     var element = new element_obj_proto(new Clutter.Actor(), info);
-				     element.childs = [];
-				     element.actor.show();
-				     if(info.hasOwnProperty('background_random'))
-					 set_random_background(element.actor);    
-				     return elements.put(element);
-				 },
-				 destroy : function(id){
-				     var element = elements.take(id);
-				     elements.free(id);
-				     element.actor.unref();
-				     element = undefined;
-				 },
-				 add : function(parent_id, child_id){
-				     var child = elements.take(child_id);
-				     var parent = elements.take(parent_id);
-				     parent.actor.add_actor(child.actor);
-				     child.parent = parent;
-				     parent.childs.push(child);
-				     if(child.hasOwnProperty('on_add'))
-					 child.on_add(parent_id);
-				     child.props_manager.apply_all();
-				 },
-				 remove : function(parent_id, child_id){
-				     var parent = elements.take(parent_id);
-				     var child = elements.take(child_id);
-				     parent.actor.remove_child(child.actor);				     
-				     child.parent = undefined;
-				     if(child.hasOwnProperty('on_remove'))
-					 child.on_remove();
-				 }
-			     });
+function element(){
+    this.id = id_allocator.alloc();
+    this.props_manager = new props_manager(this);
+    this.event_callbacks = {};
+
 }
+var pelement = element.prototype;
+
+pelement.init = function(){
+    this.actor = actor; //Clutter actor
+    this.props_manager.set_all(info, true);
+};
+
+pelement.on = function(event, callback){
+    var listened_elemns = this.comp._listened_elems;
+    if(callback !== 'undefined'){
+	//register callback
+	if(!listened_elems.hasOwnProperty(this.id))
+	    listened_elems[this.id] = this;
+	this.event_callbacks[event_name] = callback;
+	this.actor.reactive = true;
+	var mouse_handler = new _event_mouse_handler(listened_elems, element_id, event_name);
+	switch(event_name){
+	case 'pointer_down' :
+	    element.actor.connect('button-press-event', mouse_handler.handle);
+	    break;
+	    
+	case 'pointer_up' : 
+	    element.actor.connect('button-release-event', mouse_handler.handle);
+	    break;
+	    
+	case 'pointer_in' :
+	    element.actor.connect('enter-event', mouse_handler.handle);
+	    break;
+	    
+	case 'pointer_out' :
+	    element.actor.connect('leave-event', mouse_handler.handle);
+	    break;
+	    
+	case 'pointer_motion' : 
+	    element.actor.connect('motion-event', mouse_handler.handle);
+	    break;
+	    
+	case 'key_down' :
+	    element.actor.connect('key-press-event', callback);
+	    break;
+	    
+	case 'key_up' : 
+	    element.actor.connect('key-release-event', callback);
+	    break;
+	}	    
+    } else 	    //unregister
+	delete this.event_callbacks[event_name];
+};
+
+pelement.destroy = function(){
+    //FIXME
+};
+
+pelement.props = function(info){
+    this.props_manager.set_all(info);
+    this.props_manager.apply_all();
+};
+
+function frame(){
+    this.init(new Clutter.Actor(), info);
+    this.childs = [];
+    this.actor.show();
+    if(info.hasOwnProperty('background_random'))
+	set_random_background(this.actor);    
+
+};
+var pframe = frame.prototype;
+pframe = new element();
+
+pframe.destroy = function(){
+    id_allocator.free(this.id);
+    this.actor.unref();
+};
+			
+pframe.add = function(child){
+    parent.actor.add_actor(child.actor);
+    child.parent = parent;
+    parent.childs.push(child);
+//    if(child.hasOwnProperty('on_add'))
+//	child.on_add(parent_id);
+    child.props_manager.apply_all();
+};
+
+pframe.remove = function(child){
+    this.actor.remove_child(child.actor);				     
+    child.parent = undefined;
+};
+
 
 function image(){
     return  new element_proto('image', {
@@ -261,15 +322,6 @@ function video(){
 			     });
 }
 
-function element(){
-    return new element_proto('element', {
-				 change_props : function(id, info){
-				     var element = elements.take(id);
-				     element.props_manager.set_all(info);
-				     element.props_manager.apply_all();
-				 }
-			     });
-}
 
 function animation(){
     var anims = new Pool(),
@@ -365,8 +417,7 @@ function animation(){
 			     });
 }
 
-function _event_mouse_handler(listened_elems, element_id, event_name){
-    var element = elements.take(element_id);
+function _event_mouse_handler(listened_elems, element,event_name){
     this.handle = function(actor, event){
 	var coords = event.get_coords();
 	coords[0] = coords[0] - element.props_manager.x.get_pos_absolute();
@@ -383,65 +434,20 @@ function _event_mouse_handler(listened_elems, element_id, event_name){
 				   coords[1]
 			   }];
 	
-	listened_elems[element_id][event_name](pointer_obj);
+	listened_elems[element.id].event_callbacks[event_name](pointer_obj);
     };	
 }
 
 function event(){
-    var listened_elems = {
-    };
-
     return new element_proto('event', {
-				 _emit : function(element_id, event_name, event_data){
-				     if(listened_elems.hasOwnProperty(element_id)){
-					 if(listened_elems[element_id].hasOwnProperty(event_name)){
-					     listened_elems[element_id][event_name](event_data);
+				 _listened_elems : {
+				 },				     ,
+				 _emit : function(element, event_name, event_data){
+				     if(listened_elems.hasOwnProperty(element.id)){
+					 if(listened_elems[element.id].callbacks.hasOwnProperty(event_name)){
+					     listened_elems[element.id].callbacks[event_name](event_data);
 					 }
 				     }
-				 },
-
-				 register : function(element_id, event_name, callback){
-				     if(!listened_elems.hasOwnProperty(element_id))
-					 listened_elems[element_id] = {};
-				     listened_elems[element_id][event_name] = callback;
-				     var element = elements.take(element_id);
-				     element.actor.reactive = true;
-				     var mouse_handler = new _event_mouse_handler(listened_elems, element_id, event_name);
-				     switch(event_name){
-					 case 'pointer_down' :
-					 element.actor.connect('button-press-event', mouse_handler.handle);
-					 break;
-
-					 case 'pointer_up' : 
-					 element.actor.connect('button-release-event', mouse_handler.handle);
-					 break;
-
-					 case 'pointer_in' :
-					 element.actor.connect('enter-event', mouse_handler.handle);
-					 break;
-
-					 case 'pointer_out' :
-					 element.actor.connect('leave-event', mouse_handler.handle);
-					 break;
-
-					 case 'pointer_motion' : 
-					 element.actor.connect('motion-event', mouse_handler.handle);
-					 break;
-
-					 case 'key_down' :
-					 element.actor.connect('key-press-event', callback);
-					 break;
-
-					 case 'key_up' : 
-					 element.actor.connect('key-release-event', callback);
-					 break;
-				     }
-				 },
-				 unregister : function(element_id, event_name){
-				     if(!listened_elems.hasOwnProperty(element_id))
-					 return new error('event unregister', 'element pointed to has no exists');
-				     delete listened_elems[element_id][event_name];
-				     return null;
 				 }
 			     });
 }
@@ -449,11 +455,6 @@ function event(){
 function prop_handlers(){
     this.get = function(prop){
     };
-}
-
-function element_proto(name, props){
-    this.name = name;
-    this.props = props;
 }
 
 function props_manager(element){
@@ -618,78 +619,8 @@ function props_manager(element){
     
 }
 
-function element_obj_proto(actor, info){
-    this.actor = actor; //Clutter actor
-    this.props_manager = new props_manager(this);
-    this.props_manager.set_all(info, true);
-}
 
-//Pool implementation has been taked from web Compositer by freeze
-var Pool = function () {
-    this.pool = []; this.available = []; this.count = 0;
- 
-    return undefined;
-};
-
-Pool.prototype.put = function (data) {
-    var id = this.available.shift();
-    
-    if (id === undefined) {
-        id = this.pool.push();
-    }
-    
-    this.pool[id] = data;
-    this.count++;
-    
-    return id;
-};
-
-Pool.prototype.take = function (id) {
-    return this.pool[id];
-};
-
-Pool.prototype.free = function (id) {
-    delete this.pool[id];
-    
-    this.available.push(id);
-    this.count--;
-    
-    return undefined;
-};
-
-var elements = new Pool();
-
-var manager = {
-    'modules' : [],
-    'add' : function(element_constructor){
-	this.modules.push(element_constructor());
-    },
-    'assemble' : function(comp){
-	for(module in this.modules){
-	    var module = this.modules[module],
-	        name = module.name,
-	        props = module.props;
-	    var prop;
-	    for(prop in props){
-		comp[name + '_' + prop] = props[prop];		
-	    }
-	}
-    }
-};
-
-manager.add(frame);
-manager.add(image);
-manager.add(text);
-manager.add(button);
-manager.add(entry);
-manager.add(video);
-manager.add(element);
-manager.add(animation);
-manager.add(event);
-
-function comp(){
-    manager.assemble(this);
-
+function ui(){
     Gtk.init(null);
     Clutter.init(null);
     Gst.init(null, null);
@@ -700,35 +631,29 @@ function comp(){
     var cembed = new GtkClutter.Embed();
     cembed.show();
     this.root.add(cembed);
-    var stage = this.root_actor  = cembed.get_stage();
-//    set_random_background(stage);
-    this.frame_create({ x : 0, y : 0, width : 100, height : 200, opacity : 1 });
-    var element = elements.take(0);
-    element.props_manager.apply_all();
+    var stage = this.root_actor  = cembed.get_stage(),
+    root = this.root = new this.frame_create({ x : 0, y : 0, width : 100, height : 200, opacity : 1 });
     cembed.connect('configure-event', 
 		      function(window, event){
 			  var width = stage.get_width(),
 			      height = stage.get_height();
-			  if(element.props_manager.width.get() != width){
-			      element.props_manager.width.set(width);
-			      element.props_manager.width.apply();
+			  if(root.props_manager.width.get() != width){
+			      root.props_manager.width.set(width);
+			      root.props_manager.width.apply();
 			  }
-			  if(element.props_manager.height.get() != height){
-			      element.props_manager.height.set(height);
-			      element.props_manager.height.apply();
+			  if(root.props_manager.height.get() != height){
+			      root.props_manager.height.set(height);
+			      root.props_manager.height.apply();
 			  }
 		      });
-    this.root_actor.add_actor(element.actor);
-}
-
-exports.elements = elements;
-
-exports.manager = manager;
-
-exports.element_proto = element_proto;
-
-exports.element_obj_proto = element_obj_proto;
-
-exports.create = function(){
-    return new comp();
+    this.root_actor.add_actor(root.actor);
 };
+
+ui.prototype = {
+    element : element,
+    frame : frame,
+    image : image
+};
+*/
+//print('dfdfd');
+exports.haha = 'eee'; 

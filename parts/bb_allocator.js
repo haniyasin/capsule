@@ -1,19 +1,20 @@
 //универсальный выделятор переиспользуемых кирпичей
+
 exports.id_allocator = function(){
     var counter = 0;
     this.create = function(){
         return ++counter;
-    }
+    };
     this.destroy = function(){
         //надо бы подумать об удалении, но в обычной ситуации скорее будет переиспользоваться
-    }
-}
+    };
+};
 
 //black box allocalor
-exports.create = function(allocator){
+exports.allocator = function(tallocator){
     var busy = [];
     var free = [];
-    var _allocator =  new allocator();
+    var _allocator =  new tallocator();
     this.alloc = function(){
 //	console.log(free.length);
 //	console.log(busy.length);
@@ -38,5 +39,3 @@ exports.create = function(allocator){
         }
     };
 };
-
-//конец универсального выделятора

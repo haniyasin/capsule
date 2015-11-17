@@ -103,12 +103,12 @@ function frames_receiver(frames_sender, msg_packer, socket, modules){
 function msg_packer(frames_sender, capsule){
     var bb_allocator = capsule.parts.bb_allocator;
     var modules = capsule.modules;
-    var frame_id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
+    var frame_id_allocator = new bb_allocator.allocator(bb_allocator.id_allocator);
     function get_blank_frame(){
 	return { 'i' : frame_id_allocator.alloc(), 's' : 10, 'p' : [], 't' : 0, 'r' : [], 'ti' : 0};
     }
 
-    var msg_id_allocator = new bb_allocator.create(bb_allocator.id_allocator);
+    var msg_id_allocator = new bb_allocator.allocator(bb_allocator.id_allocator);
     var short_frame_timer = null;
 
     var cur_frame = get_blank_frame();

@@ -1,6 +1,9 @@
 exports.main = function(env){
-    var capsule = env.capsule;
-    print('hoi');
+ //   var capsule = env.capsule;
+
+//    var ui = require('modules/ui/Compositer');
+//    var frame = new ui.frame({ width : '80%', height : '80%'});
+//    ui.root.add(frame);
 //    capsule.tests.modules.transport.direct.test(capsule);
 //    capsule.tests.modules.timer.test(capsule);
     
@@ -12,27 +15,9 @@ exports.main = function(env){
 //    thttp.test({ 'url' : 'http://localhost:8810/krevetk/o', 'method' : 'POST'}, capsule);
 //    capsule.tests.modules.storage.low_level.test();
 
-    var ctest = require('tests/modules/ui/Compositer');
-    ctest.test(capsule); 
-
-//    var comp = capsule.modules.ui.Compositer.create();
-//    var comp1 = capsule.modules.ui.Compositer.create();
-
-/*    var video = capsule.modules.ui.video.mplayer.create({
-							    width : '100%',
-							    height : '100%'
-							}, capsule);	
-    video.control.play();
-
-    var frame = comp.frame_create({
-				      width : '80%',
-				      height : '80%',
-				      x : '10%',
-				      y : '10%'
-				  });
-    comp.frame_add(0, frame);
-    comp.frame_add(frame, video.handle);
-*/
+//    var ctest = require('tests/modules/ui/Compositer');
+    
+//    ctest.test(capsule); 
 };
 
 
