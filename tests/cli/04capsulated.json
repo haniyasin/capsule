@@ -1,0 +1,16 @@
+{
+    "type" : "module",
+
+    "preload" : true,
+    "inline" : true,
+
+    "capsulated" : "tests/cli/capsulated.js",
+    
+    "images" : {
+	"type" : "image",
+	
+	"red" : "tests/cli/images/red.png",
+	"green" : "tests/cli/images/green.png",
+	"blue" : "tests/cli/images/blue.png"
+    }
+}

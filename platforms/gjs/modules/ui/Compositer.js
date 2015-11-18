@@ -48,31 +48,31 @@ element.prototype.on = function(event_name, callback){
 	var mouse_handler = new _event_mouse_handler(listened_elems, this, event_name);
 	switch(event_name){
 	case 'pointer_down' :
-	    element.actor.connect('button-press-event', mouse_handler.handle);
+	    this.actor.connect('button-press-event', mouse_handler.handle);
 	    break;
 	    
 	case 'pointer_up' : 
-	    element.actor.connect('button-release-event', mouse_handler.handle);
+	    this.actor.connect('button-release-event', mouse_handler.handle);
 	    break;
 	    
 	case 'pointer_in' :
-	    element.actor.connect('enter-event', mouse_handler.handle);
+	    this.actor.connect('enter-event', mouse_handler.handle);
 	    break;
 	    
 	case 'pointer_out' :
-	    element.actor.connect('leave-event', mouse_handler.handle);
+	    this.actor.connect('leave-event', mouse_handler.handle);
 	    break;
 	    
 	case 'pointer_motion' : 
-	    element.actor.connect('motion-event', mouse_handler.handle);
+	    this.actor.connect('motion-event', mouse_handler.handle);
 	    break;
 	    
 	case 'key_down' :
-	    element.actor.connect('key-press-event', callback);
+	    this.actor.connect('key-press-event', callback);
 	    break;
 	    
 	case 'key_up' : 
-	    element.actor.connect('key-release-event', callback);
+	    this.actor.connect('key-release-event', callback);
 	    break;
 	}	    
     } else 	    //unregister
@@ -261,7 +261,6 @@ function animation(chain){
     frames = this.frames = [],
     prev_frames_num = 0,
     part;
-    this.started = [];
 
     for(part in chain){
 	var frames_num = chain[part].duration / 1000 * fps;
@@ -296,8 +295,6 @@ function animation(chain){
     return true;
 }
 
-animation.prototype.timeline = null;
-
 animation.prototype.bind = function(element){
     if(!this.animated)
 	this.animated = {};
@@ -309,32 +306,34 @@ animation.prototype.unbind = function(element){
 };
 		
 animation.prototype.start = function(element){
-    var timeline = this.timeline,
+    var timeline = this.comp.timeline,
         self = this,
-        started = this.started;
-    this.animated[element.id].cur_frame = 0;
-    this.started.push(element.id);
+        started = this.comp.started ? this.comp.started : this.comp.started = {},
+        animated = this.animated;
 
-    if(timeline == null){
-	timeline = this.timeline = new Clutter.Timeline({duration : 1000});
+    animated[element.id].cur_frame = 0;
+    started[element.id] = animated[element.id];
+
+    if(timeline == undefined){
+	timeline = this.comp.timeline = new Clutter.Timeline({duration : 1000});
 	
 	timeline.connect('new-frame', 
 			 function() {
 			     var sanim_ind;
 			     for(sanim_ind in started){
-				 var banim = self.animated[started[sanim_ind]];
-				 var element = self.animated[started[sanim_ind]].element;
+				 var banim = started[sanim_ind];
+				 var element = started[sanim_ind].element;
 				 if(banim.cur_frame < banim.frames.length){
 				     var changing_props = banim.frames[banim.cur_frame], prop_name;
 				     for (prop_name in changing_props){
 					 element.props_manager[prop_name].update(changing_props[prop_name]);
-					 print(prop_name, changing_props[prop_name]);
-//					 element.props_manager[prop_name].apply();
+//					 print(prop_name, changing_props[prop_name]);
+					 element.props_manager[prop_name].apply();
 				     }
 				     banim.cur_frame++;
 				 }else{
 				     if(typeof started[sanim_ind] != 'indefined'){
-					 self.started.splice(sanim_ind, 1);
+					 delete started[sanim_ind];
 					 if(self.comp._listened_elems.hasOwnProperty(element.id)){
 					     if(element.event_callbacks['animation_stopped'])
 						 element.event_callbacks['animation_stopped']();
@@ -490,7 +489,7 @@ function props_manager(element){
 	this.set = function(value){
 	    if(typeof value == 'undefined')
 		return;
-	    this.value = value;
+	    this.value = -1 * value;
 	};
 
 	this.get = function(){
@@ -546,6 +545,8 @@ function ui(){
     this.root = new Gtk.Window({ type : Gtk.WindowType.TOPLEVEL });
     this.root.title = 'GJS Compositer';
     this.root.show();
+    this.timeline = null;
+    this.anim.prototype.comp = this;
     this.element.prototype.comp = this;
     this.anim.prototype.comp = this;
 

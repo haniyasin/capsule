@@ -55,12 +55,9 @@ function slideup_cubes_test(comp){
     anim.start(red);
     anim.start(green);
     red.on('animation_stopped', function(){
-//	       print(green.props_manager.y.get());
-//	       print(red.props_manager.y.get());
-	       print('hhhh');
-///		   anim.start(red);
-//		   anim.start(green);
-	       });
+	       anim.start(red);
+	       anim.start(green);
+	   });
 }
 
 function original_test2(comp){
@@ -151,21 +148,20 @@ function original_test2(comp){
 				     y : -75
 				 }
 			     }
-			 ]),
+			 ]);
 
-    bind = anim.bind(frame);
+    anim.bind(frame);
 
-    bind.on('animation_stopped', function(eventName, eventData){
-		comp.anim_start(bind);
-	    });
+    frame.on('animation_stopped', function(eventName, eventData){
+		 anim.start(frame);
+	     });
 
     frame.add(image_red);
     frame.add(image_green);
     frame.add(image_blue);
+    comp.root.add(frame);
 
-    comp.root.add(root, frame);
-
-    bind.start();
+    anim.start(frame);
 }
 
 function original_test1(comp){
@@ -267,17 +263,16 @@ function original_test1(comp){
 				}
 			    ]),
     
-
     animation = {
         counter : 0,
         animation : 0,
 
         animations :
         [
-	    anim_right.bind(frame),
-	    anim_down.bind(frame),
-	    anim_left.bind(frame),
-	    anim_up.bind(frame)
+	    anim_right,
+	    anim_down,
+	    anim_left,
+	    anim_up
         ],
 
         get : (function () {
@@ -293,10 +288,15 @@ function original_test1(comp){
                })
     };
 
+    anim_right.bind(frame);
+    anim_down.bind(frame);
+    anim_left.bind(frame);
+    anim_up.bind(frame);
 
-    comp.event_register(frame, 'pointer_in', function(eventData){
-			    (animation.get()).start();
-			});
+    print(frame.id);
+    frame.on('pointer_down',function(eventData){
+		 (animation.get()).start(frame);
+	     });
 
     frame.add(image_red);
     frame.add(image_green);
@@ -376,7 +376,7 @@ function create_move_remove_test(comp){
 exports.test = function(){
     var comp = new (require('modules/ui/Compositer'));
     slideup_cubes_test(comp);   
-  //  original_test2(comp);
-   // original_test1(comp);
+    original_test2(comp);
+    original_test1(comp);
 //    create_move_remove_test(comp); //this test is depends of gjs
 };
