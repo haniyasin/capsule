@@ -39,7 +39,6 @@ element.prototype.init = function(actor, info){
 
 element.prototype.on = function(event_name, callback){
     var listened_elems = this.comp._listened_elems;
-    print(this.comp);
     if(callback !== 'undefined'){
 	//register callback
 	if(!listened_elems.hasOwnProperty(this.id))
@@ -84,14 +83,9 @@ element.prototype.destroy = function(){
     //FIXME
 };
 
-element.prototype.props = function(info){
-    this.props_manager.set_all(info);
-    this.props_manager.apply_all();
-};
-
 function frame(info){
     this.init(new Clutter.Actor(), info);
-    this.childs = [];
+    this.children = [];
     this.actor.show();
     if(info.hasOwnProperty('background_random'))
 	set_random_background(this.actor);    
@@ -107,14 +101,13 @@ frame.prototype.destroy = function(){
 frame.prototype.add = function(child){
     this.actor.add_actor(child.actor);
     child.parent = this;
-    this.childs.push(child);
-//    if(child.hasOwnProperty('on_add'))
-//	child.on_add(parent_id);
+    this.children.push(child);
     child.props_manager.apply_all();
 };
 
 frame.prototype.remove = function(child){
-    this.actor.remove_child(child.actor);				     
+    this.actor.remove_child(child.actor);
+    //FIXME найти в children и удалить
     child.parent = undefined;
 };
 
@@ -191,7 +184,7 @@ function entry(info){
     this.widget = widget;
     this.actor.show();
     this.set_placeholder = function(placeholder){ widget.set_placeholder_text(placeholder); };
-    this.get_value = function(){ return widget.get_text() };
+    this.get_value = function(){ return widget.get_text(); };
     this.set_value = function(value){ widget.set_text(value); };
     this.on_text_change = function(callback){ element.widget.connect('activate', callback); };
 }
@@ -303,6 +296,8 @@ function animation(chain){
     return true;
 }
 
+animation.prototype.timeline = null;
+
 animation.prototype.bind = function(element){
     if(!this.animated)
 	this.animated = {};
@@ -314,16 +309,14 @@ animation.prototype.unbind = function(element){
 };
 		
 animation.prototype.start = function(element){
-    return;
-    var timeline = null,
+    var timeline = this.timeline,
         self = this,
         started = this.started;
     this.animated[element.id].cur_frame = 0;
     this.started.push(element.id);
-    print(JSON.stringify(this.started));
 
     if(timeline == null){
-	timeline = new Clutter.Timeline({duration : 1000});
+	timeline = this.timeline = new Clutter.Timeline({duration : 1000});
 	
 	timeline.connect('new-frame', 
 			 function() {
@@ -335,7 +328,8 @@ animation.prototype.start = function(element){
 				     var changing_props = banim.frames[banim.cur_frame], prop_name;
 				     for (prop_name in changing_props){
 					 element.props_manager[prop_name].update(changing_props[prop_name]);
-					 element.props_manager[prop_name].apply();
+					 print(prop_name, changing_props[prop_name]);
+//					 element.props_manager[prop_name].apply();
 				     }
 				     banim.cur_frame++;
 				 }else{
@@ -450,16 +444,14 @@ function props_manager(element){
 	    if(this.type == '%' && element.hasOwnProperty('parent')){
 		value = element.parent.props_manager[parent_prop_name].get() / 100 * this.value;
 	    }
-
-//	    element.prop_handlers
 	    element.actor['set_' + prop_name](value);
 
-	    //for frame recalculating all childs for properly % geometry
+	    //for frame recalculating all children for properly % geometry
 	    var echild;
-	    if(element.hasOwnProperty('childs')){
+	    if(element.hasOwnProperty('children')){
 		var child;
-		for(child in element.childs){
-		    echild = element.childs[child];
+		for(child in element.children){
+		    echild = element.children[child];
 		    if(prop_name == 'width'){
 			echild.props_manager['width'].apply();
 			echild.props_manager['x'].apply();			
@@ -533,12 +525,12 @@ function props_manager(element){
 	for(prop in types){
 	    this[prop].apply();
 	}
-	if(typeof element.childs != 'undefined'){
+	if(typeof element.children != 'undefined'){
 	    //this is frame
 	    var child;
-	    for(child in element.childs){
+	    for(child in element.children){
 		for(prop in types){
-		    element.childs[child].props_manager[prop].apply();
+		    element.children[child].props_manager[prop].apply();
 		}
 	    }
 	}
@@ -561,7 +553,7 @@ function ui(){
     cembed.show();
     this.root.add(cembed);
     var stage = this.root_actor  = cembed.get_stage(),
-    root = this.root = new this.frame({ x : 0, y : 0, width : 100, height : 200, opacity : 1 });
+    root = this.root = new this.frame({ x : 0, y : 0, width : 200, height : 200, opacity : 1 });
     cembed.connect('configure-event', 
 		      function(window, event){
 			  var width = stage.get_width(),

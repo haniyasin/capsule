@@ -55,6 +55,8 @@ function slideup_cubes_test(comp){
     anim.start(red);
     anim.start(green);
     red.on('animation_stopped', function(){
+//	       print(green.props_manager.y.get());
+//	       print(red.props_manager.y.get());
 	       print('hhhh');
 ///		   anim.start(red);
 //		   anim.start(green);
