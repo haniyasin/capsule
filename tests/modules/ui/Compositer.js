@@ -50,14 +50,16 @@ function slideup_cubes_test(comp){
 				 }
 			     ]);
 
-    var banim_red = anim.bind(red);
-    var banim_green = anim.bind(green);
-    banim_red.start();
-    banim_green.start();
-    banim_red.on('animation_stopped', function(event_name){
-		     banim_red.start();
-		     banim_green.start();
-		 });
+    anim.bind(red);
+    anim.bind(green);
+    anim.start(red);
+    anim.start(green);
+    red.on('animation_stopped', function(){
+	       print('hhhh');
+///		   anim.start(red);
+//		   anim.start(green);
+	       });
+}
 
 function original_test2(comp){
     var frame = new comp.frame(
@@ -370,9 +372,9 @@ function create_move_remove_test(comp){
 }
 
 exports.test = function(){
-    var comp = new (require('modules/ui/Compositer')).create();
+    var comp = new (require('modules/ui/Compositer'));
     slideup_cubes_test(comp);   
-    original_test2(comp);
-    original_test1(comp);
+  //  original_test2(comp);
+   // original_test1(comp);
 //    create_move_remove_test(comp); //this test is depends of gjs
 };

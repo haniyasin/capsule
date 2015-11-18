@@ -27,26 +27,26 @@ function set_random_background(actor){
 }
 
 function element(){
-    this.id = id_allocator.alloc();
     this.event_callbacks = {};
-
 }
 
 element.prototype.init = function(actor, info){
+    this.id = id_allocator.alloc();
     this.props_manager = new props_manager(this);
     this.actor = actor; //Clutter actor
     this.props_manager.set_all(info, true);
 };
 
-element.prototype.on = function(event, callback){
-    var listened_elemns = this.comp._listened_elems;
+element.prototype.on = function(event_name, callback){
+    var listened_elems = this.comp._listened_elems;
+    print(this.comp);
     if(callback !== 'undefined'){
 	//register callback
 	if(!listened_elems.hasOwnProperty(this.id))
 	    listened_elems[this.id] = this;
 	this.event_callbacks[event_name] = callback;
 	this.actor.reactive = true;
-	var mouse_handler = new _event_mouse_handler(listened_elems, element_id, event_name);
+	var mouse_handler = new _event_mouse_handler(listened_elems, this, event_name);
 	switch(event_name){
 	case 'pointer_down' :
 	    element.actor.connect('button-press-event', mouse_handler.handle);
@@ -134,7 +134,7 @@ function image(info){
 	this.actor.content = this.image;
     } else {
 	//					  print('comp.image', 'please set image.source');
-	set_random_background(element.actor);    
+	set_random_background(this.actor);    
     }
 }
 
@@ -198,7 +198,7 @@ function entry(info){
 
 entry.prototype = new element();
 
-entry.prototype. destroy = function(){
+entry.prototype.destroy = function(){
     id_allocator.free(this.id);
     this.actor.unref();
     this.widget.unref();
@@ -263,17 +263,13 @@ video.prototype.destroy = function(id){
     this.sink.unref();
 };
 
-//start HERE
-function animation(){
-    var anims = new Pool(),
-        binded = new Pool,
-        started = [],
-        fps = 60,
-        timeline = null;
+function animation(chain){
+    var fps = 60,
+    frames = this.frames = [],
+    prev_frames_num = 0,
+    part;
+    this.started = [];
 
-    var frames = [];
-    var prev_frames_num = 0;
-    var part;
     for(part in chain){
 	var frames_num = chain[part].duration / 1000 * fps;
 	if(chain[part].duration == 0){
@@ -304,56 +300,63 @@ function animation(){
 	}
 	prev_frames_num += frames_num;
     }				     
-
-				 destroy : function(anim_id){
-				     anims.free(anim_id);
-				 },
-				 bind : function(element_id, anim_id){
-				     var anim = anims.take(anim_id);
-				     //if(anim) проверять и ошибку бросать
-				     return binded.put({ element : element_id,  
-							 frames : anim });
-				 },
-				 unbind : function(binded_id){
-				     binded.free(binded_id);
-				 },
-				 start : function(binded_id){
-				     comp = this;
-				     var banim = binded.take(binded_id);
-				     banim.cur_frame = 0;
-				     started.push(binded_id);
-				     if(timeline == null){
-					 timeline = new Clutter.Timeline({duration : 1000});
-
-					 timeline.connect('new-frame', function() {
-							      var sanim_ind;
-							      for(sanim_ind in started){
-								  var banim = binded.take(started[sanim_ind]);
-								  var element = elements.take(banim.element);
-								  if(banim.cur_frame < banim.frames.length){
-								      var changing_props = banim.frames[banim.cur_frame], prop_name;
-								      for (prop_name in changing_props){
-									  element.props_manager[prop_name].update(changing_props[prop_name]);
-									  element.props_manager[prop_name].apply();
-								      }
-								      banim.cur_frame++;
-								  }else{
-								      if(typeof started[sanim_ind] != 'indefined'){
-									  started.splice(sanim_ind, 1);
-									  comp.event__emit(banim.element, 'animation_stopped');
-								      }
-								  }
-							      }
-//							      element.actor.set_rotation(Clutter.RotateAxis.Z_AXIS, rotation, 200,0,0);								  
-							  });
-					 timeline.set_loop(true);
-					 timeline.start();					 
-				     }
-				 },
-				 stop : function(binded_id){
-				 }
-			     });
+    return true;
 }
+
+animation.prototype.bind = function(element){
+    if(!this.animated)
+	this.animated = {};
+    this.animated[element.id] = { element : element,  frames : this.frames};
+};
+
+animation.prototype.unbind = function(element){
+    delete this.animated[element.id];
+};
+		
+animation.prototype.start = function(element){
+    return;
+    var timeline = null,
+        self = this,
+        started = this.started;
+    this.animated[element.id].cur_frame = 0;
+    this.started.push(element.id);
+    print(JSON.stringify(this.started));
+
+    if(timeline == null){
+	timeline = new Clutter.Timeline({duration : 1000});
+	
+	timeline.connect('new-frame', 
+			 function() {
+			     var sanim_ind;
+			     for(sanim_ind in started){
+				 var banim = self.animated[started[sanim_ind]];
+				 var element = self.animated[started[sanim_ind]].element;
+				 if(banim.cur_frame < banim.frames.length){
+				     var changing_props = banim.frames[banim.cur_frame], prop_name;
+				     for (prop_name in changing_props){
+					 element.props_manager[prop_name].update(changing_props[prop_name]);
+					 element.props_manager[prop_name].apply();
+				     }
+				     banim.cur_frame++;
+				 }else{
+				     if(typeof started[sanim_ind] != 'indefined'){
+					 self.started.splice(sanim_ind, 1);
+					 if(self.comp._listened_elems.hasOwnProperty(element.id)){
+					     if(element.event_callbacks['animation_stopped'])
+						 element.event_callbacks['animation_stopped']();
+					 }
+				     }
+				 }
+			     }
+			 });
+	timeline.set_loop(true);
+	timeline.start();					 
+    }
+};
+
+animation.prototype.stop = function(element){
+    //FIXME stub
+};
 
 function _event_mouse_handler(listened_elems, element,event_name){
     this.handle = function(actor, event){
@@ -376,20 +379,6 @@ function _event_mouse_handler(listened_elems, element,event_name){
     };	
 }
 
-function event(){
-    return new element_proto('event', {
-				 _listened_elems : {
-				 },				     ,
-				 _emit : function(element, event_name, event_data){
-				     if(listened_elems.hasOwnProperty(element.id)){
-					 if(listened_elems[element.id].callbacks.hasOwnProperty(event_name)){
-					     listened_elems[element.id].callbacks[event_name](event_data);
-					 }
-				     }
-				 }
-			     });
-}
-*/
 function prop_handlers(){
     this.get = function(prop){
     };
@@ -565,6 +554,8 @@ function ui(){
     this.root = new Gtk.Window({ type : Gtk.WindowType.TOPLEVEL });
     this.root.title = 'GJS Compositer';
     this.root.show();
+    this.element.prototype.comp = this;
+    this.anim.prototype.comp = this;
 
     var cembed = new GtkClutter.Embed();
     cembed.show();
@@ -588,9 +579,15 @@ function ui(){
 };
 
 ui.prototype = {
+    _listened_elems : {}, //for events				     ,
     element : element,
     frame : frame,
-    image : image
+    image : image,
+    text : text,
+    button : button,
+    entry : entry,
+    video : video,
+    anim : animation
 };
 
 module.exports = ui;
