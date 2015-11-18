@@ -1,6 +1,6 @@
 var bb_allocator = require('../../../parts/bb_allocator.js');
 
-var ids = new bb_allocator.create(bb_allocator.id_allocator);
+var ids = new bb_allocator.allocator(bb_allocator.id_allocator);
 var base32 = require('../../../dependencies/base32.js');
 
 //неплохо бы подумать как это загружать и выгружать, без вот таких вот свидетельств:)

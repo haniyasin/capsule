@@ -19,11 +19,7 @@
 	    "timer" : "modules/timer.js",
 	    "fs" : "platforms/web/modules/fs.js",
 	    "ui" : {
-		"Compositer" : "platforms/web/modules/ui/Compositer.js",
-		"base_items" : "platforms/web/modules/ui/base_items.js",
-		"dnd" : "platforms/web/modules/ui/dnd.js",
-		"filechooser" : "platforms/web/modules/ui/filechooser.js",
-		"map" : "platforms/web/modules/ui/map.js"
+		"Compositer" : "platforms/web/modules/ui/Compositer.js"
 	    },
 	    "http_requester" : "platforms/web/modules/http_requester.js"	    
 	}

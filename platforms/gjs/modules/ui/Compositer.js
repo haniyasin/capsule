@@ -1,6 +1,9 @@
 /*
  * Compositer module based on modern gnome technologies - mix of clutter and gtk+
+ * 
  * author Nikita Zaharov aka ix(ix@2du.ru)
+ * 
+ * version 0.2
  */
 
 const GLib = imports.gi.GLib;
@@ -549,6 +552,7 @@ function ui(){
     this.anim.prototype.comp = this;
     this.element.prototype.comp = this;
     this.anim.prototype.comp = this;
+    this._listened_elems = {}; //for events				     ,
 
     var cembed = new GtkClutter.Embed();
     cembed.show();
@@ -572,7 +576,6 @@ function ui(){
 };
 
 ui.prototype = {
-    _listened_elems : {}, //for events				     ,
     element : element,
     frame : frame,
     image : image,

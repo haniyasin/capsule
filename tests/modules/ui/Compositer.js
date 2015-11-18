@@ -217,9 +217,9 @@ function original_test1(comp){
 
             source : require('images/blue')
         }
-    ),
+    );
 
-    anim_right = new comp.anim([
+/*    anim_right = new comp.anim([
 				   {
 				       duration : 0,
 				       
@@ -293,10 +293,10 @@ function original_test1(comp){
     anim_left.bind(frame);
     anim_up.bind(frame);
 
-    print(frame.id);
+
     frame.on('pointer_down',function(eventData){
 		 (animation.get()).start(frame);
-	     });
+	     });*/
 
     frame.add(image_red);
     frame.add(image_green);
@@ -375,8 +375,8 @@ function create_move_remove_test(comp){
 
 exports.test = function(){
     var comp = new (require('modules/ui/Compositer'));
-    slideup_cubes_test(comp);   
-    original_test2(comp);
+//    slideup_cubes_test(comp);   
+//    original_test2(comp);
     original_test1(comp);
 //    create_move_remove_test(comp); //this test is depends of gjs
 };
