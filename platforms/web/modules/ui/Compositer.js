@@ -22,6 +22,9 @@
 
 /* Compositer */
 
+var bba = require('parts/bb_allocator'),
+    id_allocator = new bba.allocator(bba.id_allocator);
+
 'use strict';
 
 /* Universal method to take window size in different browsers */
@@ -95,6 +98,7 @@ Unit.prototype.id = function (id) {
 };
 
 Unit.prototype.prepare = function (object) {
+    this.id(id_allocator.alloc());
     this.html.style.position = 'fixed';
     this.html.style.margin   = '0px';
     this.html.style.padding  = '0px';
@@ -395,6 +399,7 @@ function frame (object) {
 frame.prototype = new Unit();
 
 frame.prototype.destroy = function(){
+    id_allocator.free(thid.id());
     //fixme
 };
 
@@ -536,6 +541,7 @@ function image(object){
 image.prototype = new Unit();
 
 image.prototype.destroy = function(){
+    id_allocator.free(thid.id());
     //FIXME
 };
 
@@ -558,6 +564,11 @@ function text(object){
 }
 
 text.prototype = new Unit();
+
+text.prototype.destroy = function(){
+    id_allocator.free(thid.id());
+    //FIXME
+}
 
 text.prototype.resized = function () {
     if (typeof this.width !== 'object' || typeof this.height !== 'object') {
@@ -629,6 +640,11 @@ function entry(object){
 
 entry.prototype = new Unit();
 
+entry.prototype.destroy = function(){
+    id_allocator.free(thid.id());
+    //FIXME
+};
+
 entry.prototype.on_text_change = function(callback){
     this.html.onchange = function(){
 	callback(unit.html.value);
@@ -664,6 +680,11 @@ function button(object){
 
 button.prototype = new Unit();
 
+button.prototype.destroy = function(){
+    id_allocator.free(thid.id());
+    //FIXME
+};
+
 button.prototype.on_press = function(callback){
     this.html.onclick = function(){
 	callback();
@@ -688,6 +709,11 @@ function video(object){
 };
 
 video.prototype = new Unit();
+
+video.prototype.destroy = function(){
+    id_allocator.free(thid.id());
+    //FIXME
+};
 
 video.prototype.load = function(file){
     this.source_child.src = file.uri;	
@@ -724,20 +750,18 @@ video.prototype.set_volume = function(volume){
 
 video.prototype.ontimeupdate = function(callback){
     this.html.ontimeupdate = callback;
-}
+};
 
-/*
 // Animation//
 
 // @constructor //
 
-var Animation = function (chain) {
-    if (!this.init(chain)) {
+function animation(chain){
+    if (!this.init(chain))
         return {};
-    }
 };
 
-Animation.prototype.init = function (chain) {
+animation.prototype.init = function(chain){
     if (
         chain             === undefined ||
             chain.constructor !== Array     ||
@@ -746,44 +770,73 @@ Animation.prototype.init = function (chain) {
         return false;
     }
 
+    this.binded = {};
     this.acts  = chain;
-    this.binds = new Pool();
 
     return true;
 };
 
+animation.prototype.bind = function(element){
+    if (element === undefined) {
+        return false;
+    }
+
+    var bind = new binded_anim(element, this);
+    this.binded[element.id()] = bind;
+   
+    return true;
+};
+
+animation.prototype.unbind = function(element){
+    if (element === undefined) {
+        return false;
+    }
+
+    this.binded[element_id()].destroy();
+    delete this.binded[element.id()];
+
+    return true;
+};
+
+animation.prototype.start = function(element) {
+    if (element === undefined) {
+        return false;
+    }
+    
+    this.binded[element.id()].start();
+
+    return true;;
+};
+
+animation.prototype.stop = function(element) {
+    if (element === undefined) {
+        return false;
+    }
+    
+    this.binded[element.id()].stop();
+
+    return true;;
+};
 
 // Animation bind //
 
 /// @constructor //
 
-Animation.Bind = function (element, animation) {
-    if (this.init(element, animation) === false) {
-        return {};
-    }
-};
-
-Animation.Bind.pool = new Pool();
-
-Animation.Bind.prototype.init = function (element, animation) {
-    if (element === undefined) {
-        return false;
-    }
-
-    if (animation === undefined) {
-        return false;
-    }
-
+function binded_anim(element, animation){
+    //FIXME нужна проверка аргументов
+    this.id = id_allocator.alloc();
     this.element   = element;
     this.animation = animation;
 
     this.act = 0;
     this.initAct(this.act, undefined);
-
-    return true;
 };
 
-Animation.Bind.prototype.initAct = function (actId, late) {
+binded_anim.prototype.destroy = function(){
+    id_allocator.free(this.id);
+};
+
+binded_anim.prototype.initAct = function(actId, late){
     var act = this.animation.acts[actId];
 
     if (act === undefined) {
@@ -811,25 +864,21 @@ Animation.Bind.prototype.initAct = function (actId, late) {
     return true;
 };
 
-Animation.Bind.prototype.start = function () {
-    this.workerPoolId = Animation.worker.pool.put(this);
+binded_anim.prototype.start = function () {
+    animation.worker.runned[this.id] = this;
 
-    Animation.worker(undefined);
+    animation.worker(undefined);
 };
 
-Animation.Bind.prototype.stop = function () {
-    if (this.workerPoolId === undefined) {
-        return false;
-    }
-
-    Animation.worker.pool.free(this.workerPoolId);
+binded_anim.prototype.stop = function () {
+    delete animation.worker.runned[this.id];
     //if (this.callback) //нужно для восстановления доставки события по binded_id
-    window['incident']({type : 'animation_stopped', currentTarget : this.elementId});
+    window['incident']({type : 'animation_stopped', currentTarget : this.element.id()});
 
     return true;
 };
 
-Animation.Bind.prototype.blink = function (delay) {
+binded_anim.prototype.blink = function (delay) {
     var last;
 
     if (this.duration - delay < 0) {
@@ -866,29 +915,29 @@ Animation.Bind.prototype.blink = function (delay) {
 
 // Animation worker //
 
-Animation.worker = function (work) {
+animation.worker = function (work) {
     if (!work) {
-        if (Animation.worker.already) {
+        if (animation.worker.already) {
             return undefined;
         }
     }
 
-    Animation.worker.already = true;
+   animation.worker.already = true;
 
     var delay =
-        (Animation.worker.last) ?
-        (new Date()).getTime() - Animation.worker.last.getTime() :
-        1000 / Animation.worker.maxFps,
+        (animation.worker.last) ?
+        (new Date()).getTime() - animation.worker.last.getTime() :
+        1000 / animation.worker.maxFps,
 
 
-    pool = Animation.worker.pool,
+    runned = animation.worker.runned,
 
-    poolId, more;
+    runned_id, more;
 
-    if (pool.count > 0) {
-        for (poolId in pool.pool) {
-            if (pool.pool.hasOwnProperty(poolId)) {
-                var bind = pool.pool[poolId];
+    if (runned.length != 0) {
+        for (runned_id in runned) {
+            if (runned.hasOwnProperty(runned_id)) {
+                var bind = runned[runned_id];
 
                 if (bind) {
                     bind.blink(delay);
@@ -900,25 +949,26 @@ Animation.worker = function (work) {
     }
 
     if (more !== true) {
-        Animation.worker.already = false;
-        delete Animation.worker.last;
+        animation.worker.already = false;
+        delete animation.worker.last;
 
         return undefined;
     }
 
-    Animation.worker.last = new Date();
+    animation.worker.last = new Date();
 
     setTimeout(
-        function () {Animation.worker(true);},
-        1000 / Animation.worker.maxFps
+        function () {animation.worker(true);},
+        1000 / animation.worker.maxFps
     );
 
     return undefined;
 };
 
-Animation.worker.pool   = new Pool();
-Animation.worker.maxFps = 100;
-*/
+animation.worker.runned = {};
+
+animation.worker.maxFps = 100;
+
 
 // Event //
 
@@ -1064,78 +1114,6 @@ Compositer.prototype['element_change_props'] = function(elementId, info){
     return undefined;	
 };
 
-Compositer.prototype['anim_bind'] = function (elementId, animationId) {
-    if (typeof elementId   !== 'number' ||
-        typeof animationId !== 'number')
-    {
-        return undefined;
-    }
-
-    var element   = Unit.pool.take(elementId),
-    animation = Animation.pool.take(animationId);
-
-    if (element === undefined || animation === undefined) {
-        return undefined;
-    }
-
-    var bind = new Animation.Bind(element, animation);
-    bind.elementId = elementId;
-
-    animation.binds.put(bind);
-
-    bind.id = Animation.Bind.pool.put(bind);
-
-    return bind.id;
-};
-
-Compositer.prototype['anim_unbind'] = function (bindId) {
-    if (typeof bindId !== 'number') {
-        return undefined;
-    }
-
-    var bind = Animation.Bind.pool.take(bindId);
-
-    if (bind === undefined) {
-        return undefined;
-    }
-
-    bind.animation.binds.free(bindId);
-    Animation.Bind.pool.free(bindId);
-
-    return undefined;
-};
-
-Compositer.prototype['anim_start'] = function (bindId) {
-    if (typeof bindId !== 'number') {
-        return undefined;
-    }
-
-    var bind = Animation.Bind.pool.take(bindId);
-
-    if (bind === undefined) {
-        return undefined;
-    }
-
-    bind.start();
-
-    return undefined;
-};
-
-Compositer.prototype['anim_stop'] = function (bindId) {
-    if (typeof bindId !== 'number') {
-        return undefined;
-    }
-
-    var bind = Animation.Bind.pool.take(bindId);
-
-    if (bind === undefined) {
-        return undefined;
-    }
-
-    bind.stop();
-
-    return undefined;
-};
 
 Compositer.prototype['event_register'] = function (elementId, eventName, callback) {
     if (typeof elementId !== 'number' ||
@@ -1255,7 +1233,11 @@ var Compositer = function () {
 Compositer.prototype = {
     Unit : Unit,
     frame : frame,
-    image : image
+    image : image,
+    text : text,
+    entry : entry,
+    video : video,
+    anim : animation
 };
 
 module.exports = Compositer;
