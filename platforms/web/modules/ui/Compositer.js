@@ -124,6 +124,15 @@ Unit.prototype.prepare = function (object) {
     return undefined;
 };
 
+Unit.prototype.change_props = function(info){
+    var field;
+    for(field in info){
+	this[field].value = info[field];
+	this[field].apply(this);
+    }
+    return true;	
+};
+
 Unit.prototype.defaults = {
     width   : {type : 'width',   value : 100, unit : '%' },
     height  : {type : 'height',  value : 100, unit : '%' },
@@ -133,8 +142,108 @@ Unit.prototype.defaults = {
     opacity : {type : 'opacity', value : 0,   unit : '%' }
 };
 
+Unit.prototype.event_correct = {
+    'pointer_in'     : 'onmouseover',
+    'pointer_out'    : 'onmouseout',
+    'pointer_down'   : 'onmousedown',
+    'pointer_up'     : 'onmouseup',
+    'pointer_motion' : 'onmousemove',
+
+    'key_down'       : 'onkeydown',
+    'key_up'         : 'onkeyup',
+
+
+    'mouseover'      : 'pointer_in',
+    'mouseout'       : 'pointer_out',
+    'mousedown'      : 'pointer_down',
+    'mouseup'        : 'pointer_up',
+    'mousemove'      : 'pointer_motion',
+
+    'keydown'        : 'key_down',
+    'keyup'          : 'key_up'
+};
+
+function process_mouse_event(element, event){
+    var re_disassemble = /(\d+)px/;
+    var x = event.clientX - re_disassemble.exec(element.html.style.left)[1],
+    y = event.clientY - re_disassemble.exec(element.html.style.top)[1];
+    return [{
+		'pointer_id' : 0,
+		
+		'x' : (element.width.unit  === '%') ?
+                    (100 / element.width.px().value  * x) :
+                    x,
+		
+                'y' : (element.height.unit === '%') ?
+                    (100 / element.height.px().value * y) :
+		    y
+            }];    
+}
+
+function process_key_event(element, event){
+    var eventData = {
+        'key_obj' :
+        {
+                'group_id' : 0, 'keynum' : event.keyCode,
+                'key_modificators' : {}
+            }
+        };
+
+        if (event['ctrlKey']) {
+            eventData['key_obj']['key_modificators']['ctrl']  = true;
+        }
+
+        if (event['shiftKey']) {
+            eventData['key_obj']['key_modificators']['shift'] = true;
+        }
+
+        if (event['metaKey']) {
+            eventData['key_obj']['key_modificators']['alt']   = true;
+        } 
+   
+    return eventData;
+}
+
 Unit.prototype.on = function(event_name, callback){
-    
+    if (typeof event_name !== 'string')
+    {
+        return false;
+    }
+
+    var self = this;
+
+    if(event_name == 'animation_stopped'){
+	if(callback)
+	    this.on_animation_stopped = callback;
+	else 
+	    delete this.on_animation_stopped;
+    }
+
+    event_name = this.event_correct[event_name];
+
+    if (event_name === undefined) {
+        return false;
+    }
+
+    if ((/mouse/).test(event_name)) {
+	if(callback)
+            this.html[event_name] = function(event){
+		callback(process_mouse_event(self, event));
+	    };
+	else
+            delete this.html[eventName];
+    }
+
+    if ((/key/).test(event_name)) {
+	if(callback)
+            document[event_name] = function(event){
+		callback(process_key_event(self, event));
+	    };
+	else
+	    delete document[eventName];
+    }
+
+    return true;
 };
 
 /* Value */
@@ -873,7 +982,8 @@ binded_anim.prototype.start = function () {
 binded_anim.prototype.stop = function () {
     delete animation.worker.runned[this.id];
     //if (this.callback) //нужно для восстановления доставки события по binded_id
-    window['incident']({type : 'animation_stopped', currentTarget : this.element.id()});
+    if(this.element.on_animation_stopped)
+	this.element.on_animation_stopped({type : 'animation_stopped'});
 
     return true;
 };
@@ -969,122 +1079,6 @@ animation.worker.runned = {};
 
 animation.worker.maxFps = 100;
 
-
-// Event //
-
-window['incident'] = function (event) {
-    if (typeof window['incident'].callback !== 'function') {
-        return undefined;
-    }
-
-    if (!event) {
-        incident = window['event'];
-    }
-
-    if (event.type === 'animation_stopped') {
-	if(window['incident'].callbacks.hasOwnProperty(event['currentTarget']))
-	    window['incident'].callbacks[event['currentTarget']]['animation_stopped']();
-        window['incident'].callback(
-            event['currentTarget'], 'animation_stopped'
-        );
-    }
-
-    var eventGroup =
-        (/mouse/).test(event.type) ? 'mouse' :
-        (/key/).test(event.type)   ? 'key'   :
-        null,
-
-    eventName = window['incident'].correct[event.type];
-
-    if (eventName === undefined) {
-        return undefined;
-    }
-
-    var elementId, eventData, element;
-
-    switch (eventGroup) {
-    case 'mouse':
-        elementId = +(/^_(\d+)$/).exec(event['currentTarget']['id'])[1];
-
-        element = Unit.pool.take(elementId);
-
-	var re_disassemble = /(\d+)px/;
-	var x = event.clientX - re_disassemble.exec(element.html.style.left)[1],
-        y = event.clientY - re_disassemble.exec(element.html.style.top)[1];
-	
-        eventData = [{
-                         'pointer_id' : 0,
-
-                         'x' : (element.width.unit  === '%') ?
-                             (100 / element.width.px().value  * x) :
-                             x,
-
-                         'y' : (element.height.unit === '%') ?
-                             (100 / element.height.px().value * y) :
-			     y
-                     }];
-        break;
-    case 'key':
-        elementId = 0;
-
-        eventData = {
-            'key_obj' :
-            {
-                'group_id' : 0, 'keynum' : event.keyCode,
-                'key_modificators' : {}
-            }
-        };
-
-        if (event['ctrlKey']) {
-            eventData['key_obj']['key_modificators']['ctrl']  = true;
-        }
-
-        if (event['shiftKey']) {
-            eventData['key_obj']['key_modificators']['shift'] = true;
-        }
-
-        if (event['metaKey']) {
-            eventData['key_obj']['key_modificators']['alt']   = true;
-        }
-        break;
-    default: return undefined;
-    }
-
-    window['incident'].callback(elementId, eventName, eventData);
-
-    if(window['incident'].callbacks.hasOwnProperty(elementId))
-	window['incident'].callbacks[elementId][eventName](eventData);
-
-    return undefined;
-};
-
-window['incident'].callback = function(){}; // a litle hack for not calling events_callback_set if do not need
-window['incident'].callbacks = [];
-
-window['incident'].correct = {
-    'pointer_in'     : 'onmouseover',
-    'pointer_out'    : 'onmouseout',
-    'pointer_down'   : 'onmousedown',
-    'pointer_up'     : 'onmouseup',
-    'pointer_motion' : 'onmousemove',
-
-    'key_down'       : 'onkeydown',
-    'key_up'         : 'onkeyup',
-
-
-    'mouseover'      : 'pointer_in',
-    'mouseout'       : 'pointer_out',
-    'mousedown'      : 'pointer_down',
-    'mouseup'        : 'pointer_up',
-    'mousemove'      : 'pointer_motion',
-
-    'keydown'        : 'key_down',
-    'keyup'          : 'key_up'
-};
-
-
-/* Compositer */
-
 /*
 Compositer.prototype['elem_get_geometry'] = function(elemId, px){
     if (typeof elemId !== 'number') {
@@ -1101,136 +1095,16 @@ Compositer.prototype['elem_get_geometry'] = function(elemId, px){
     };	
 };
 */
-
-/*
-
-Compositer.prototype['element_change_props'] = function(elementId, info){
-    var element = Unit.pool.take(elementId);
-    var field;
-    for(field in info){
-	element[field].value = info[field];
-	element[field].apply(element);
-    }
-    return undefined;	
-};
-
-
-Compositer.prototype['event_register'] = function (elementId, eventName, callback) {
-    if (typeof elementId !== 'number' ||
-        typeof eventName !== 'string')
-    {
-        return undefined;
-    }
-
-    if(typeof(callback) != 'undefined'){
-	if(!window['incident'].callbacks.hasOwnProperty(elementId))
-	    window['incident'].callbacks[elementId] = {};
-	window['incident'].callbacks[elementId][eventName] = callback;	    
-    }
-
-    if (eventName === 'animation_stopped') {
-        var bind = Animation.Bind.pool.take(elementId);
-        if (bind !== undefined) {
-            bind.callback = true;
-        }
-
-        return undefined;
-    }
-
-    eventName = window['incident'].correct[eventName];
-
-    if (eventName === undefined) {
-        return undefined;
-    }
-
-    if ((/mouse/).test(eventName)) {
-        var element = Unit.pool.take(elementId);
-
-        if (element === undefined) {
-            return undefined;
-        }
-
-        element.html[eventName] = window['incident'];
-
-        return undefined;
-    }
-
-    if ((/key/).test(eventName)) {
-        document[eventName] = window['incident'];
-    }
-
-    return undefined;
-};
-
-Compositer.prototype['event_unregister'] = function (elementId, eventName) {
-    if (typeof elementId !== 'number') {
-        return undefined;
-    }
-
-    if (typeof eventName !== 'string') {
-        return undefined;
-    }
-    
-    if(window['incident'].callbacks[elementId].hasOwnProperty('eventName'))
-	delete window['incident'].callbacks[elementId][eventName];
-
-    var element;
-
-    if (eventName === 'animation_stopped') {
-        element = Animation.Bind.pool.take(elementId);
-
-        if (element === undefined) {
-            return undefined;
-        }
-
-        delete element.callback;
-
-        return undefined;
-    }
-
-    element = Unit.pool.take (elementId);
-
-    if (element === undefined) {
-        return undefined;
-    }
-
-    eventName = event.correct[eventName];
-
-    if (eventName === undefined) {
-        return undefined;
-    }
-
-    if ((/mouse/).test(eventName)) {
-        delete element.html[eventName];
-
-        return undefined;
-    }
-
-    if ((/key/).test(eventName)) {
-        delete document[eventName];
-    }
-
-    return undefined;
-};
-
-Compositer.prototype['events_callback_set'] = function (callback) {
-    window['incident'].callback = callback;
-
-    return undefined;
-};
-*/
-
-
-var Compositer = function () {
+function ui() {
     this.root = new root();
 
     if (typeof this.root === 'object')
-        return undefined;
+        return true;
     else 
         throw new Error('You can create Compositer object only after load DOM');
 };
 
-Compositer.prototype = {
+ui.prototype = {
     Unit : Unit,
     frame : frame,
     image : image,
@@ -1240,6 +1114,6 @@ Compositer.prototype = {
     anim : animation
 };
 
-module.exports = Compositer;
+module.exports = ui;
 
 

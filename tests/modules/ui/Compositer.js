@@ -56,6 +56,8 @@ function slideup_cubes_test(comp){
     anim.start(green);
     red.on('animation_stopped', function(){
 	       anim.start(red);
+	   });
+    green.on('animation_stopped', function(){
 	       anim.start(green);
 	   });
 }
