@@ -857,7 +857,7 @@ video.prototype.set_volume = function(volume){
 	    this.html.volume = volume;
 },
 
-video.prototype.ontimeupdate = function(callback){
+video.prototype.on_timeupdate = function(callback){
     this.html.ontimeupdate = callback;
 };
 
@@ -1109,6 +1109,7 @@ ui.prototype = {
     frame : frame,
     image : image,
     text : text,
+    button : button,
     entry : entry,
     video : video,
     anim : animation

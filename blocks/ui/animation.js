@@ -19,10 +19,10 @@ function _toggle(){
     
     if(this.toggled){
 	this.toggled = false;
-	this._start('boff');		
+	this._start('off');		
     } else {
 	this.toggled = true;
-	this._start('bon');	    
+	this._start('on');	    
     }
     
     return true;	
@@ -31,32 +31,32 @@ function _toggle(){
 exports.many_toggle = function(comp, anim_info){
     var anim_ind, el_ind,   
         anim_arr = this.anim_arr = [],
-        self = this;
+        self = this, element;
     for(anim_ind in anim_info){
 	anim_arr[anim_ind] = {};
-	anim_arr[anim_ind].on = comp.anim_create(anim_info[anim_ind].on);
-	anim_arr[anim_ind].off = comp.anim_create(anim_info[anim_ind].off);
-	anim_arr[anim_ind].bon = [];
-	anim_arr[anim_ind].boff = [];
+	anim_arr[anim_ind].on = new comp.anim(anim_info[anim_ind].on);
+	anim_arr[anim_ind].off = new comp.anim(anim_info[anim_ind].off);
+	anim_arr[anim_ind].elements = [];
 	for(el_ind in anim_info[anim_ind].elements){
-	    anim_arr[anim_ind].bon.push(comp.anim_bind(anim_info[anim_ind].elements[el_ind], anim_arr[anim_ind].on));
-	    anim_arr[anim_ind].boff.push(comp.anim_bind(anim_info[anim_ind].elements[el_ind], anim_arr[anim_ind].off));
-	    comp.event_register(anim_info[anim_ind].elements[el_ind], 'animation_stopped', function(){
-				    self.runned--;		    
-				});
+	    element = anim_info[anim_ind].elements[el_ind];
+	    anim_arr[anim_ind].elements.push(element);
+	    anim_arr[anim_ind].on.bind(element);
+	    anim_arr[anim_ind].off.bind(element);
+	    element.on('animation_stopped', function(){
+			   self.runned--;		    
+		       });
 	}
     }
 
-    this.anim_arr = anim_arr;
     this.runned = 0;
     this.toggled = false;
     
     function _anim_starter(onoff){
-	anim_arr = this.anim_arr;
 	for(anim_ind in anim_arr){
-	    for(el_ind in anim_arr[anim_ind][onoff]){
+	    for(el_ind in anim_arr[anim_ind].elements){
 		this.runned++;
-		comp.anim_start(anim_arr[anim_ind][onoff][el_ind]);
+		print(anim_arr[anim_ind].elements[el_ind].id);
+		anim_arr[anim_ind][onoff].start([anim_arr[anim_ind].elements[el_ind]]);
 	    }   
 	}
     }
@@ -67,28 +67,29 @@ exports.many_toggle = function(comp, anim_info){
 exports.many_toggle.prototype.toggle = _toggle;
 
 exports.toggle = function(comp, name, on_chain, off_chain){
-    var aonchain = comp.anim_create(on_chain),
-        aoffchain = comp.anim_create(off_chain);
+    var a = { on : new comp.anim(on_chain),
+              off : new comp.anim(off_chain)
+	    };
 
     this.bind = function(widget){
+	a.on.bind(widget.element),
+	a.off.bind(widget.element);
 	widget[name] = {
 	    runned : 0,
 	    toggled : false,
-	    bon : comp.anim_bind(widget.frame, aonchain),
-	    boff : comp.anim_bind(widget.frame, aoffchain),
-	    _start : function(onoff){ this.runned++; comp.anim_start(this[onoff]); },
+	    _start : function(onoff){ this.runned++; a[onoff].start(widget.element); },
 	    toggle : _toggle
 	};
 	
-	comp.event_register(widget.frame, 'animation_stopped', function(){
-				widget[name].runned = 0;
-			    }
-			   );
+	widget.element.on('animation_stopped', function(){
+			      widget[name].runned = 0;
+			  }
+			 );
     };
 
     this.unbind = function(widget){
-	comp.anim_unbind(widget.anim.banimslu);
-	comp.anim_unbind(widget.anim.banimsld);
+	a.off.unbind(windget.element);
+	a.on.unbind(widget.element);
 	widget[name] = undefined;
     };
 }

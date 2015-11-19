@@ -152,9 +152,9 @@ function text(info){
     this.init(new Clutter.Text(), info);
     if(!info.hasOwnProperty('text'))
 	info.text = 'text';
-    element.actor.set_font_name("Sans 26");
-    element.actor.set_text(info.text);
-    element.actor.show();
+    this.actor.set_font_name("Sans 26");
+    this.actor.set_text(info.text);
+    this.actor.show();
 }
 
 text.prototype = new element();
@@ -173,7 +173,7 @@ function button(info){
     this.widget = widget;
     this.actor.show();
     this.set_label = function(label){widget.set_label(label);};
-    this.on_press = function(callback){element.widget.connect('pressed', callback);};
+    this.on_press = function(callback){widget.connect('pressed', callback);};
 }
 
 button.prototype = new element();
@@ -194,7 +194,7 @@ function entry(info){
     this.set_placeholder = function(placeholder){ widget.set_placeholder_text(placeholder); };
     this.get_value = function(){ return widget.get_text(); };
     this.set_value = function(value){ widget.set_text(value); };
-    this.on_text_change = function(callback){ element.widget.connect('activate', callback); };
+    this.on_text_change = function(callback){ widget.connect('activate', callback); };
 }
 
 entry.prototype = new element();
@@ -232,14 +232,14 @@ function video(info){
     
     this.load = function(file){
 	info.source = file.uri;
-	load_video(element, info);
+	load_video(this, info);
     };
 
-    this.play = function(){ element.pipeline.set_state(Gst.State.PLAYING); };
-    this.pause = function(){ element.pipeline.set_state(Gst.State.PAUSED); };
-    this.set_position = function(msecond){ element.pipeline.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH, msecond *Gst.MSECOND); };	
-    this.get_position = function(){ return element.pipeline.query_position(Gst.Format.TIME)[1] / Gst.MSECOND; };
-    this.get_duration = function(){ return element.pipeline.query_duration(Gst.Format.TIME)[1] / Gst.MSECOND; };
+    this.play = function(){ this.pipeline.set_state(Gst.State.PLAYING); };
+    this.pause = function(){ this.pipeline.set_state(Gst.State.PAUSED); };
+    this.set_position = function(msecond){ this.pipeline.seek_simple(Gst.Format.TIME, Gst.SeekFlags.FLUSH, msecond *Gst.MSECOND); };	
+    this.get_position = function(){ return this.pipeline.query_position(Gst.Format.TIME)[1] / Gst.MSECOND; };
+    this.get_duration = function(){ return this.pipeline.query_duration(Gst.Format.TIME)[1] / Gst.MSECOND; };
     this.get_volume = function(){ return 100; }; //FIXME
     this.set_volume = function(volume){ }; //FIXME
     this.on_timeupdate = function(callback){

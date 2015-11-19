@@ -4,22 +4,18 @@
 
 var tfile, comp, animation,
     bplayer, work_zone_switcher;
-
+/*
 function file_opener_widget(comp, player, parent, info){
-    /*
-     * common functionality
-     */
+
 
     function file_choosen(file){
 //	console.log(address);
 	player.source = file;
-	player.vcontrol.load(file);
+	player.load(file);
 	player.slide.toggle();
     }
 
-    /*
-     * link entering
-     */
+
     var addr_e = comp.entry_create({
 				   x : '2%',
 				   y : '30%',
@@ -33,9 +29,7 @@ function file_opener_widget(comp, player, parent, info){
     comp.frame_add(form_frame, addr_e);
     addr_c.set_value("http://docs.gstreamer.com/media/sintel_trailer-480p.ogv");
 
-    /*
-     * choosing local file
-     */
+
     var filechooser = comp.filechooser_create({
 					      x : '2%',
 					      y : '51%',
@@ -48,13 +42,7 @@ function file_opener_widget(comp, player, parent, info){
     filechooser.on_choose(function(file){
 			      file_choosen(file);
 			  });
-    /*
-     * dnd file
-     */
 
-    /*
-     * finishing choosing file
-     */
 }
 
 function dnd_widget(comp, player, info){
@@ -78,33 +66,33 @@ function dnd_widget(comp, player, info){
 	drag_dest.destroy();
     };
 }
+*/
 
 function playlist(player, info){
-    var form_frame = this.frame = comp.frame_create(info),
-    bg = comp.image_create({
-			       x : '0%', y : '0%',
-			       width : '100%', height : '100%',z_index : 0,
-			       source : require('images/file_form_bg')
-			   }),
-    title = comp.text_create({
-				 x : '1%', y : '1%',
-				 width : '98%', height : '10%', z_index : 1,
-				 text : 'Filelist'
-			     });
-    comp.frame_add(form_frame, bg);
-    comp.frame_add(form_frame, title);
-    comp.frame_add(0, form_frame);
-    var add_b = comp.button_create({
-				  x : '1%', y : '89%',
-				  width : '30%', height : '10%', z_index : 2,
-				  label : 'add'
-			     }),
-    add_c = comp.button_get_control(add_b);
-    comp.frame_add(form_frame, add_b);
-    add_c.on_press(function(){
+    var form_frame = this.element = new comp.frame(info),
+    bg = new comp.image({
+			    x : '0%', y : '0%',
+			    width : '100%', height : '100%',z_index : 0,
+			    source : require('images/file_form_bg')
+			}),
+    title = new comp.text({
+			      x : '1%', y : '1%',
+			      width : '98%', height : '10%', z_index : 1,
+			      text : 'Filelist'
+			  });
+    form_frame.add(bg);
+    form_frame.add(title);
+    comp.root.add(form_frame);
+    var add_b = new comp.button({
+				    x : '1%', y : '89%',
+				    width : '30%', height : '10%', z_index : 2,
+				    label : 'add'
+				});
+    form_frame.add(add_b);
+    add_b.on_press(function(){
 		       work_zone_switcher.toggle();
-//		      file_choosen(new tfile(addr_c.get_value()));
-		 });
+		       //		      file_choosen(new tfile(addr_c.get_value()));
+		   });
 /*
     var file_opener = new file_opener_widget(comp, player.video, player.video, ),
     dnd = new dnd_widget(comp, player.frame, {
@@ -117,7 +105,8 @@ function playlist(player, info){
 			 });    */
 }
 
-function player(info){ 
+function player(info){
+    this.element = new comp.frame(info); 
     var self = this,
     video = this.video = new bplayer.video(comp,{
 						   x : '1%', y : '1%',
@@ -131,12 +120,12 @@ function player(info){
 					height : '10%',
 					z_index : 5
 				    }),
-    bg = comp.image_create({
-			       x : '0%', y : '0%',
-			       width : '100%', height : '100%',
-			       z_index : 0,
-			       source : require('images/main_bg')
-			   }),
+    bg = new comp.image({
+			    x : '0%', y : '0%',
+			    width : '100%', height : '100%',
+			    z_index : 0,
+			    source : require('images/main_bg')
+			}),
     sanim = new animation.toggle(comp, 'slide',
 				 [
 				     {
@@ -158,24 +147,23 @@ function player(info){
 				     }
 				 ]
 				);
-    this.frame = comp.frame_create(info);
     sanim.bind(this);
-    comp.frame_add(this.frame, controls.frame);
-    comp.frame_add(this.frame, video.frame);
-    comp.frame_add(this.frame, bg);
-    comp.frame_add(0, this.frame);
-    comp.event_register(bg, 'pointer_down', function(){
-			    work_zone_switcher.toggle();
-			});
+    this.element.add(controls.element);
+    this.element.add(video.element);
+    this.element.add(bg);
+    comp.root.add(this.element);
+    bg.on('pointer_down', function(){
+	      work_zone_switcher.toggle();
+	  });
 }
 
 exports.main = function(){
     if(!tfile)
 	tfile = require('types/file');
     var Compositer = require('modules/ui/Compositer');
-    require('modules/ui/dnd');//подключаем возможности dnd в Compositer
-    require('modules/ui/filechooser'); //подключаем возможности filechooser
-    comp = Compositer.create();
+//    require('modules/ui/dnd');//подключаем возможности dnd в Compositer
+//    require('modules/ui/filechooser'); //подключаем возможности filechooser
+    comp = new Compositer();
     animation = require('blocks/ui/animation');
     bplayer = require('blocks/ui/player');
     var iplayer = new player({
@@ -191,10 +179,9 @@ exports.main = function(){
 				      opacity : 1,
 				      z_index : 1
 				  });
-
     work_zone_switcher = new animation.many_toggle(comp,
 	[{
-	     elements : [iplayer.frame],
+	     elements : [iplayer.element],
 	     on : [
 		 {
 		   duration : 200,
@@ -228,7 +215,7 @@ exports.main = function(){
 	     ]
 	 },
 	 {
-	     elements : [iplaylist.frame],
+	     elements : [iplaylist.element],
 	     on : [
 		 {
 		     duration : 300,
