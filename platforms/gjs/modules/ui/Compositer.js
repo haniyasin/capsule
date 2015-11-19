@@ -30,14 +30,19 @@ function set_random_background(actor){
 }
 
 function element(){
-    this.event_callbacks = {};
 }
 
 element.prototype.init = function(actor, info){
+    this.event_callbacks = {};
     this.id = id_allocator.alloc();
     this.props_manager = new props_manager(this);
     this.actor = actor; //Clutter actor
     this.props_manager.set_all(info, true);
+};
+
+element.prototype.change_props = function(info){
+    this.props_manager.set_all(info, true);
+    this.props_namager.apply_all();    
 };
 
 element.prototype.on = function(event_name, callback){
@@ -311,21 +316,20 @@ animation.prototype.unbind = function(element){
 animation.prototype.start = function(element){
     var timeline = this.comp.timeline,
         self = this,
-        started = this.comp.started ? this.comp.started : this.comp.started = {},
+        started = this.comp.started ? this.comp.started : this.comp.started = [],
         animated = this.animated;
 
     animated[element.id].cur_frame = 0;
-    started[element.id] = animated[element.id];
-
+    started.push(animated[element.id]);
     if(timeline == undefined){
 	timeline = this.comp.timeline = new Clutter.Timeline({duration : 1000});
 	
 	timeline.connect('new-frame', 
 			 function() {
-			     var sanim_ind;
-			     for(sanim_ind in started){
-				 var banim = started[sanim_ind];
-				 var element = started[sanim_ind].element;
+			     var sanim_ind = started.length - 1, banim, element;
+			     while(sanim_ind >= 0){
+				 banim = started[sanim_ind];
+				 element = started[sanim_ind].element;
 				 if(banim.cur_frame < banim.frames.length){
 				     var changing_props = banim.frames[banim.cur_frame], prop_name;
 				     for (prop_name in changing_props){
@@ -335,14 +339,13 @@ animation.prototype.start = function(element){
 				     }
 				     banim.cur_frame++;
 				 }else{
-				     if(typeof started[sanim_ind] != 'indefined'){
-					 delete started[sanim_ind];
-					 if(self.comp._listened_elems.hasOwnProperty(element.id)){
-					     if(element.event_callbacks['animation_stopped'])
-						 element.event_callbacks['animation_stopped']();
-					 }
+				     started.splice(sanim_ind, 1);
+				     if(self.comp._listened_elems.hasOwnProperty(element.id)){
+					 if(element.event_callbacks['animation_stopped'])
+					     element.event_callbacks['animation_stopped']();
 				     }
 				 }
+				 sanim_ind--;
 			     }
 			 });
 	timeline.set_loop(true);
@@ -373,11 +376,6 @@ function _event_mouse_handler(listened_elems, element,event_name){
 	
 	listened_elems[element.id].event_callbacks[event_name](pointer_obj);
     };	
-}
-
-function prop_handlers(){
-    this.get = function(prop){
-    };
 }
 
 function props_manager(element){
@@ -478,7 +476,7 @@ function props_manager(element){
 
 	this.apply = function(){
 	    if(this.type == '%')
-		element.actor.opacity = this.value * 2.5;
+		element.actor.opacity = this.value * 2.55;
 	    else 
 		if(this.type == 'a')
 		    element.actor.opacity = this.value * 255;
