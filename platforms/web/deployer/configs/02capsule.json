@@ -19,7 +19,8 @@
 	    "timer" : "modules/timer.js",
 	    "fs" : "platforms/web/modules/fs.js",
 	    "ui" : {
-		"Compositer" : "platforms/web/modules/ui/Compositer.js"
+		"Compositer" : "platforms/web/modules/ui/Compositer.js",
+		"filechooser" : "platforms/web/modules/ui/filechooser.js"
 	    },
 	    "http_requester" : "platforms/web/modules/http_requester.js"	    
 	}

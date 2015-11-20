@@ -23,6 +23,7 @@
 /* Compositer */
 
 var bba = require('parts/bb_allocator'),
+    event_dispatcher = require('parts/event_dispatcher'),
     id_allocator = new bba.allocator(bba.id_allocator);
 
 'use strict';
@@ -80,6 +81,83 @@ wsSize.take = function () {
 var Unit = function () {
 };
 
+function process_mouse_event(element, event){
+    var re_disassemble = /(\d+)px/;
+    var x = event.clientX - re_disassemble.exec(element.html.style.left)[1],
+    y = event.clientY - re_disassemble.exec(element.html.style.top)[1];
+    return [{
+		'pointer_id' : 0,
+		
+		'x' : (element.width.unit  === '%') ?
+                    (100 / element.width.px().value  * x) :
+                    x,
+		
+                'y' : (element.height.unit === '%') ?
+                    (100 / element.height.px().value * y) :
+		    y
+            }];    
+}
+
+function process_key_event(element, event){
+    var eventData = {
+        'key_obj' :
+        {
+                'group_id' : 0, 'keynum' : event.keyCode,
+                'key_modificators' : {}
+            }
+        };
+
+        if (event['ctrlKey']) {
+            eventData['key_obj']['key_modificators']['ctrl']  = true;
+        }
+
+        if (event['shiftKey']) {
+            eventData['key_obj']['key_modificators']['shift'] = true;
+        }
+
+        if (event['metaKey']) {
+            eventData['key_obj']['key_modificators']['alt']   = true;
+        } 
+   
+    return eventData;
+}
+
+function element_catcher_on(event_name, callback){
+    if (typeof event_name !== 'string')
+    {
+        return false;
+    }
+
+    var self = this;
+
+    event_name = this.event_correct[event_name];
+
+    if (event_name === undefined) {
+        return false;
+    }
+
+    if ((/mouse/).test(event_name)) {
+	if(callback)
+            this.html[event_name] = function(event){
+		callback(process_mouse_event(self, event));
+	    };
+	else
+            delete this.html[eventName];
+    }
+
+    if ((/key/).test(event_name)) {
+	if(callback)
+            document[event_name] = function(event){
+		callback(process_key_event(self, event));
+	    };
+	else
+	    delete document[eventName];
+    }
+
+    return false;
+};
+Unit.prototype = new event_dispatcher();
+
 //set id of element if passed or get if it is not
 Unit.prototype.id = function (id) {
     var parseResult;
@@ -99,6 +177,9 @@ Unit.prototype.id = function (id) {
 
 Unit.prototype.prepare = function (object) {
     this.id(id_allocator.alloc());
+    this.event_dispatcher_init();
+    this.catch_on(['pointer_down', 'pointer_up', 'pointer_in', 'pointer_out', 'pointer_motion', 'key_down', 'key_up'], element_catcher_on);
+
     this.html.style.position = 'fixed';
     this.html.style.margin   = '0px';
     this.html.style.padding  = '0px';
@@ -163,88 +244,6 @@ Unit.prototype.event_correct = {
     'keyup'          : 'key_up'
 };
 
-function process_mouse_event(element, event){
-    var re_disassemble = /(\d+)px/;
-    var x = event.clientX - re_disassemble.exec(element.html.style.left)[1],
-    y = event.clientY - re_disassemble.exec(element.html.style.top)[1];
-    return [{
-		'pointer_id' : 0,
-		
-		'x' : (element.width.unit  === '%') ?
-                    (100 / element.width.px().value  * x) :
-                    x,
-		
-                'y' : (element.height.unit === '%') ?
-                    (100 / element.height.px().value * y) :
-		    y
-            }];    
-}
-
-function process_key_event(element, event){
-    var eventData = {
-        'key_obj' :
-        {
-                'group_id' : 0, 'keynum' : event.keyCode,
-                'key_modificators' : {}
-            }
-        };
-
-        if (event['ctrlKey']) {
-            eventData['key_obj']['key_modificators']['ctrl']  = true;
-        }
-
-        if (event['shiftKey']) {
-            eventData['key_obj']['key_modificators']['shift'] = true;
-        }
-
-        if (event['metaKey']) {
-            eventData['key_obj']['key_modificators']['alt']   = true;
-        } 
-   
-    return eventData;
-}
-
-Unit.prototype.on = function(event_name, callback){
-    if (typeof event_name !== 'string')
-    {
-        return false;
-    }
-
-    var self = this;
-
-    if(event_name == 'animation_stopped'){
-	if(callback)
-	    this.on_animation_stopped = callback;
-	else 
-	    delete this.on_animation_stopped;
-    }
-
-    event_name = this.event_correct[event_name];
-
-    if (event_name === undefined) {
-        return false;
-    }
-
-    if ((/mouse/).test(event_name)) {
-	if(callback)
-            this.html[event_name] = function(event){
-		callback(process_mouse_event(self, event));
-	    };
-	else
-            delete this.html[eventName];
-    }
-
-    if ((/key/).test(event_name)) {
-	if(callback)
-            document[event_name] = function(event){
-		callback(process_key_event(self, event));
-	    };
-	else
-	    delete document[eventName];
-    }
-
-    return true;
-};
 
 /* Value */
 
@@ -982,8 +981,7 @@ binded_anim.prototype.start = function () {
 binded_anim.prototype.stop = function () {
     delete animation.worker.runned[this.id];
     //if (this.callback) //нужно для восстановления доставки события по binded_id
-    if(this.element.on_animation_stopped)
-	this.element.on_animation_stopped({type : 'animation_stopped'});
+    this.element.emit('animation_stopped');
 
     return true;
 };
@@ -1105,7 +1103,6 @@ function ui() {
 };
 
 ui.prototype = {
-    Unit : Unit,
     frame : frame,
     image : image,
     text : text,
@@ -1115,6 +1112,7 @@ ui.prototype = {
     anim : animation
 };
 
-module.exports = ui;
+exports.ui = ui;
+exports.unit = Unit;
 
 
