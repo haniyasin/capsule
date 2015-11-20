@@ -51,7 +51,6 @@ element.prototype.change_props = function(info){
 
 function element_catcher_on(event_name, callback){
     if(callback !== 'undefined'){
-	this.handlers[event_name] = callback;
 	this.actor.reactive = true;
 	var mouse_handler = new _event_mouse_handler(this, event_name);
 	switch(event_name){
@@ -84,6 +83,8 @@ function element_catcher_on(event_name, callback){
 	    break;
 	}	    
     } //else FIXME здесь мы должны задисконнектить нужные сигналы 	    //unregister
+
+    return true;
 };
 
 
@@ -580,4 +581,5 @@ ui.prototype = {
     anim : animation
 };
 
-module.exports = ui;
+exports.ui = ui;
+exports.element = element;
