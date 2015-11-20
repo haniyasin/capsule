@@ -18,6 +18,7 @@ const Gst = imports.gi.Gst;
 var error = require('parts/error.js');
 
 var bba = require('parts/bb_allocator'),
+    event_dispatcher = require('parts/event_dispatcher'),
     id_allocator = new bba.allocator(bba.id_allocator);
 
 function set_random_background(actor){
@@ -32,8 +33,11 @@ function set_random_background(actor){
 function element(){
 }
 
+element.prototype = new event_dispatcher();
+
 element.prototype.init = function(actor, info){
-    this.event_callbacks = {};
+    this.event_dispatcher_init();
+    this.catch_on(['pointer_down', 'pointer_up', 'pointer_in', 'pointer_out', 'pointer_motion', 'key_down', 'key_up'], element_catcher_on); 
     this.id = id_allocator.alloc();
     this.props_manager = new props_manager(this);
     this.actor = actor; //Clutter actor
@@ -45,15 +49,11 @@ element.prototype.change_props = function(info){
     this.props_manager.apply_all();    
 };
 
-element.prototype.on = function(event_name, callback){
-    var listened_elems = this.comp._listened_elems;
+function element_catcher_on(event_name, callback){
     if(callback !== 'undefined'){
-	//register callback
-	if(!listened_elems.hasOwnProperty(this.id))
-	    listened_elems[this.id] = this;
-	this.event_callbacks[event_name] = callback;
+	this.handlers[event_name] = callback;
 	this.actor.reactive = true;
-	var mouse_handler = new _event_mouse_handler(listened_elems, this, event_name);
+	var mouse_handler = new _event_mouse_handler(this, event_name);
 	switch(event_name){
 	case 'pointer_down' :
 	    this.actor.connect('button-press-event', mouse_handler.handle);
@@ -83,9 +83,9 @@ element.prototype.on = function(event_name, callback){
 	    this.actor.connect('key-release-event', callback);
 	    break;
 	}	    
-    } else 	    //unregister
-	delete this.event_callbacks[event_name];
+    } //else FIXME здесь мы должны задисконнектить нужные сигналы 	    //unregister
 };
+
 
 element.prototype.destroy = function(){
     //FIXME
@@ -340,10 +340,7 @@ animation.prototype.start = function(element){
 				     banim.cur_frame++;
 				 }else{
 				     started.splice(sanim_ind, 1);
-				     if(self.comp._listened_elems.hasOwnProperty(element.id)){
-					 if(element.event_callbacks['animation_stopped'])
-					     element.event_callbacks['animation_stopped']();
-				     }
+				     element.emit('animation_stopped');
 				 }
 				 sanim_ind--;
 			     }
@@ -357,7 +354,7 @@ animation.prototype.stop = function(element){
     //FIXME stub
 };
 
-function _event_mouse_handler(listened_elems, element,event_name){
+function _event_mouse_handler(element,event_name){
     this.handle = function(actor, event){
 	var coords = event.get_coords();
 	coords[0] = coords[0] - element.props_manager.x.get_pos_absolute();
@@ -374,7 +371,7 @@ function _event_mouse_handler(listened_elems, element,event_name){
 				   coords[1]
 			   }];
 	
-	listened_elems[element.id].event_callbacks[event_name](pointer_obj);
+	element.emit(event_name, pointer_obj);
     };	
 }
 
@@ -550,7 +547,6 @@ function ui(){
     this.anim.prototype.comp = this;
     this.element.prototype.comp = this;
     this.anim.prototype.comp = this;
-    this._listened_elems = {}; //for events				     ,
 
     var cembed = new GtkClutter.Embed();
     cembed.show();

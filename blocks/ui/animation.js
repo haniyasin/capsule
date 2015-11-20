@@ -13,7 +13,6 @@
  */
 
 function _toggle(){
-//    alert('huhu', this.runned);    
     if(this.runned)
 	return false;
     
@@ -43,7 +42,7 @@ exports.many_toggle = function(comp, anim_info){
 	    anim_arr[anim_ind].on.bind(element);
 	    anim_arr[anim_ind].off.bind(element);
 	    element.on('animation_stopped', function(){
-			   self.runned--;		    
+			   self.runned--;  
 		       });
 	}
     }

@@ -70,15 +70,36 @@ function dnd_widget(comp, player, info){
 
 function list_element(index){
     var frame = this.element = new comp.frame({
-						  x : '1%', y : (5 + index*8) + '%',
-						  width : '96%', height : 1, z_index : 1 
+						  x : 0, y : (index*10) + '%',
+						  width : '100%', height : '10%', z_index : 1 
 					      }),
-    delim = new comp.image({
-			       x : 0, y : 0,
-			       width : '100%', height : '100%', z_index : 1,
-			       source : require('images/blue')
-			   });
+    delim = this.delim = new comp.image({
+					    x : 0, y : 0,
+					    width : '100%', height : 1, z_index : 1,
+					    source : require('images/blue')
+					});
     frame.add(delim);
+}
+
+list_element.prototype.destroy = function(){
+    
+};
+
+function list_elements(comp, max_elements){
+    var frame = this.element = new comp.frame({
+				      x : '1%', y : '5%',
+				      width : '96%', height : '80%', z_index : 2
+				  });
+    frame.add((new list_element(max_elements--)).element);
+    frame.add((new list_element(max_elements--)).element);
+    frame.add((new list_element(max_elements--)).element);
+    frame.add((new list_element(max_elements--)).element);
+    frame.add((new list_element(max_elements--)).element);
+    frame.add((new list_element(max_elements--)).element);
+    frame.add((new list_element(max_elements--)).element);
+    frame.add((new list_element(max_elements--)).element);
+    frame.add((new list_element(max_elements--)).element);
+    frame.add((new list_element(max_elements--)).element);    
 }
 
 function playlist(player, info){
@@ -94,17 +115,7 @@ function playlist(player, info){
 			      text : 'Filelist'
 			  });
     frame.add(bg);
-    var index = 1;
-    frame.add((new list_element(index++)).element);
-    frame.add((new list_element(index++)).element);
-    frame.add((new list_element(index++)).element);
-    frame.add((new list_element(index++)).element);
-    frame.add((new list_element(index++)).element);
-    frame.add((new list_element(index++)).element);
-    frame.add((new list_element(index++)).element);
-    frame.add((new list_element(index++)).element);
-    frame.add((new list_element(index++)).element);
-    frame.add((new list_element(index++)).element);
+//    frame.add(new list_elements(comp, 10)); //создаём список из 10 элементов
     frame.add(title);
     comp.root.add(frame);
     var add_b = new comp.button({
@@ -185,7 +196,7 @@ exports.main = function(){
     if(!tfile)
 	tfile = require('types/file');
     var Compositer = require('modules/ui/Compositer');
-    require('modules/ui/dnd');//подключаем возможности dnd в Compositer
+//    require('modules/ui/dnd');//подключаем возможности dnd в Compositer
 //    require('modules/ui/filechooser'); //подключаем возможности filechooser
     comp = new Compositer();
     animation = require('blocks/ui/animation');

@@ -14,6 +14,7 @@
 	},
 	
 	"parts" : {
+	    "event_dispatcher" : "parts/event_dispatcher.js",
 	    "bb_allocator" : "parts/bb_allocator.js",
 	    "cb_synhronizer" : "parts/cb_synchronizer.js",
 	    "utils" : "parts/utils.js",
