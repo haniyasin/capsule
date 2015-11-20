@@ -68,8 +68,21 @@ function dnd_widget(comp, player, info){
 }
 */
 
+function list_element(index){
+    var frame = this.element = new comp.frame({
+						  x : '1%', y : (5 + index*8) + '%',
+						  width : '96%', height : 1, z_index : 1 
+					      }),
+    delim = new comp.image({
+			       x : 0, y : 0,
+			       width : '100%', height : '100%', z_index : 1,
+			       source : require('images/blue')
+			   });
+    frame.add(delim);
+}
+
 function playlist(player, info){
-    var form_frame = this.element = new comp.frame(info),
+    var frame = this.element = new comp.frame(info),
     bg = new comp.image({
 			    x : '0%', y : '0%',
 			    width : '100%', height : '100%',z_index : 0,
@@ -80,15 +93,26 @@ function playlist(player, info){
 			      width : '98%', height : '10%', z_index : 1,
 			      text : 'Filelist'
 			  });
-    form_frame.add(bg);
-    form_frame.add(title);
-    comp.root.add(form_frame);
+    frame.add(bg);
+    var index = 1;
+    frame.add((new list_element(index++)).element);
+    frame.add((new list_element(index++)).element);
+    frame.add((new list_element(index++)).element);
+    frame.add((new list_element(index++)).element);
+    frame.add((new list_element(index++)).element);
+    frame.add((new list_element(index++)).element);
+    frame.add((new list_element(index++)).element);
+    frame.add((new list_element(index++)).element);
+    frame.add((new list_element(index++)).element);
+    frame.add((new list_element(index++)).element);
+    frame.add(title);
+    comp.root.add(frame);
     var add_b = new comp.button({
-				    x : '1%', y : '89%',
-				    width : '30%', height : '10%', z_index : 2,
+				    x : '1%', y : '93%',
+				    width : '30%', height : '6%', z_index : 2,
 				    label : 'add'
 				});
-    form_frame.add(add_b);
+    frame.add(add_b);
     add_b.on_press(function(){
 		       work_zone_switcher.toggle();
 		       //		      file_choosen(new tfile(addr_c.get_value()));
@@ -148,9 +172,9 @@ function player(info){
 				 ]
 				);
     sanim.bind(this);
-    this.element.add(controls.element);
-    this.element.add(video.element);
     this.element.add(bg);
+    this.element.add(video.element);
+    this.element.add(controls.element);
     comp.root.add(this.element);
     bg.on('pointer_down', function(){
 	      work_zone_switcher.toggle();
@@ -161,7 +185,7 @@ exports.main = function(){
     if(!tfile)
 	tfile = require('types/file');
     var Compositer = require('modules/ui/Compositer');
-//    require('modules/ui/dnd');//подключаем возможности dnd в Compositer
+    require('modules/ui/dnd');//подключаем возможности dnd в Compositer
 //    require('modules/ui/filechooser'); //подключаем возможности filechooser
     comp = new Compositer();
     animation = require('blocks/ui/animation');
@@ -190,7 +214,7 @@ exports.main = function(){
 		     }  
 		 },
 		 {
-		     duration : 300,
+		     duration : 100,
 		     actions : {
 			 x : -16,
 			 width : 36
@@ -199,7 +223,7 @@ exports.main = function(){
 	     ],
 	     off : [
 		 {
-		     duration : 300,
+		     duration : 100,
 		     actions : {
 			 x : 16,
 			 width : -36,

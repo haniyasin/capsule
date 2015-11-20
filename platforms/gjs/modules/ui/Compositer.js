@@ -42,7 +42,7 @@ element.prototype.init = function(actor, info){
 
 element.prototype.change_props = function(info){
     this.props_manager.set_all(info, true);
-    this.props_namager.apply_all();    
+    this.props_manager.apply_all();    
 };
 
 element.prototype.on = function(event_name, callback){

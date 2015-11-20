@@ -30,7 +30,7 @@ function _toggle(){
 
 exports.many_toggle = function(comp, anim_info){
     var anim_ind, el_ind,   
-        anim_arr = this.anim_arr = [],
+        anim_arr = [],
         self = this, element;
     for(anim_ind in anim_info){
 	anim_arr[anim_ind] = {};
@@ -52,11 +52,11 @@ exports.many_toggle = function(comp, anim_info){
     this.toggled = false;
     
     function _anim_starter(onoff){
+	anim_ind = undefined;
 	for(anim_ind in anim_arr){
 	    for(el_ind in anim_arr[anim_ind].elements){
 		this.runned++;
-		print(anim_arr[anim_ind].elements[el_ind].id);
-		anim_arr[anim_ind][onoff].start([anim_arr[anim_ind].elements[el_ind]]);
+		anim_arr[anim_ind][onoff].start(anim_arr[anim_ind].elements[el_ind]);
 	    }   
 	}
     }

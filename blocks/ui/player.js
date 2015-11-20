@@ -121,7 +121,7 @@ exports.controls = function(comp, player, info){
 	    height : '100%',
 	    x : '11%',
 	    y : '0%',
-	    z_index : 2
+	    z_index : 3
 	}
     ),
     timeline_i = new comp.image(
