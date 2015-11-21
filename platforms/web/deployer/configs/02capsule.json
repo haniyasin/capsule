@@ -20,6 +20,7 @@
 	    "fs" : "platforms/web/modules/fs.js",
 	    "ui" : {
 		"Compositer" : "platforms/web/modules/ui/Compositer.js",
+		"dnd" : "platforms/web/modules/ui/dnd.js",
 		"filechooser" : "platforms/web/modules/ui/filechooser.js"
 	    },
 	    "http_requester" : "platforms/web/modules/http_requester.js"	    

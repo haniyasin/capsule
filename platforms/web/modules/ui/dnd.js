@@ -1,115 +1,90 @@
 var comp = require('./Compositer'),
     tfile;
 
-/* dnd_source unit */
-
-comp.Unit.prototype.types['dnd_source'] = function (object) {
-    this.childs = [];
-    
+function dnd_source(info){
     this.html = document.createElement('div');
     
-    this.init(object);
-    this.prepare(object);
-};
-
-comp.Unit.prototype.types['dnd_source'].prototype = new comp.Unit(undefined, undefined);
-
-comp.Unit.prototype.types['dnd_source'].prototype.init = function (object) {
-    if (typeof object.color === 'string') {
-        this.html.style.backgroundColor = object.color;
+    if (typeof info.color === 'string') {
+        this.html.style.backgroundColor = info.color;
     }
     this.html.ondragstart = function(){ return false; };
+
+    this.prepare(info);
 };
 
-/* dnd_dest unit */
+dnd_source.prototype = new comp.unit();
 
-comp.Unit.prototype.types['dnd_dest'] = function (object) {
-    this.childs = [];
+exports.dnd_source = dnd_source;
+
+//motion, leave, data, drop
+function catcher_on(event, callback){
+    if(callback){
+    unit.html.addEventListener('dragenter', function(e){
+				   e.stopPropagation();
+				   e.preventDefault();					   
+			       }, false);
     
-    this.html = document.createElement('div');
-    
-    this.init(object);
-    this.prepare(object);
-};
+	switch(event){
+	case 'motion' :
+	    unit.html.addEventListener('dragover',function(e){
+					   var context = {
+					   };
+					   callback(context);
+					   e.stopPropagation();
+					   e.preventDefault();
+				       }, false);
+	    break;
+	    
+	case 'leave' : 
+	    unit.html.addEventListener('dragleave', function(e){
+					   var context = {
+					   };
+					   callback(context, x, y);
+					   e.stopPropagation();
+					   e.preventDefault();
+				       }, false);
+	    break;
+	    
+	case 'drop':
+	    unit.html.addEventListener('drop', function(e){
+					   e.stopPropagation();
+					   e.preventDefault();
+					   var context = {
+					       
+					   };
+					   //					       callback(context);
+					   var dt = e.dataTransfer;
+					   var files = dt.files;
+					   
+					   for(ind in files){
+					       var file = files[ind];
+					       
+					       context.file = new tfile(URL.createObjectURL(file));
+					       this.emit('data', context);
+					   }
+				       });
+	    break;
+	    
+	case 'data' : 
+	    return true;
+	}	
+    } // else FIXME нужно убирать установленный callback
+    return false;
+}
 
-comp.Unit.prototype.types['dnd_dest'].prototype = new comp.Unit(undefined, undefined);
-
-comp.Unit.prototype.types['dnd_dest'].prototype.init = function (object) {
-        if (typeof object.color === 'string') {
-            this.html.style.backgroundColor = object.color;
-        }
-//    this.html.ondragstart = function(){ return false; };
-};
-
-comp.Compositer.prototype.dnd_source_create = function(info, options, target_list, action_after){
-    
-};
-
-comp.Compositer.prototype.dnd_destination_create = function(info, options, target_list, action_after){
+function dnd_dest(info, options, target_list, action_after){
     if(!tfile)
 	tfile = require('types/file');
 
-    var unit = new comp.Unit('dnd_dest', info);
+    this.html = document.createElement('div');
+    this.catch_on(['motion', 'leave', 'drop', 'data'], catcher_on);
+    if (typeof info.color === 'string') {
+        this.html.style.backgroundColor = info.color;
+    }
     
-    unit.id(comp.Unit.pool.put(unit));
-    var ondata;
-    return {
-	id : unit.id(null),
- 	//motion, leave, data, drop
-	on : function(event, callback){
-	    unit.html.addEventListener('dragenter', function(e){
-					   e.stopPropagation();
-					   e.preventDefault();					   
-				       }, false);
-
-	    switch(event){
-	    case 'motion' :
-		unit.html.addEventListener('dragover',function(e){
-					       var context = {
-					       };
-					       callback(context);
-					       e.stopPropagation();
-					       e.preventDefault();
-			       }, false);
-		break;
-
-	    case 'leave' : 
-		unit.html.addEventListener('dragleave', function(e){
-					       var context = {
-					       };
-					       callback(context, x, y);
-					       e.stopPropagation();
-					       e.preventDefault();
-			       }, false);
-		break;
-		
-	    case 'drop':
-		unit.html.addEventListener('drop', function(e){
-					       e.stopPropagation();
-					       e.preventDefault();
-					       var context = {
-						   
-					       };
-//					       callback(context);
-					       var dt = e.dataTransfer;
-					       var files = dt.files;
-					       
-					       for(ind in files){
-						   var file = files[ind];
-						   
-						   context.file = new tfile(URL.createObjectURL(file));
-						   ondata(context);
-					       }
-			       });
-		break;
-		
-	    case 'data' : 
-		ondata = callback;
-		break;
-	    }
-	},
-	destroy : function(){
-	    comp.Unit.pool.free(this.id);
-	}
-    };
+    this.prepare(info);
 };
+
+dnd_dest.prototype = new comp.unit();
+
+exports.dnd_dest = dnd_dest;

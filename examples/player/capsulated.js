@@ -197,7 +197,7 @@ exports.main = function(){
 	tfile = require('types/file');
     var Compositer = require('modules/ui/Compositer');
     require('modules/ui/dnd');//подключаем возможности dnd в Uiositer
-//    require('modules/ui/filechooser'); //подключаем возможности filechooser
+    require('modules/ui/filechooser'); //подключаем возможности filechooser
     ui = new Compositer.ui();
     animation = require('blocks/ui/animation');
     bplayer = require('blocks/ui/player');
