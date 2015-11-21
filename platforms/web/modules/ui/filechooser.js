@@ -21,9 +21,9 @@ function filechooser(info){
     }
     if(!tfile)
 	tfile = require('types/file');
-    this.catch_on('choose', choose_catcher);
-    
+
     this.prepare(info);
+    this.catch_on('choose', choose_catcher);    
 };
 
 filechooser.prototype = new comp.unit();

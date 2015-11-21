@@ -14,29 +14,28 @@ function dnd_source(info){
 
 dnd_source.prototype = new comp.unit();
 
-exports.dnd_source = dnd_source;
-
 //motion, leave, data, drop
 function catcher_on(event, callback){
+    var self = this;
     if(callback){
-    unit.html.addEventListener('dragenter', function(e){
-				   e.stopPropagation();
-				   e.preventDefault();					   
-			       }, false);
+	this.html.addEventListener('dragenter', function(e){
+				       e.stopPropagation();
+				       e.preventDefault();		   
+				   }, false);
     
 	switch(event){
-	case 'motion' :
-	    unit.html.addEventListener('dragover',function(e){
+	case 'drag-motion' :
+	    this.html.addEventListener('dragover',function(e){
 					   var context = {
 					   };
-					   callback(context);
+					   callback(context, e.clientX, e.clientY);
 					   e.stopPropagation();
 					   e.preventDefault();
 				       }, false);
 	    break;
 	    
-	case 'leave' : 
-	    unit.html.addEventListener('dragleave', function(e){
+	case 'drag-leave' : 
+	    this.html.addEventListener('dragleave', function(e){
 					   var context = {
 					   };
 					   callback(context, x, y);
@@ -45,8 +44,8 @@ function catcher_on(event, callback){
 				       }, false);
 	    break;
 	    
-	case 'drop':
-	    unit.html.addEventListener('drop', function(e){
+	case 'drag-drop':
+	    this.html.addEventListener('drop', function(e){
 					   e.stopPropagation();
 					   e.preventDefault();
 					   var context = {
@@ -60,31 +59,23 @@ function catcher_on(event, callback){
 					       var file = files[ind];
 					       
 					       context.file = new tfile(URL.createObjectURL(file));
-					       this.emit('data', context);
+					       self.emit('data', context);
 					   }
 				       });
 	    break;
 	    
-	case 'data' : 
+	case 'drag-data' : 
 	    return true;
 	}	
     } // else FIXME нужно убирать установленный callback
     return false;
 }
 
-function dnd_dest(info, options, target_list, action_after){
+function dnd_dest_activate(element, info, options){
     if(!tfile)
 	tfile = require('types/file');
 
-    this.html = document.createElement('div');
-    this.catch_on(['motion', 'leave', 'drop', 'data'], catcher_on);
-    if (typeof info.color === 'string') {
-        this.html.style.backgroundColor = info.color;
-    }
-    
-    this.prepare(info);
+    element.catch_on(['drag-motion', 'drag-leave', 'drag-drop', 'drag-data'], catcher_on);
 };
 
-dnd_dest.prototype = new comp.unit();
-
-exports.dnd_dest = dnd_dest;
+comp.ui.prototype.dnd_dest_activate = dnd_dest_activate;

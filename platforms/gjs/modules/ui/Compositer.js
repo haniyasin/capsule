@@ -165,6 +165,14 @@ text.prototype.destroy = function(){
     this.actor.unref();
 };
 
+function _pressed_catcher(name ,callback){
+    if(callback)
+	this.widget.connect('pressed', callback);
+    else
+	this.widget.disconnect('pressed');
+    return false;
+};
+
 function button(info){
     if(!info.hasOwnProperty('label'))
 	info.label = 'button';
@@ -173,16 +181,18 @@ function button(info){
     this.init(GtkClutter.Actor.new_with_contents(widget), info);
     this.widget = widget;
     this.actor.show();
-    this.set_label = function(label){widget.set_label(label);};
-    this.on_press = function(callback){widget.connect('pressed', callback);};
+    this.catch_on(['pressed'], _pressed_catcher);
 }
 
 button.prototype = new element();
+
 button.prototype.destroy = function(){
     id_allocator.free(this.id);
     this.actor.unref();
     this.widget.unref();
 };
+
+button.prototype.set_label = function(label){ this.widget.set_label(label);};
 
 function entry(info){
     if(!info.hasOwnProperty('placeholder'))

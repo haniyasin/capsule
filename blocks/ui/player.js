@@ -16,10 +16,6 @@ exports.video = function (comp, info){
     };
 };
 
-function play_control(comp, player, parent){
-    
-}
-
 //ui controls for player(play|pause, progressbar, volumecontrol etc)
 exports.controls = function(comp, player, info){
     /*
@@ -50,16 +46,17 @@ exports.controls = function(comp, player, info){
 	play_b.set_label('pause');
 	pause = false;				  			   
     }
-    play_b.on_press(function(){
-			controls_standby = 0;
-			if(pause)
-			    play();
-			else {
-			    player.element.pause();
-			    play_b.set_label('play');
-			    pause = true;
-		       }
-		    });
+
+    play_b.on('pressed',function(){
+		  controls_standby = 0;
+		  if(pause)
+		      play();
+		  else {
+		      player.element.pause();
+		      play_b.set_label('play');
+		      pause = true;
+		  }
+	      });
 
     /*
      * fullscreen button

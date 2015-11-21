@@ -75,7 +75,7 @@ function list_element(index){
 					      }),
     delim = this.delim = new ui.image({
 					    x : 0, y : 0,
-					    width : '100%', height : 1, z_index : 1,
+					    width : '100%', height : 3, z_index : 1,
 					    source : require('images/blue')
 					});
     frame.add(delim);
@@ -89,18 +89,24 @@ function list_elements(ui, max_elements){
     var frame = this.element = new ui.frame({
 				      x : '1%', y : '5%',
 				      width : '96%', height : '80%', z_index : 2
-				  });
-    frame.add((new list_element(max_elements--)).element);
-    frame.add((new list_element(max_elements--)).element);
-    frame.add((new list_element(max_elements--)).element);
-    frame.add((new list_element(max_elements--)).element);
-    frame.add((new list_element(max_elements--)).element);
-    frame.add((new list_element(max_elements--)).element);
-    frame.add((new list_element(max_elements--)).element);
-    frame.add((new list_element(max_elements--)).element);
-    frame.add((new list_element(max_elements--)).element);
-    frame.add((new list_element(max_elements--)).element);    
+				  }),
+        lelement, elements = this.elements = [];
+    while(max_elements){
+	elements.unshift(lelement = new list_element(max_elements--));
+	frame.add(lelement.element);	
+    }
 }
+
+/*
+    var file_opener = new file_opener_widget(ui, player.video, player.video, ),
+    dnd = new dnd_widget(ui, player.frame, {
+			     x : '0%',
+			     y : '0%',
+			     width : '100%',
+			     height : '80%',
+			     opacity : 0.1,
+			     z_index : 0
+			 });    */
 
 function playlist(player, info){
     var frame = this.element = new ui.frame(info),
@@ -113,32 +119,41 @@ function playlist(player, info){
 			      x : '1%', y : '1%',
 			      width : '98%', height : '10%', z_index : 1,
 			      text : 'Filelist'
-			  });
+			}),
+    add_b = new ui.button({
+			     x : '1%', y : '91%',
+			     width : '30%', height : '8%', z_index : 2,
+			     label : 'add'
+			 }),
+    elements = new list_elements(ui, 10);
+
+    frame.add(add_b);
     frame.add(bg);
-//    frame.add(new list_elements(ui, 10)); //создаём список из 10 элементов
+    frame.add(elements.element); //создаём список из 10 элементов
     frame.add(title);
     ui.root.add(frame);
-    var add_b = new ui.button({
-				    x : '1%', y : '93%',
-				    width : '30%', height : '6%', z_index : 2,
-				    label : 'add'
-				});
-    frame.add(add_b);
-    add_b.on_press(function(){
-		       work_zone_switcher.toggle();
-		       //		      file_choosen(new tfile(addr_c.get_value()));
-		   });
-/*
-    var file_opener = new file_opener_widget(ui, player.video, player.video, ),
-    dnd = new dnd_widget(ui, player.frame, {
-			     x : '0%',
-			     y : '0%',
-			     width : '100%',
-			     height : '80%',
-			     opacity : 0.1,
-			     z_index : 0
-			 });    */
+
+    ui.dnd_dest_activate(elements.element);
+    var lheight = 80;
+    elements.element.on('drag-motion', function(context, x, y){
+			    alert('aaa', x, y);
+//			    frame.change_props({height : lheight--});
+			    return true;
+			});
+    elements.element.on('drag-drop', function(context, x, y){
+			    return true;
+			});
+    elements.element.on('drag-data', function(context){
+			});
+    add_b.on('pressed', function(){
+		 work_zone_switcher.toggle();
+		 //		      file_choosen(new tfile(addr_c.get_value()));
+	     });
 }
+
+playlist.prototype.destroy = function(){
+    //FIXME
+};
 
 function player(info){
     this.element = new ui.frame(info); 
@@ -196,7 +211,7 @@ exports.main = function(){
     if(!tfile)
 	tfile = require('types/file');
     var Compositer = require('modules/ui/Compositer');
-    require('modules/ui/dnd');//подключаем возможности dnd в Uiositer
+    require('modules/ui/dnd');//подключаем возможности dnd в ui
     require('modules/ui/filechooser'); //подключаем возможности filechooser
     ui = new Compositer.ui();
     animation = require('blocks/ui/animation');

@@ -771,6 +771,15 @@ entry.prototype.set_value = function(value){
     this.html.value = value;
 };
 
+function _pressed_catcher(event, callback){
+    if(callback)
+	this.html.onclick = callback;
+    else
+	this.html.onclick = undefined;
+
+    return false;
+}
+
 function button(object){
     this.html = document.createElement('input');
     this.html.type = 'button';
@@ -784,6 +793,7 @@ function button(object){
     }
 
     this.prepare(object);
+    this.catch_on(['pressed'], _pressed_catcher);
 };
 
 button.prototype = new Unit();
@@ -791,12 +801,6 @@ button.prototype = new Unit();
 button.prototype.destroy = function(){
     id_allocator.free(thid.id());
     //FIXME
-};
-
-button.prototype.on_press = function(callback){
-    this.html.onclick = function(){
-	callback();
-    };
 };
 
 button.prototype.set_label = function(label){
