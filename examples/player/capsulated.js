@@ -67,6 +67,16 @@ function dnd_widget(ui, player, info){
     };
 }
 */
+/*
+    var file_opener = new file_opener_widget(ui, player.video, player.video, ),
+    dnd = new dnd_widget(ui, player.frame, {
+			     x : '0%',
+			     y : '0%',
+			     width : '100%',
+			     height : '80%',
+			     opacity : 0.1,
+			     z_index : 0
+			 });    */
 
 function list_element(index){
     var frame = this.element = new ui.frame({
@@ -85,28 +95,51 @@ list_element.prototype.destroy = function(){
     
 };
 
-function list_elements(ui, max_elements){
+//выделение и снятие выделения
+list_element.prototype.select = function(onoff){
+    if(onoff)
+	this.delim.change_props({ height : 100});
+    else    
+	this.delim.change_props({ height : 3});
+};
+
+list_element.prototype.set = function(text){
+    this.text = new ui.text({
+				x : 0, y : 4,
+				width : '100%', height : '96%',
+				text : text
+			    });
+    this.element.add(text);
+};
+
+function elems_list(ui, max_elements){
     var frame = this.element = new ui.frame({
 				      x : '1%', y : '5%',
 				      width : '96%', height : '80%', z_index : 2
 				  }),
-        lelement, elements = this.elements = [];
+        lelement, elems = this.elems = [];
+    this.selected = undefined;
+
     while(max_elements){
-	elements.unshift(lelement = new list_element(max_elements--));
+	elems.unshift(lelement = new list_element(max_elements--));
 	frame.add(lelement.element);	
     }
 }
 
-/*
-    var file_opener = new file_opener_widget(ui, player.video, player.video, ),
-    dnd = new dnd_widget(ui, player.frame, {
-			     x : '0%',
-			     y : '0%',
-			     width : '100%',
-			     height : '80%',
-			     opacity : 0.1,
-			     z_index : 0
-			 });    */
+//выбор, выделение элемента при drag-motion над ним
+elems_list.prototype.select = function(y){
+    if(typeof this.selected != 'undefined')
+	this.elems[this.selected].select(false);
+
+    if(y){
+	this.selected = Math.round(y/10 - 1);
+	this.elems[this.selected].select(true);	
+    }
+};
+
+elems_list.prototype.set = function(text){
+  this.elems[this.selected].set(text);  
+};
 
 function playlist(player, info){
     var frame = this.element = new ui.frame(info),
@@ -125,26 +158,30 @@ function playlist(player, info){
 			     width : '30%', height : '8%', z_index : 2,
 			     label : 'add'
 			 }),
-    elements = new list_elements(ui, 10);
+    elems = new elems_list(ui, 10);
 
     frame.add(add_b);
     frame.add(bg);
-    frame.add(elements.element); //создаём список из 10 элементов
+    frame.add(elems.element); //создаём список из 10 элементов
     frame.add(title);
     ui.root.add(frame);
 
-    ui.dnd_dest_activate(elements.element);
+    ui.dnd_dest_activate(elems.element);
     var lheight = 80;
-    elements.element.on('drag-motion', function(context, x, y){
-			    alert('aaa', x, y);
-//			    frame.change_props({height : lheight--});
-			    return true;
-			});
-    elements.element.on('drag-drop', function(context, x, y){
-			    return true;
-			});
-    elements.element.on('drag-data', function(context){
-			});
+    elems.element.on('drag-motion', function(context){
+			 elems.select(context.y);
+			 //			    frame.change_props({height : lheight--});
+			 return true;
+		     });
+    elems.element.on('drag-leave', function(context){
+			 elems.select(undefined);
+		     });
+    elems.element.on('drag-drop', function(context){
+			 elems.set('hahaha');
+			 return true;
+		     });
+    elems.element.on('drag-data', function(context){
+		     });
     add_b.on('pressed', function(){
 		 work_zone_switcher.toggle();
 		 //		      file_choosen(new tfile(addr_c.get_value()));

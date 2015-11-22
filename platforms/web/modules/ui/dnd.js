@@ -26,9 +26,8 @@ function catcher_on(event, callback){
 	switch(event){
 	case 'drag-motion' :
 	    this.html.addEventListener('dragover',function(e){
-					   var context = {
-					   };
-					   callback(context, e.clientX, e.clientY);
+					   var context = (comp.process_mouse_event(self, e))[0];
+					   callback(context);
 					   e.stopPropagation();
 					   e.preventDefault();
 				       }, false);
@@ -38,7 +37,7 @@ function catcher_on(event, callback){
 	    this.html.addEventListener('dragleave', function(e){
 					   var context = {
 					   };
-					   callback(context, x, y);
+					   callback(context);
 					   e.stopPropagation();
 					   e.preventDefault();
 				       }, false);
@@ -58,7 +57,7 @@ function catcher_on(event, callback){
 					   for(ind in files){
 					       var file = files[ind];
 					       
-					       context.file = new tfile(URL.createObjectURL(file));
+//					       context.file = new tfile(URL.createObjectURL(file));
 					       self.emit('data', context);
 					   }
 				       });

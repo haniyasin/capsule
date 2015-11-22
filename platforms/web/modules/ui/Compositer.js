@@ -1117,6 +1117,7 @@ ui.prototype = {
 };
 
 exports.ui = ui;
+exports.process_mouse_event = process_mouse_event;
 exports.unit = Unit;
 
 
