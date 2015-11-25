@@ -376,9 +376,9 @@ function create_move_remove_test(comp){
 }
 
 exports.test = function(){
-    var comp = new (require('modules/ui/Compositer'));
-    slideup_cubes_test(comp);   
-    original_test2(comp);
-    original_test1(comp);
+    var ui = new (require('modules/ui/Compositer').ui);
+    slideup_cubes_test(ui);   
+    original_test2(ui);
+    original_test1(ui);
 //    create_move_remove_test(comp); //this test is depends of gjs
 };
