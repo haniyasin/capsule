@@ -134,7 +134,8 @@ elems_list.prototype.select = function(y){
     if(y){
 	this.selected = Math.round(y/10 - 1);
 	this.elems[this.selected].select(true);	
-    }
+    } else
+	this.selected = undefined;
 };
 
 elems_list.prototype.set = function(text){
@@ -162,12 +163,11 @@ function playlist(player, info){
 
     frame.add(add_b);
     frame.add(bg);
-    frame.add(elems.element); //создаём список из 10 элементов
+    frame.add(elems.element);
     frame.add(title);
     ui.root.add(frame);
 
     ui.dnd_dest_activate(elems.element);
-    var lheight = 80;
     elems.element.on('drag-motion', function(context){
 			 elems.select(context.y);
 			 //			    frame.change_props({height : lheight--});
